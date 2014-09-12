@@ -1,0 +1,21 @@
+{
+	"caret_style": "phase",
+	"font_face": "Consolas",
+	"font_options":
+	[
+		"gray_antialias"
+	],
+	"font_size": 12,
+	"highlight_modified_tabs": true,
+	"ignored_packages":
+	[
+		"Vintage",
+		"sublimelint",
+		"GitGutter",
+		"Emmet",
+		"Alignment",
+		"sublime-text-puppet"
+	],
+	"tab_size": 4,
+	"translate_tabs_to_spaces": true
+}
