@@ -31,10 +31,10 @@ set vb t_vb=
 set ruler
 
 
-if has("mouse")
-    set mouse=a
-    set mousehide
-endif
+"if has("mouse")
+"    set mouse=a
+"    set mousehide
+"endif
 
 set wildmode=longest,list
 set wildmenu
