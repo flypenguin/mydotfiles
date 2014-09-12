@@ -1,5 +1,7 @@
 export PATH="$PATH:${HOME}/bin"
 
+[ ! -f $HOME/.no_solarized ] && eval `dircolors .solarized/dircolors.256dark`
+
 # workaround for terminator / gnome vte bug: http://bit.ly/1ByO5es
 # pretty crazy stuff, this.
 if [ ! -f $HOME/.no_term_fix ]; then
