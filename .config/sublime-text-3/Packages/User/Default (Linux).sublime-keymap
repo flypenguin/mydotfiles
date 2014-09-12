@@ -18,6 +18,9 @@
     { "keys": ["ctrl+alt+e"],           "command": "find_next_lint_error" },
     { "keys": ["ctrl+alt+shift+e"],     "command": "find_previous_lint_error" },
 
+    // trailing spaces
+    { "keys": ["ctrl+shift+backspace"], "command": "delete_trailing_spaces" },
+
     { "keys": ["ctrl+#"], "command": "toggle_comment", "args": { "block": false } },
 
     { "keys": ["ctrl+alt+backspace"],   "command": "delete_trailing_spaces" },
