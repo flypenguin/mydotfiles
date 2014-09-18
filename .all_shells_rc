@@ -1,4 +1,9 @@
+
 export PATH="$PATH:${HOME}/bin"
+
+# from http://bit.ly/1r1VoYA
+export LESS='-iMRS#15'
+export LESSOPEN="|$HOME/bin/_lessfilter %s"
 
 [ ! -f $HOME/.no_solarized ] && eval `dircolors .solarized/dircolors.256dark`
 
