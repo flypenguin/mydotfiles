@@ -7,6 +7,14 @@ export LESSOPEN="|$HOME/bin/_lessfilter %s"
 
 [ ! -f $HOME/.no_solarized ] && eval `dircolors $HOME/.solarized/dircolors.256dark`
 
+# python virtualenv
+for a in /usr/bin /usr/local/bin ; do 
+  vs="$a/virtualenvwrapper.sh"
+  if [ -f "$vs" ]; then
+    source "$vs"
+  fi
+done
+
 # workaround for terminator / gnome vte bug: http://bit.ly/1ByO5es
 # pretty crazy stuff, this.
 if [ ! -f $HOME/.no_term_fix ]; then
