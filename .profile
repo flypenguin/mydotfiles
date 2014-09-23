@@ -2,6 +2,12 @@
 # ALIASES
 #
 
+# ssh
+alias ssr="ssh -l root"
+alias ssp="ssh -o PubkeyAuthentication=no"
+ssd() { ssh "e13itao@$1.dvag.com" }
+ssdr() { ssh "root@$1.dvag.com" }
+
 # git
 alias gco="git checkout"
 alias gls="git ls"
