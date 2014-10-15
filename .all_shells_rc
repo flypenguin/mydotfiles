@@ -1,4 +1,6 @@
+## RC FOR ALL INTERACTIVE (at least for zsh) SHELLS
 
+export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl"
 export PATH="$PATH:${HOME}/bin"
 
 # from http://bit.ly/1r1VoYA
@@ -8,7 +10,7 @@ export LESSOPEN="|$HOME/bin/_lessfilter %s"
 [ ! -f $HOME/.no_solarized ] && eval `dircolors $HOME/.solarized/dircolors.256dark`
 
 # python virtualenv
-for a in /usr/bin /usr/local/bin ; do 
+for a in /usr/bin /usr/local/bin ; do
   vs="$a/virtualenvwrapper.sh"
   if [ -f "$vs" ]; then
     source "$vs"

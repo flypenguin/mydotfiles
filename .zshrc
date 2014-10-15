@@ -1,3 +1,12 @@
+## FOR INTERACTIVE SHELLS
+# zsh ordering:
+#   $ZDOTDIR/.zshenv                    # all shells
+#   $ZDOTDIR/.zprofile                  # login shells
+#   $ZDOTDIR/.zshrc                     # interactive shells
+#   $ZDOTDIR/.zlogin                    # login-shells
+#   $ZDOTDIR/.zlogout                   # login-shells (on exit)
+# see here: http://bit.ly/1sGzo6g
+
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
@@ -32,17 +41,4 @@ source $ZSH/oh-my-zsh.sh
 setopt autocd
 zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
 
-export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl"
-# export MANPATH="/usr/local/man:$MANPATH"
-
-export EDITOR='vim'
-
-source ~/.profile
-
-# rvm seems to WANT this in HERE. well.
-if [ -d "$HOME/.rvm" ]; then
-    export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
-fi
-
 source $HOME/.all_shells_rc
-
