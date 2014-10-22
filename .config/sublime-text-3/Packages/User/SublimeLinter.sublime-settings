@@ -1,6 +1,5 @@
 {
     "user": {
-        "debug": true,
         "delay": 0.25,
         "error_color": "D02000",
         "gutter_theme": "Packages/SublimeLinter/gutter-themes/Default/Default.gutter-theme",
@@ -15,7 +14,7 @@
                     "--no-inherits_across_namespaces-check",
                     "--no-class_inherits_from_params_class-check",
                     "--no-2sp_soft_tabs-check",
-                    "--no-arrow_alignment-check",
+                    "--no-arrow_alignment-check"
                 ],
                 "excludes": []
             }
