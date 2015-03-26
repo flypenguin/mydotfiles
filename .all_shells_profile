@@ -14,7 +14,7 @@ ssdr() { ssh "root@$1.dvag.com" }
 
 # git
 alias gco="git checkout"
-alias gls="git ls"
+#alias gls="git ls" // git ls was a GIT INTERNAL alias, removed for simplicity.
 alias gri="git rebase --interactive"
 alias gra="git rebase --abort"
 alias grc="git rebase --continue"
@@ -23,6 +23,11 @@ alias  gp="git push"
 alias  gs="git status"
 alias  gd="git diff"
 alias gdc="git diff --cached"
+# see http://is.gd/h9AB6z
+alias gls="git log --pretty=format:'%C(yellow)%h%Cred%d %Creset%s%Cblue [%cn]' --decorate"
+alias gll="git log --pretty=format:'%C(yellow)%h%Cred%d %Creset%s%Cblue [%cn]' --decorate --numstat"
+alias gld="git log --pretty=format:'%C(yellow)%h %ad%Cred%d %Creset%s%Cblue [%cn]' --decorate --date=short"
+alias glr="git log --pretty=format:'%C(yellow)%h %ad%Cred%d %Creset%s%Cblue [%cn]' --decorate --date=relative"
 
 # ls
 alias ls="ls --color=auto"
