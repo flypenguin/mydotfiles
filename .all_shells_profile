@@ -3,5 +3,7 @@
 # that's annoying, but let's just keep it as it is.
 
 # pretty much everything which was here belongs to an interactive
-# shell ... 
+# shell ...
 
+a="$HOME/.host_specific_profile"
+[ -f "$a" ] && source $a

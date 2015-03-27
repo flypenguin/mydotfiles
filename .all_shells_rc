@@ -127,3 +127,7 @@ if [ ! -f $HOME/.no_term_fix ]; then
     fi
   fi
 fi
+
+
+a="$HOME/.host_specific_rc"
+[ -f "$a" ] && source $a
