@@ -1,11 +1,17 @@
 {
     "user": {
+        "debug": false,
         "delay": 0.25,
         "error_color": "D02000",
         "gutter_theme": "Packages/SublimeLinter/gutter-themes/Default/Default.gutter-theme",
         "gutter_theme_excludes": [],
         "lint_mode": "background",
         "linters": {
+            "puppet": {
+                "@disable": false,
+                "args": [],
+                "excludes": []
+            },
             "puppetlint": {
                 "@disable": false,
                 "args": [
@@ -17,10 +23,25 @@
                     "--no-arrow_alignment-check"
                 ],
                 "excludes": []
+            },
+            "pylint": {
+                "@disable": false,
+                "args": [
+                	"-d C0301",
+                	"-d C0321",
+                	"-d C0326"
+                ],
+                "disable": "",
+                "enable": "",
+                "excludes": [],
+                "paths": [],
+                "rcfile": "",
+                "show-codes": false
             }
         },
         "mark_style": "outline",
         "no_column_highlights_line": false,
+        "passive_warnings": false,
         "paths": {
             "linux": [],
             "osx": [],
