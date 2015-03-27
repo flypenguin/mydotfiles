@@ -103,6 +103,10 @@ for a in /usr/bin /usr/local/bin ; do
   vs="$a/virtualenvwrapper.sh"
   if [ -f "$vs" ]; then
     source "$vs"
+    # for $WORKON_HOME for example. just so we don't need to check that in here.
+    local V_SET_FILE="$HOME/.virtualenvwrapper_settings"
+    [ -f "$V_SET_FILE" ] && source "$V_SET_FILE"
+    break
   fi
 done
 
