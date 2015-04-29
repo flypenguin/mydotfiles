@@ -21,8 +21,12 @@ ZSH_THEME="jreese"
 # export UPDATE_ZSH_DAYS=13
 # DISABLE_LS_COLORS="true"
 # DISABLE_AUTO_TITLE="true"
-ENABLE_CORRECTION="true"
+# ENABLE_CORRECTION="true"
 # COMPLETION_WAITING_DOTS="true"
+
+# disable the corrections
+DISABLE_CORRECTION="true"
+unsetopt correct 
 
 # Uncomment the following line if you want to disable marking untracked files
 # under VCS as dirty. This makes repository status check for large repositories
