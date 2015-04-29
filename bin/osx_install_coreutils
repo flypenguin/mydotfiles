@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+for a in coreutils findutils gnu-tar gnu-sed gawk gnutls gnu-indent gnu-getopt ; do
+    brew uninstall $a
+    brew install $a --with-default-names
+done
+

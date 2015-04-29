@@ -1,0 +1,4 @@
+
+bindkey '[D' backward-word          # alt-left
+bindkey '[C' forward-word           # alt-right
+

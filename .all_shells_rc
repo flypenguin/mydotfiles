@@ -64,6 +64,17 @@ export EDITOR='vim'
 
 
 #
+# path mangling ...
+#
+
+# mac os & homebrew - if the coreutils are installed, use them instead of the OS X ones.
+[ -d "/usr/local/opt/coreutils/libexec/gnubin" ] && path_prepend "/usr/local/opt/coreutils/libexec/gnubin"
+
+# our own binary directory should have preference over the system ones ... 
+path_prepend "${HOME}/bin"
+
+
+#
 # proper colors
 #
 
@@ -71,12 +82,10 @@ export EDITOR='vim'
 
 
 #
-# path mangling ...
+# platform-dependent settings :)
 #
 
-path_prepend "${HOME}/bin"
-# why???
-#export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl"
+[ -f "$HOME/.all_shells_rc.$(uname)" ] && source "$HOME/.all_shells_rc.$(uname)"
 
 
 #
