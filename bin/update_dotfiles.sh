@@ -5,7 +5,7 @@ case $1 in
         cd $(dirname $0)
         cd ..
         pwd
-        rsync -rl --exclude=".git" ./ $HOME
+        rsync -rli --exclude=".git" ./ $HOME
         cd "$HOME"
         if [ ! -d .oh-my-zsh ]; then
             git clone --depth 1 https://github.com/robbyrussell/oh-my-zsh.git .oh-my-zsh
@@ -24,7 +24,7 @@ case $1 in
         ;;
     update-git)
         cd $(dirname $0)
-        rsync -rl "$HOME/" ../ --existing --exclude-from="exclude-update-git"
+        rsync -rli "$HOME/" ../ --existing --exclude-from="exclude-update-git"
         ;;
     *)
         echo "USAGE: $(basename $0) [update-home|update-git]"
