@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 case $1 in
-    update-home)
+    git2home)
         cd $(dirname $0)
         cd ..
         pwd
@@ -22,7 +22,7 @@ case $1 in
             (cd .vim/bundle/Vundle.vim && git pull)
         fi
         ;;
-    update-git)
+    home2git)
         cd $(dirname $0)
         rsync -rli "$HOME/" ../ --existing --exclude-from="exclude-update-git"
         ;;
