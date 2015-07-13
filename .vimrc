@@ -10,12 +10,22 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 " DEFINE ALL PLUGINS AFTER THIS LINE
 
+Plugin 'bling/vim-airline'
+
 " DEFINE ALL PLUGINS BEFORE THIS LINE
 call vundle#end()            " required
 filetype plugin indent on    " required
 
 
 " now my personal settings.
+
+syntax on
+filetype plugin indent on
+
+" set search highlighting on, but use ENTER in normal mode to clear
+" http://is.gd/lUkBFh
+set hlsearch
+nnoremap <CR> :noh<CR><CR>
 
 set backspace=indent,eol,start
 set number
