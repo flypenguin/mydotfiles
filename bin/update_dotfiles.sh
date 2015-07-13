@@ -28,8 +28,8 @@ case $1 in
         ;;
     *)
         echo "USAGE: $(basename $0) [update-home|update-git]"
-        echo "       update-home: populates the home directory"
-        echo "       update-git:  copies changed files back to git repo"
+        echo "       git2home: populates the home directory"
+        echo "       home2git:  copies changed files back to git repo"
         exit -1
         ;;
 esac
