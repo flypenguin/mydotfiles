@@ -1,6 +1,6 @@
 {
     "user": {
-        "debug": false,
+        "debug": true,
         "delay": 0.25,
         "error_color": "D02000",
         "gutter_theme": "Packages/SublimeLinter/gutter-themes/Default/Default.gutter-theme",
@@ -27,9 +27,9 @@
             "pylint": {
                 "@disable": false,
                 "args": [
-                	"-d C0301",
-                	"-d C0321",
-                	"-d C0326"
+                    "-d C0301",
+                    "-d C0321",
+                    "-d C0326"
                 ],
                 "disable": "",
                 "enable": "",
@@ -37,6 +37,15 @@
                 "paths": [],
                 "rcfile": "",
                 "show-codes": false
+            },
+            "summitlinter": {
+                "@disable": false,
+                "args": [],
+                "excludes": [],
+                "globals": "",
+                "ignore": "channel",
+                "limit": null,
+                "only": ""
             }
         },
         "mark_style": "outline",
