@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+usage() {
+    cat <<EOF
+USAGE:
+    activate_proxy
+        actually activate the proxy
+    activate_proxy -e
+        print out the ENVs to source for bash
+    activate_proxy -h
+        this help
+EOF
+    exit -1
+}
+
+if [ "$1" = "-h" ] ; then
+
+    usage
+
+elif [ "$1" = "-e" ]; then
+
+    cat <<EOF
+export HTTP_PROXY=http://localhost:8080
+export HTTPS_PROXY=http://localhost:8080
+export http_proxy=http://localhost:8080
+export https_proxy=http://localhost:8080
+EOF
+    exit 0
+
+elif [ "$1" != "" ]; then
+
+    usage
+
+else
+
+  SSH_KEY="id_rsa_aws_bridge01"
+  HOST_NAME="ec2-52-28-161-54.eu-central-1.compute.amazonaws.com"
+  LOCAL_PORT="9090"
+  REMOTE_USER="ubuntu"
+
+  # bind to which ips?
+  BIND_TO="*"
+
+  # for HTTP proxying
+  USE_HTTP_PROXY=yes
+  HTTP_PROXY_PORT=8080
+  HTTP_PROXY_REMOTE=8888
+
+
+  # don't change this ;)
+
+  SSH_KEY_FILE="$HOME/.ssh/${SSH_KEY}"
+
+  if [ "$USE_HTTP_PROXY" = "yes" ]; then
+      USE_HP="-L $BIND_TO:$HTTP_PROXY_PORT:localhost:$HTTP_PROXY_REMOTE"
+  else
+      USE_HP=""
+  fi
+
+  echo ssh -D $BIND_TO:$LOCAL_PORT -i $SSH_KEY_FILE $REMOTE_USER@$HOST_NAME $USE_HP
+  ssh -D $BIND_TO:$LOCAL_PORT -i $SSH_KEY_FILE $REMOTE_USER@$HOST_NAME $USE_HP
+
+fi
+
