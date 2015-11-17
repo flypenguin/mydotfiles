@@ -1,6 +1,6 @@
 {
 	"caret_style": "phase",
-	"color_scheme": "Packages/User/SublimeLinter/Monokai (SL).tmTheme",
+	"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 	"font_face": "Liberation Mono",
 	"font_options":
 	[
@@ -10,12 +10,12 @@
 	"highlight_modified_tabs": true,
 	"ignored_packages":
 	[
-		"Vintage",
-		"SublimeGit",
-		"Emmet",
 		"Alignment",
+		"Emmet",
 		"sublime-text-puppet",
-		"sublimelint"
+		"SublimeGit",
+		"sublimelint",
+		"Vintage"
 	],
 	"tab_size": 4,
 	"translate_tabs_to_spaces": true
