@@ -71,6 +71,10 @@ echo "Enabling SSH service ..."
 sudo systemctl enable sshd
 sudo systemctl start sshd
 
+echo "Setting up rest ..."
+"$(dirname $0)/setup_generic.sh"
+
+
 echo ""
 echo -e "\n\n Done.\n Please re-login. \n"
 
