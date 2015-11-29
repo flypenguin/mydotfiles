@@ -11,6 +11,10 @@ call vundle#begin()
 " DEFINE ALL PLUGINS AFTER THIS LINE
 
 Plugin 'bling/vim-airline'
+Plugin 'kien/ctrlp.vim'
+Plugin 'scrooloose/nerdtree'
+Plugin 'tpope/vim-fugitive'
+Plugin 'easymotion/vim-easymotion'
 
 " DEFINE ALL PLUGINS BEFORE THIS LINE
 call vundle#end()            " required
@@ -40,12 +44,22 @@ set laststatus=2
 set vb t_vb=
 set ruler
 
-
-"if has("mouse")
-"    set mouse=a
-"    set mousehide
-"endif
-
 set wildmode=longest,list
 set wildmenu
+
+
+"
+" PLUGIN CONFIGURATIONS
+"
+
+" ctrlp, from https://github.com/kien/ctrlp.vim
+let g:ctrlp_map = '<c-p>'
+let g:ctrlp_cmd = 'CtrlP'
+let g:ctrlp_working_path_mode = 'ra'
+let g:ctrlp_user_command = 'find %s -type f'
+let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+  \ 'file': '\v\.(exe|so|dll)$',
+  \ 'link': 'some_bad_symbolic_links',
+  \ }
 
