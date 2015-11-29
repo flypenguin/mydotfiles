@@ -3,4 +3,12 @@
 	email = mr.axel.bock@gmail.com
 [push]
 	default = simple
-
+[alias]
+    ls = log --pretty=format:\"%C(yellow)%h %C(blue)%ad %C(reset)%s %C(green)[%cn]%C(red)%d \" --decorate --date=local
+[color]
+	ui = true
+[mergetool]
+	keepBackup = true
+[core]
+	excludesfile = /Users/tm/.gitignore_global
+	editor = vim
