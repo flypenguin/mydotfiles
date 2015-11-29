@@ -1,6 +1,6 @@
 {
     "user": {
-        "debug": true,
+        "debug": false,
         "delay": 0.25,
         "error_color": "D02000",
         "gutter_theme": "Packages/SublimeLinter/gutter-themes/Default/Default.gutter-theme",
@@ -37,15 +37,6 @@
                 "paths": [],
                 "rcfile": "",
                 "show-codes": false
-            },
-            "summitlinter": {
-                "@disable": false,
-                "args": [],
-                "excludes": [],
-                "globals": "",
-                "ignore": "channel",
-                "limit": null,
-                "only": ""
             }
         },
         "mark_style": "outline",
