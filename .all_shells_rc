@@ -8,6 +8,14 @@ path_prepend ()
     export PATH="$1:$PATH"
 }
 
+path_append ()
+{
+    PATH=${PATH//:$1:/:}
+    PATH=${PATH#$1:}
+    PATH=${PATH%:$1}
+    export PATH="$PATH:$1"
+}
+
 #
 # ALIASES
 #
@@ -72,9 +80,15 @@ export EDITOR='vim'
 #
 
 # mac os & homebrew - if the coreutils are installed, use them instead of the OS X ones.
-[ -d "/usr/local/opt/coreutils/libexec/gnubin" ] && path_prepend "/usr/local/opt/coreutils/libexec/gnubin"
+# TODO - find a better way than executing this thing!!
+if sw_vers > /dev/null 2>&1 ; then
+  for a in /usr/local/opt/* ; do
+    [ -d "$a/libexec/gnubin" ] && path_prepend "$a/libexec/gnubin"
+  done
+  [ -d /usr/local/sbin ] && path_prepend "/usr/local/sbin"
+fi
 
-# our own binary directory should have preference over the system ones ... 
+# our own binary directory should have preference over the system ones ...
 path_prepend "${HOME}/bin"
 
 
