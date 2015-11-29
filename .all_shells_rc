@@ -91,6 +91,13 @@ fi
 # our own binary directory should have preference over the system ones ...
 path_prepend "${HOME}/bin"
 
+if [ -d "$HOME/clis" ] ; then
+  for p in "$HOME/clis/"* ; do
+    [ -d "$p/bin" ] && p="$p/bin"
+    path_append "$p"
+  done
+fi
+
 
 #
 # proper colors
