@@ -7,6 +7,10 @@
 #   $ZDOTDIR/.zlogout                   # login-shells (on exit)
 # see here: http://bit.ly/1sGzo6g
 
+
+set -k                    # recognize inline comments on the command line
+setopt HIST_IGNORE_SPACE  # start with " " -> no history entry
+
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
