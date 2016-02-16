@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+
+import yaml
+
+import os
+import sys
+import json
+import uuid
+import argparse
+
+
+NOTFOUND = uuid.uuid4()
+
+
+# python 2 / 3 shit
+def construct_yaml_str(self, node):
+    # Override the default string handling function
+    # to always return unicode objects
+    return self.construct_scalar(node)
+
+
+def fail(message):
+    print("fail: %s" % message)
+    sys.exit(-1)
+
+
+def load_files():
+    global contents
+    contents = []
+    for filename in [args.file1, args.file2]:
+        print("Loading: %s" % filename)
+        ext = os.path.splitext(filename)[1]
+        with open(filename, "r") as ofile:
+            if ext in (".json"):
+                contents.append(json.load(ofile))
+            elif ext in (".yaml", ".yml"):
+                contents.append(yaml.load(ofile))
+    print("Contents loaded.")
+
+
+def compare_files():
+    if not isinstance(contents[0], type(contents[1])):
+        fail("Different object types found: %s and %s"
+             % (str(type(contents[0])), str(type(contents[1]))))
+    if isinstance(contents[0], dict):
+        compare_dicts(*contents)
+    else:
+        fail("Cannot compare objects of type %s" % str(type(contents[0])))
+
+
+def compare_dicts(dict0, dict1, path=""):
+    for k, d0v in dict0.items():
+        d1v = dict1.get(k, NOTFOUND)
+        ref = "%s.%s" % (path, str(k))
+        if d1v == NOTFOUND:
+            fail("%s missing on right" % ref)
+        elif not isinstance(d0v, type(d1v)):
+            fail("%s have different types (%s and %s)" %
+                 (ref, str(type(d0v)), str(type(d1v))))
+        elif isinstance(d0v, dict):
+            compare_dicts(d0v, d1v, ref)
+        elif d0v != d1v:
+            fail("%s: values don't match" % ref)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file1", help="first file to compare")
+    parser.add_argument("file2", help="second file to compare")
+    args = parser.parse_args()
+    # python 2 / 3 shit. python 2 returns "str" objects in yaml
+    # and "unicode" objects in python. that sucks. python 3 works just fine.
+    yaml.Loader.add_constructor(u'tag:yaml.org,2002:str', construct_yaml_str)
+    yaml.SafeLoader.add_constructor(u'tag:yaml.org,2002:str', construct_yaml_str)
+    load_files()
+    compare_files()
+    print("File contents identical")
+
