@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+
+import yaml
+
+import os
+import json
+import argparse
+
+
+# python 2 / 3 shit
+def make_yaml_str(self, node):
+    # Override the default string handling function
+    # to always return unicode objects
+    return self.construct_scalar(node)
+
+
+def load_and_convert():
+    global content
+    filename = args.inputfile
+    ext = os.path.splitext(filename)[1]
+    with open(filename, "r") as ifile:
+        if ext in (".json"):
+            content = json.load(ifile)
+            print(yaml.safe_dump(content,
+                  explicit_start=args.yaml_explicit_start,
+                  default_flow_style=args.yaml_default_flow_style,
+                  canonical=args.yaml_canonical,
+                  indent=args.indent
+                                 )
+                  )
+        elif ext in (".yaml", ".yml"):
+            content = yaml.load(ifile)
+            print(json.dumps(content, indent=args.indent))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("inputfile", help="either a yaml or a json file")
+    parser.add_argument("-i", "--indent",
+                        help="JSON/YAML indentation level",
+                        type=int,
+                        default=None)
+    parser.add_argument("--no-yaml-explicit-start",
+                        dest="yaml_explicit_start",
+                        help="YAML: use document start marker '---' "
+                        "(default: True)",
+                        action="store_false",
+                        default=True)
+    parser.add_argument("--yaml-canonical",
+                        dest="yaml_canonical",
+                        help="YAML: use canonical style (default: False)",
+                        action="store_true",
+                        default=False)
+    parser.add_argument("--yaml-default-flow-style",
+                        dest="yaml_default_flow_style",
+                        help="YAML: use default flow style (default: False)",
+                        action="store_true",
+                        default=False)
+    args = parser.parse_args()
+    # python 2 / 3 shit. python 2 returns "str" objects in yaml
+    # and "unicode" objects in python. that sucks. python 3 works just fine.
+    yaml.Loader.add_constructor(u'tag:yaml.org,2002:str', make_yaml_str)
+    yaml.SafeLoader.add_constructor(u'tag:yaml.org,2002:str', make_yaml_str)
+    load_and_convert()
+
