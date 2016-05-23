@@ -62,6 +62,12 @@ alias psu="sudo pacman -Su"
 alias yss="yaourt -Ss"
 alias  yi="yaourt -S"
 
+# docker
+alias docker_clean_images="docker images | grep '<none>' | awk '{print $3}' | xargs docker rmi"
+alias docker_rm_all="docker ps -a | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker rm -f"
+alias docker_stop_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker stop"
+alias docker_kill_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker kill"
+
 #
 # general settings
 #
