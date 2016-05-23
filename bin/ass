@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-dir ~/.ssh/id* | grep -v .pub | while read a ; do ssh-add $a ; done
+ls ~/.ssh/id* | grep -v .pub | while read a ; do ssh-add $a ; done
 
 
