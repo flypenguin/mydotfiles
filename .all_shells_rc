@@ -136,7 +136,7 @@ fi
 
 
 #
-# python virtualenv
+# python virtualenv and pyenv
 #
 
 for a in /usr/bin /usr/local/bin ; do
@@ -149,6 +149,9 @@ for a in /usr/bin /usr/local/bin ; do
     break
   fi
 done
+
+# take care of pyenv if installed
+if which pyenv > /dev/null; then eval "$(pyenv init -)"; fi
 
 
 #
