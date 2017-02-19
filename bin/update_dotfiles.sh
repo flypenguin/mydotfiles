@@ -21,6 +21,16 @@ case $1 in
         else
             (cd .vim/bundle/Vundle.vim && git pull)
         fi
+        if [ -f "$HOME/.ssh/config_base" ] ; then
+            touch "$HOME/.ssh/config"
+            echo '#BASESTART' > "$HOME/.ssh/config-new"
+            cat "$HOME/.ssh/config_base" >> "$HOME/.ssh/config-new"
+            echo '#BASEEND' >> "$HOME/.ssh/config-new"
+            cat "$HOME/.ssh/config" \
+              | sed -r '/#BASESTART/,/#BASEEND/d' \
+              >> "$HOME/.ssh/config-new"
+            mv -f "$HOME/.ssh/config-new" "$HOME/.ssh/config"
+        fi
         ;;
     home2git)
         cd $(dirname $0)
@@ -33,4 +43,3 @@ case $1 in
         exit -1
         ;;
 esac
-
