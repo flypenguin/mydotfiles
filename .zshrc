@@ -12,19 +12,31 @@
 # Set up timing if used
 # ############################################################################
 
-TIME_CALLS=0
-TIME_LAST=$(/usr/local/opt/coreutils/libexec/gnubin/date +%s.%N)
-TIME_START=$TIME_LAST
+export _TIME_STARTUP=0
+
+if [[ $_TIME_STARTUP -ne 0 ]] ; then
+  # enable using GNU date on Mac
+  for t in /usr/local/opt/coreutils/libexec/gnubin/date /usr/bin/date $(which date) ; do
+    if [ -f $t ] ; then
+      export DATE_BIN=$t
+      echo "Using date binary: $DATE_BIN"
+      break
+    fi
+  done
+  export _TIME_STARTUP_LAST=$($DATE_BIN +%s.%N)
+  export _TIME_STARTUP_FIRST=$_TIME_STARTUP_LAST
+fi
+
 ttime() {
-  [ "$TIME_CALLS" = "0" ] && return
+  [ "$_TIME_STARTUP" = "0" ] && return
   local NEWTIME
   local DURATION
   local USE_TIME
-  [ "$2" = "" ] && USE_TIME=$TIME_LAST || USE_TIME=$2
-  NEWTIME=$(/usr/local/opt/coreutils/libexec/gnubin/date +%s.%N)
+  [ "$2" = "" ] && USE_TIME=$_TIME_STARTUP_LAST || USE_TIME=$2
+  NEWTIME=$($DATE_BIN +%s.%N)
   DURATION=$(( $NEWTIME - $USE_TIME ))
-  printf "%15s done after %f\n" $1 $DURATION
-  TIME_LAST=$NEWTIME
+  printf "%15s at %f sec\n" $1 $DURATION
+  export _TIME_STARTUP_LAST=$NEWTIME
 }
 
 
@@ -48,24 +60,8 @@ ttime init
 # Mangle some more paths
 # ############################################################################
 
-# we SHOULD not need this much longer (maybe), thanks to zplug :D
-if [ -d "$HOME/clis" ] ; then
-  for p in "$HOME/clis/"* ; do
-    [ -d "$p/bin" ] && p="$p/bin"
-    path+=($p)
-  done
-fi
-ttime clis
-
 # our own binary directory should have preference over the system ones ...
 path=("$HOME/bin" $path)
-
-# load rvm
-if [ -d "$HOME/.rvm" ]; then
-    path=("$HOME/.rvm" $path)
-    [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-fi
-ttime rvm
 
 
 # ############################################################################
@@ -80,7 +76,8 @@ ttime zplug_init
 zplug "zplug/zplug",            hook-build:"zplug --self-manage"
 
 zplug "Tarrasch/zsh-autoenv"
-zplug "johnhamelink/rvm-zsh",   if:"which rvm"
+zplug "johnhamelink/rvm-zsh"
+zplug "supercrabtree/k"
 
 zplug "themes/robbyrussell",    from:oh-my-zsh
 zplug "plugins/git",            from:oh-my-zsh
@@ -90,18 +87,12 @@ zplug "lib/grep",               from:oh-my-zsh
 zplug "lib/termsupport",        from:oh-my-zsh
 zplug "lib/completion",         from:oh-my-zsh
 
-# I ignore local-* in this directory. so for host-local settings, this is
-# the place to put them. cool, eh? :)
-zplug "~/.shell",               from:local, use:"*.{z,}sh{.$UNAME,}"
+# host-local things can be placed under this directory.
+# and we need those two glob entries ...
+zplug "~/.shell",               from:local, use:"*.sh{.$UNAME,}"
+zplug "~/.shell",               from:local, use:"*.zsh{.$UNAME,}"
 
 ttime zplug_commands
-
-
-# ############################################################################
-# Almost done - do host-local settings if present
-# ############################################################################
-
-[ -f "$HOME/.zshrc.local" ] && source $a
 
 
 # ############################################################################
@@ -120,4 +111,4 @@ ttime zplug_check
 
 zplug load
 ttime zplug_load
-ttime all $TIME_START
+ttime all $_TIME_STARTUP_FIRST
