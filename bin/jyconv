@@ -17,6 +17,8 @@ def make_yaml_str(self, node):
 def load_and_convert():
     global content
     filename = args.inputfile
+    if filename == "-":
+        filename = "/dev/stdin"
     ext = os.path.splitext(filename)[1]
     with open(filename, "r") as ifile:
         if ext in (".json"):
