@@ -1,6 +1,0 @@
-
-bindkey '[D' backward-word          # alt-left
-bindkey '[C' forward-word           # alt-right
-
-source ~/bin/iterm2_shell_integration.$(basename $SHELL)
-

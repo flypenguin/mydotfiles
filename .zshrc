@@ -41,31 +41,8 @@ unsetopt correct                # dito
 setopt autocd
 zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
 
-[ -f "$HOME/.settings" ] && source "$HOME/.settings"
-[ -f "$HOME/.aliases" ] && source "$HOME/.aliases"
-
 ttime init
 
-# ############################################################################
-# Mac OS specific settings.
-# ############################################################################
-
-if [[ "$UNAME" = "Darwin" ]] ; then
-  # use iterm2 shell integration
-  source "$HOME/bin/iterm2_shell_integration.zsh"
-
-  # nice keyboard bindings
-  bindkey '[D' backward-word          # alt-left
-  bindkey '[C' forward-word           # alt-right
-
-  # use homebrew gnu utils if intalled instead of system binaries
-  # we might be able to speed this up using the find command
-  for a in /usr/local/opt/* ; do
-    [ -d "$a/libexec/gnubin" ] && path=("$a/libexec/gnubin" $path)
-  done
-  [ -d /usr/local/sbin ] && path=("$a/libexec/gnubin" $path)
-fi
-ttime mac_specific
 
 # ############################################################################
 # Mangle some more paths
@@ -115,7 +92,7 @@ zplug "lib/completion",         from:oh-my-zsh
 
 # I ignore local-* in this directory. so for host-local settings, this is
 # the place to put them. cool, eh? :)
-zplug "~/.zsh",                 from:local, use:"*.zsh"
+zplug "~/.shell",               from:local, use:"*.{z,}sh{.$UNAME,}"
 
 ttime zplug_commands
 
