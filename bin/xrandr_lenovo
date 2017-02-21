@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+INTERNAL_DISPLAY="eDP.*"
+
+OUTPUTS=$(xrandr  | grep -Ev '^[[:space:]]' | cut -f1 -d " " | sort | grep -Ev "($INTERNAL_DISPLAY|Screen)" | sed -n 2,\$p)
+INT_DISP=$(xrandr | grep -Ev '^[[:space:]]' | cut -f1 -d " " | sort | grep -E  $INTERNAL_DISPLAY)
+
+if [ "$1" == "docked" ]; then
+    LAST=""
+    for OUT in $OUTPUTS  ; do
+        xrandr --output $OUT --auto --mode "1920x1080" --right-of $INT_DISP $LAST
+        LAST="--right-of $OUT"
+    done
+    for OUT in $INT_DISP ; do xrandr --output $OUT --off  ; done
+elif [ "$1" == "solo" ]; then
+    for OUT in $OUTPUTS  ; do xrandr --output $OUT --off  ; done
+    for OUT in $INT_DISP ; do xrandr --output $OUT --auto ; done
+elif [ "$1" == "presentation" ]; then
+    for OUT in $INT_DISP ; do xrandr --output $OUT --auto ; done
+    for OUT in $OUTPUTS  ; do xrandr --output $OUT --auto --same-as $INT_DISP ; done
+else
+    cat <<EOF
+USAGE: $(basename $0) <docked|free>
+       docked - activates docked configuration without internal monitor
+       solo   - activates solo configuration with only internal monitor
+EOF
+fi
