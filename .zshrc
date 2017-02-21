@@ -73,24 +73,28 @@ source ~/.zplug/init.zsh
 
 ttime zplug_init
 
-zplug "zplug/zplug",            hook-build:"zplug --self-manage"
+zplug "zplug/zplug",                  hook-build:"zplug --self-manage"
 
 zplug "Tarrasch/zsh-autoenv"
 zplug "johnhamelink/rvm-zsh"
 zplug "supercrabtree/k"
 
-zplug "themes/robbyrussell",    from:oh-my-zsh
-zplug "plugins/git",            from:oh-my-zsh
-zplug "plugins/rvm",            from:oh-my-zsh
-zplug "lib/directories",        from:oh-my-zsh
-zplug "lib/grep",               from:oh-my-zsh
-zplug "lib/termsupport",        from:oh-my-zsh
-zplug "lib/completion",         from:oh-my-zsh
+zplug "themes/robbyrussell",          from:oh-my-zsh
+zplug "plugins/virtualenv",           from:oh-my-zsh
+zplug "plugins/virtualenvwrapper",    from:oh-my-zsh
+zplug "plugins/git",                  from:oh-my-zsh
+zplug "plugins/rvm",                  from:oh-my-zsh
+zplug "plugins/common-aliases",       from:oh-my-zsh
+zplug "lib/directories",              from:oh-my-zsh
+zplug "lib/grep",                     from:oh-my-zsh
+zplug "lib/termsupport",              from:oh-my-zsh
+zplug "lib/completion",               from:oh-my-zsh
+zplug "lib/key-bindings",             from:oh-my-zsh
 
 # host-local things can be placed under this directory.
 # and we need those two glob entries ...
-zplug "~/.shell",               from:local, use:"*.sh{.$UNAME,}"
-zplug "~/.shell",               from:local, use:"*.zsh{.$UNAME,}"
+zplug "~/.shell",                     from:local, use:"*.sh{.$UNAME,}"
+zplug "~/.shell",                     from:local, use:"*.zsh{.$UNAME,}"
 
 ttime zplug_commands
 
