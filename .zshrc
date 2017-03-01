@@ -41,27 +41,14 @@ ttime() {
 
 
 # ############################################################################
-# Init
-# ############################################################################
-
-set -k                          # recognize inline comments on the command line
-setopt HIST_IGNORE_SPACE        # start with " " -> no history entry
-typeset -U path                 # see here: https://is.gd/1Kfp67
-UNAME=$(uname -s)               # to find out OS later
-DISABLE_CORRECTION="true"       # might be oh-my-zsh only
-unsetopt correct                # dito
-setopt autocd
-zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
-
-ttime init
-
-
-# ############################################################################
 # Mangle some more paths
 # ############################################################################
 
 # our own binary directory should have preference over the system ones ...
 path=("$HOME/bin" $path)
+
+# only relevant for this script.
+UNAME=$(uname -s)               # to find out OS later
 
 
 # ############################################################################
@@ -79,17 +66,22 @@ zplug "Tarrasch/zsh-autoenv"
 zplug "johnhamelink/rvm-zsh"
 zplug "supercrabtree/k"
 
-zplug "themes/robbyrussell",          from:oh-my-zsh
-zplug "plugins/virtualenv",           from:oh-my-zsh
-zplug "plugins/virtualenvwrapper",    from:oh-my-zsh
-zplug "plugins/git",                  from:oh-my-zsh
-zplug "plugins/rvm",                  from:oh-my-zsh
-zplug "plugins/common-aliases",       from:oh-my-zsh
+# alternate theme(s):
+#zplug "themes/robbyrussell",          from:oh-my-zsh
+
+zplug "themes/jreese",                from:oh-my-zsh, as:theme
+
 zplug "lib/directories",              from:oh-my-zsh
 zplug "lib/grep",                     from:oh-my-zsh
 zplug "lib/termsupport",              from:oh-my-zsh
 zplug "lib/completion",               from:oh-my-zsh
 zplug "lib/key-bindings",             from:oh-my-zsh
+zplug "lib/history",                  from:oh-my-zsh
+zplug "plugins/virtualenvwrapper",    from:oh-my-zsh
+zplug "plugins/virtualenv",           from:oh-my-zsh
+zplug "plugins/git",                  from:oh-my-zsh
+zplug "plugins/rvm",                  from:oh-my-zsh
+zplug "plugins/common-aliases",       from:oh-my-zsh
 
 # host-local things can be placed under this directory.
 # and we need those two glob entries ...
