@@ -48,7 +48,7 @@ ttime() {
 path=("$HOME/bin" $path)
 
 # only relevant for this script.
-export UNAME=$(uname -s)               # to find out OS later
+UNAME=$(uname -s)               # to find out OS later
 
 
 # ############################################################################
@@ -83,12 +83,14 @@ zplug "plugins/git",                  from:oh-my-zsh
 zplug "plugins/rvm",                  from:oh-my-zsh
 zplug "plugins/common-aliases",       from:oh-my-zsh
 
-
-# glob didn't work. fuck this.
-zplug "~/.shell",                     from:local, use:"*.sh.$UNAME"
-zplug "~/.shell",                     from:local, use:"*.sh"
-zplug "~/.shell",                     from:local, use:"*.zsh.$UNAME"
-zplug "~/.shell",                     from:local, use:"*.zsh"
+# host-local things can be placed under this directory.
+# and we need those two glob entries ...
+# zplug "~/.shell",               from:local, use:"*.sh{.$UNAME,}",  defer:2
+# zplug "~/.shell",               from:local, use:"*.zsh{.$UNAME,}", defer:2
+zplug "~/.shell",               from:local, defer:2, use:"*.sh"
+zplug "~/.shell",               from:local, defer:2, use:"*.zsh"
+zplug "~/.shell",               from:local, defer:2, use:"*.sh.$UNAME"
+zplug "~/.shell",               from:local, defer:2, use:"*.zsh.$UNAME"
 
 ttime zplug_commands
 
