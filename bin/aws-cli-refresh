@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+SETTINGS_FILE="$HOME/.aws/c11h-settings"
+CREDENTIALS_FILE="$HOME/.aws/credentials"
+TMPFILE=$(mktemp)
+
+if [ "$1" == "init" ]; then
+
+  source "$SETTINGS_FILE"
+
+  cat <<EOF
+
+Enter the ARN of your MFA device. You can find it by ...
+  * open AWS console
+  * open IAM
+  * select your user
+  * go to "Security Credentials" tab
+It's next to "Assigned MFA device".
+
+EOF
+
+  echo -n "MFA token ARN [$MFA_DEVICE]: "
+  read TMP
+  [ -n "$TMP" ] && MFA_DEVICE="$TMP"
+  [ -z "$MFA_DEVICE" ] && echo "Aborting." && exit
+  echo "Using '$MFA_DEVICE'"
+
+  cat <<EOF
+
+
+Enter your profile name to use to *create* the temporary credentials.
+That profile needs to be configured in \$HOME/.aws/credentials like this:
+  [PROFILE_NAME]
+  aws_access_key_id=SOME_TEXT
+  aws_secret_access_key=SOME_MORE_TEXT
+It's the PROFILE_NAME you're looking for, and it MUST NOT BE "default", because
+your temporary credentials will be saved in the "default" profile.
+
+PLEASE ALSO NOTE that your "default" profile, if present, MUST NOT contain
+any blank lines and MUST end with one!
+
+EOF
+
+  echo -n "AWS profile name [$PROFILE_NAME]: "
+  read TMP
+  [ -n "$TMP" ] && PROFILE_NAME="$TMP"
+  [ -z "$PROFILE_NAME" ] && echo "Aborting." && exit
+  echo "Using '$PROFILE_NAME'"
+
+  echo -e "MFA_DEVICE=$MFA_DEVICE\nPROFILE_NAME=$PROFILE_NAME" > "$SETTINGS_FILE"
+  echo "Settings saved in $SETTINGS_FILE"
+  echo "Initialization done."
+  exit
+
+else
+
+  set -e
+
+  source ~/.aws/c11h-settings
+  echo -n "Enter current token code: "
+  read TOKEN_CODE
+
+  # the real one, uncomment later
+  CREDS=$(aws sts get-session-token --profile $PROFILE_NAME --serial-number $MFA_DEVICE --token-code $TOKEN_CODE)
+
+  cat > $TMPFILE <<EOF
+[default]
+aws_access_key_id=$(echo $CREDS | jq '.Credentials.AccessKeyId' -r)
+aws_secret_access_key=$(echo $CREDS | jq '.Credentials.SecretAccessKey' -r)
+aws_session_token=$(echo $CREDS | jq '.Credentials.SessionToken' -r)
+
+EOF
+  cat $CREDENTIALS_FILE | sed -r '/\[default\]/,/^ *$/d' >> $TMPFILE
+
+  mv -f "$TMPFILE" "$CREDENTIALS_FILE"
+
+fi
