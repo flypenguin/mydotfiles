@@ -7,11 +7,6 @@
 #   $ZDOTDIR/.zlogout                   # login-shells (on exit)
 # see here: http://bit.ly/1sGzo6g
 
-
-# ############################################################################
-# Set up timing if used
-# ############################################################################
-
 UNAME=$(uname -s)                                   # to find out OS later
 export path=("/usr/local/bin" $path)
 source "${HOME}/.zgen/zgen.zsh"
