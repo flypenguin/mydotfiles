@@ -35,8 +35,12 @@ if ! zgen saved; then
   zgen   oh-my-zsh   "plugins/rvm"
   zgen   oh-my-zsh   "plugins/common-aliases"
 
-  for plug in $HOME/.shell/* ; do
-    zgen load "$plug"
+  for system in "" ".$UNAME" ; do
+    for plug in $HOME/.shell/*.sh${system} ; do
+      # don't add dummy files :)
+      if echo $plug | grep -q dummy ; then continue ; fi
+      zgen load "$plug"
+    done
   done
 
   # generate the init script from plugins above
