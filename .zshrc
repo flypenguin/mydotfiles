@@ -8,7 +8,7 @@
 # see here: http://bit.ly/1sGzo6g
 
 UNAME=$(uname -s)                                   # to find out OS later
-export path=("/usr/local/bin" $path)
+export path=("/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
 source "${HOME}/.zgen/zgen.zsh"
 
 # if the init scipt doesn't exist

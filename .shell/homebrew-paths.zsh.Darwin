@@ -1,6 +1,6 @@
 # mac os & homebrew - if the coreutils are installed, use them instead of the OS X ones.
 
 for a in /usr/local/opt/* ; do
-  [ -d "$a/libexec/gnubin" ] && path=("$a/libexec/gnubin" $path)
+  [ -d "$a/libexec/gnubin" ] && path=("$a/libexec/gnubin" "$path[@]")
 done
-[ -d /usr/local/sbin ] && path=("/usr/local/sbin" $path)
+[ -d /usr/local/sbin ] && path=("/usr/local/sbin" "$path[@]")
