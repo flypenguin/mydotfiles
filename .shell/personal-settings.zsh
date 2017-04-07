@@ -10,4 +10,3 @@ unsetopt correct                # might be oh-my-zsh only
 DISABLE_CORRECTION="true"       # might be oh-my-zsh only
 
 zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
-
