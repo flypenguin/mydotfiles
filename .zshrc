@@ -7,8 +7,13 @@
 #   $ZDOTDIR/.zlogout                   # login-shells (on exit)
 # see here: http://bit.ly/1sGzo6g
 
-UNAME=$(uname -s)                                   # to find out OS later
-export path=("/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
+UNAME=$(uname -s)
+
+# otherwise we don't have a path. super creepy.
+typeset -Ug path
+path=("/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
+
+# source zgen
 source "${HOME}/.zgen/zgen.zsh"
 
 # if the init scipt doesn't exist
