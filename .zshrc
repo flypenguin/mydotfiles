@@ -13,42 +13,33 @@
 # ############################################################################
 
 UNAME=$(uname -s)                                   # to find out OS later
-source "$HOME/.zplug/init.zsh"
+path
+source "${HOME}/.zgen/zgen.zsh"
 
-zplug "zplug/zplug",                  hook-build:"zplug --self-manage"
+# if the init scipt doesn't exist
+if ! zgen saved; then
 
-zplug "themes/robbyrussell",          from:oh-my-zsh, as:theme
+  zgen   oh-my-zsh
 
-zplug "lib/directories",              from:oh-my-zsh
-zplug "lib/grep",                     from:oh-my-zsh
-zplug "lib/termsupport",              from:oh-my-zsh
-zplug "lib/completion",               from:oh-my-zsh
-zplug "lib/key-bindings",             from:oh-my-zsh
-zplug "lib/history",                  from:oh-my-zsh
-zplug "plugins/virtualenvwrapper",    from:oh-my-zsh
-zplug "plugins/virtualenv",           from:oh-my-zsh
-zplug "plugins/git",                  from:oh-my-zsh
-zplug "plugins/rvm",                  from:oh-my-zsh
-zplug "plugins/common-aliases",       from:oh-my-zsh
+  # specify plugins here
+  zgen   oh-my-zsh   "themes/robbyrussell"
+#  zgen   oh-my-zsh   "lib/directories"
+#  zgen   oh-my-zsh   "lib/grep"
+#  zgen   oh-my-zsh   "lib/termsupport"
+#  zgen   oh-my-zsh   "lib/completion"
+#  zgen   oh-my-zsh   "lib/key-bindings"
+#  zgen   oh-my-zsh   "lib/history"
+  zgen   oh-my-zsh   "plugins/virtualenvwrapper"
+  zgen   oh-my-zsh   "plugins/virtualenv"
+  zgen   oh-my-zsh   "plugins/git"
+  zgen   oh-my-zsh   "plugins/rvm"
+  zgen   oh-my-zsh   "plugins/common-aliases"
 
+  for plug in $HOME/.shell/* ; do
+    zgen load "$plug"
+  done
 
-# host-local things can be placed under this directory.
-# and we need those two glob entries ...
-zplug "~/.shell",                     from:local, use:"*.sh"
-zplug "~/.shell",                     from:local, use:"*.zsh"
-zplug "~/.shell",                     from:local, use:"*.sh.$UNAME"
-zplug "~/.shell",                     from:local, use:"*.zsh.$UNAME"
+  # generate the init script from plugins above
+  zgen save
 
-# ############################################################################
-# Finally - zplug.
-# ############################################################################
-
-# Install plugins if there are plugins that have not been installed
-if ! zplug check --verbose; then
-    printf "Install? [y/N]: "
-    if read -q; then
-        echo; zplug install
-    fi
 fi
-
-zplug load
