@@ -8,6 +8,8 @@ export LESSOPEN="|$HOME/bin/_lessfilter %s"
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=on'
 export EDITOR='vim'
 
+# I *WANT* the virtualenv prompt
+unset VIRTUAL_ENV_DISABLE_PROMPT
 
 # ZSH settings
 
