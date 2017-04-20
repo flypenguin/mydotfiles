@@ -33,6 +33,8 @@ alias glf="git log --stat --oneline --pretty='%n%C(yellow reverse)%h%C(reset) %C
 # ls
 alias ls="ls --color=auto"
 alias dir="ls -lh"
+alias  ll="ls -lh"
+alias  la="ls -lha"
 
 # arch
 alias  pi="sudo pacman -S"
@@ -53,4 +55,6 @@ alias docker_stop_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs d
 alias docker_kill_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker kill"
 
 # OPS
-alias tg=terragrunt
+alias tf=terraform
+alias tfp="terraform plan"
+alias tfa="terraform apply"
