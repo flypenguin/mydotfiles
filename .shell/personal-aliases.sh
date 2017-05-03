@@ -55,6 +55,11 @@ alias docker_stop_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs d
 alias docker_kill_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker kill"
 
 # OPS
-alias tf=terraform
-alias tfp="terraform plan"
-alias tfa="terraform apply"
+alias   tf="terraform"
+alias  tfp="terraform plan"
+alias  tfa="terraform apply"
+alias tfps="terraform plan -out=terraform-plan-file.tmp"
+alias tfas="terraform apply terraform-plan-file.tmp ; rm -f terraform-plan-file.tmp"
+
+# OPS AWS
+alias aws-list-instances="aws ec2 describe-instances | jq '.Reservations[].Instances[] | {IP: .PrivateIpAddress, ID: .InstanceId, Name: .Tags[] | select(.Key==\"Name\").Value}'"
