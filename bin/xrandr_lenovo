@@ -2,13 +2,32 @@
 
 INTERNAL_DISPLAY="eDP.*"
 
-OUTPUTS=$(xrandr  | grep -Ev '^[[:space:]]' | cut -f1 -d " " | sort | grep -Ev "($INTERNAL_DISPLAY|Screen)" | sed -n 2,\$p)
-INT_DISP=$(xrandr | grep -Ev '^[[:space:]]' | cut -f1 -d " " | sort | grep -E  $INTERNAL_DISPLAY)
+DFILE=/tmp/displays
+xrandr > $DFILE
 
+#set -x
+
+OUTPUTS=$(cat $DFILE  | grep -v disconnected | grep -Ev '^[[:space:]]' | cut -f1 -d " " | sort | grep -Ev "($INTERNAL_DISPLAY|Screen)")
+INT_DISP=$(cat $DFILE | grep -v disconnected | grep -Ev '^[[:space:]]' | cut -f1 -d " " | sort | grep -E  $INTERNAL_DISPLAY)
+DISDISPS=$(cat $DFILE | grep    disconnected | grep -Ev '^[[:space:]]' | cut -f1 -d " " | sort | grep -Ev $INTERNAL_DISPLAY)
+
+echo "DISCONNECTED $DISDISPS"
+echo "INTERNAL     $INT_DISP"
+echo "OUTPUTS      $OUTPUTS"
+
+set -e
+set -x
+
+# first step - disable all "disconnected" outputs
+for OUT in $DISDISPS ; do
+    xrandr --output $OUT --off
+done
+
+# now set the screen up
 if [ "$1" == "docked" ]; then
     LAST=""
     for OUT in $OUTPUTS  ; do
-        xrandr --output $OUT --auto --mode "1920x1080" --right-of $INT_DISP $LAST
+        xrandr --output $OUT --auto $LAST
         LAST="--right-of $OUT"
     done
     for OUT in $INT_DISP ; do xrandr --output $OUT --off  ; done
@@ -18,10 +37,17 @@ elif [ "$1" == "solo" ]; then
 elif [ "$1" == "presentation" ]; then
     for OUT in $INT_DISP ; do xrandr --output $OUT --auto ; done
     for OUT in $OUTPUTS  ; do xrandr --output $OUT --auto --same-as $INT_DISP ; done
+elif [ "$1" == "all" ]; then
+    LAST=""
+    for OUT in $INT_DISP $OUTPUTS  ; do
+        xrandr --output $OUT --auto $LAST
+        LAST="--right-of $OUT"
+    done
 else
     cat <<EOF
 USAGE: $(basename $0) <docked|free>
        docked - activates docked configuration without internal monitor
        solo   - activates solo configuration with only internal monitor
 EOF
+    exit -1
 fi
