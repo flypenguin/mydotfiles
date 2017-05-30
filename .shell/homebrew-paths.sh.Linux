@@ -1,0 +1,3 @@
+# linux homebrew (yes, this is a thing ;) path settings
+
+[ -d $HOME/.linuxbrew ] && path=("$HOME/.linuxbrew/bin" "$path[@]")
