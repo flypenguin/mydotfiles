@@ -11,7 +11,7 @@ UNAME=$(uname -s)
 
 # otherwise we don't have a path. super creepy.
 typeset -Ug path
-path=("/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
+path=("$HOME/bin" "/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
 
 # source zgen
 source "${HOME}/.zgen/zgen.zsh"
