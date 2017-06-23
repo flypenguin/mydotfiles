@@ -2,6 +2,9 @@
 # ALIASES
 #
 
+# console helpers
+alias -g WL=' | wc -l'
+
 # ssh
 alias ssr="ssh -l root"
 alias ssp="ssh -o PubkeyAuthentication=no"
