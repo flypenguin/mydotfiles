@@ -2,6 +2,10 @@
 # ALIASES
 #
 
+# UN-aliases
+unalias rm
+unalias cp
+
 # console helpers
 alias -g WL=' | wc -l'
 
