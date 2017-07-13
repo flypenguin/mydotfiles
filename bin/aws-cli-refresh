@@ -41,7 +41,7 @@ any blank lines and MUST end with one!
 
 EOF
 
-  echo -n "AWS profile name [$PROFILE_NAME]: "
+  echo -n "Default AWS profile name to use [$PROFILE_NAME]: "
   read TMP
   [ -n "$TMP" ] && PROFILE_NAME="$TMP"
   [ -z "$PROFILE_NAME" ] && echo "Aborting." && exit
@@ -57,10 +57,12 @@ else
   set -e
 
   source ~/.aws/c11h-settings
+  [ -n "$1" ] && PROFILE_NAME="$1"
+  echo "Using profile '$PROFILE_NAME'"
+
   echo -n "Enter current token code: "
   read TOKEN_CODE
 
-  # the real one, uncomment later
   CREDS=$(aws sts get-session-token --profile $PROFILE_NAME --serial-number $MFA_DEVICE --token-code $TOKEN_CODE)
 
   cat > $TMPFILE <<EOF
