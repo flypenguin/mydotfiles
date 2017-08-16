@@ -37,7 +37,7 @@ alias gld="git log --pretty=format:'%C(yellow reverse)%h%C(reset) %C(yellow reve
 alias gds="git --no-pager diff --stat"
 alias glf="git log --stat --oneline --pretty='%n%C(yellow reverse)%h%C(reset) %C(yellow)%ad%C(red)%d%C(reset) %C(white)%s%C(reset) %C(blue)[%cn]%C(reset)'"
 alias git-branch-clean="git remote update && git fetch -a && git remote prune origin && git fetch origin 'refs/tags/*:refs/tags/*' --prune && git branch --merged | grep / | grep -v \* | cut -b3- | xargs -r git branch -d && git branch -vv"
-alias gpb="git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)"
+alias gpb="git push --set-upstream origin \$(git rev-parse --abbrev-ref HEAD)"
 
 # ls
 alias ls="ls --color=auto"
