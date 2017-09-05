@@ -27,7 +27,7 @@ if ! zgen saved; then
   zgen   oh-my-zsh
 
   # specify plugins here
-  zgen   oh-my-zsh   "themes/robbyrussell"
+  zgen   oh-my-zsh   "themes/jreese"
 #  zgen   oh-my-zsh   "lib/directories"
 #  zgen   oh-my-zsh   "lib/grep"
 #  zgen   oh-my-zsh   "lib/termsupport"
