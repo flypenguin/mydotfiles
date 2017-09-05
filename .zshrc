@@ -11,7 +11,12 @@ UNAME=$(uname -s)
 
 # otherwise we don't have a path. super creepy.
 typeset -Ug path
-path=("$HOME/bin" "/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
+export path=("$HOME/bin" "/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
+
+# fix VIRTUALENVWRAPPER on OS X
+_PY_CHECK="/usr/local/bin/python2"
+[[ -x "$_PY_CHECK" ]] && export VIRTUALENVWRAPPER_PYTHON="$_PY_CHECK"
+
 
 # source zgen
 source "${HOME}/.zgen/zgen.zsh"
@@ -29,8 +34,8 @@ if ! zgen saved; then
 #  zgen   oh-my-zsh   "lib/completion"
 #  zgen   oh-my-zsh   "lib/key-bindings"
 #  zgen   oh-my-zsh   "lib/history"
-  zgen   oh-my-zsh   "plugins/virtualenvwrapper"
   zgen   oh-my-zsh   "plugins/virtualenv"
+  zgen   oh-my-zsh   "plugins/virtualenvwrapper"
   zgen   oh-my-zsh   "plugins/git"
   zgen   oh-my-zsh   "plugins/rvm"
   zgen   oh-my-zsh   "plugins/common-aliases"
