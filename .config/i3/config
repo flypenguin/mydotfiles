@@ -1,71 +1,31 @@
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
 
+#############################################################################
+# set modifier
+
 set $mod Mod4
+
+
+#############################################################################
+# run applets / daemons
 
 exec --no-startup-id nm-applet
 exec --no-startup-id which gpaste-client && gpaste-client start
 
+
+#############################################################################
+# set fonts
+
 font pango:monospace 8
 #font pango:DejaVu Sans Mono 8
+
+
+#############################################################################
+# workspace keyboard bindings
 
 # move workspaces
 bindsym $mod+Shift+Ctrl+Right move workspace to output right
 bindsym $mod+Shift+Ctrl+Left move workspace to output left
-
-# monitor modes
-bindsym $mod+Shift+Ctrl+s exec $HOME/bin/xrandr_lenovo solo
-bindsym $mod+Shift+Ctrl+d exec $HOME/bin/xrandr_lenovo docked
-bindsym $mod+Shift+Ctrl+p exec $HOME/bin/xrandr_lenovo presentation
-bindsym $mod+Shift+Ctrl+a exec $HOME/bin/xrandr_lenovo all
-
-# common execs
-bindsym $mod+Shift+c reload                                   # reload the configuration file
-bindsym $mod+Shift+r restart                                  # restart i3 inplace (preserves session & layout)
-# exit i3
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'Exit i3?' -b 'Yes' 'gnome-session-quit --logout --no-prompt'"
-
-# control volume (needs amixer)
-bindsym $mod+F10 exec $HOME/bin/i3_volume_wrapper toggle_mute
-bindsym $mod+F11 exec $HOME/bin/i3_volume_wrapper vol_down
-bindsym $mod+F12 exec $HOME/bin/i3_volume_wrapper vol_up
-
-# misc tools
-bindsym $mod+n exec nautilus                                  # file manager
-bindsym $mod+l exec i3lock -d -c 000000                       # lock screen
-bindsym $mod+odiaeresis exec gpaste-client ui                 # clipboard manager
-bindsym $mod+Return exec i3-sensible-terminal                 # start terminal
-bindsym $mod+Shift+k kill                                     # kill focused window
-
-# Use Mouse+$mod to drag floating windows to their wanted position
-floating_modifier $mod
-
-# start dmenu (a program launcher)
-#bindsym $mod+d exec dmenu_run
-bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
-
-# change focus
-bindsym $mod+Left focus left
-bindsym $mod+Down focus down
-bindsym $mod+Up focus up
-bindsym $mod+Right focus right
-
-bindsym $mod+Shift+Left move left
-bindsym $mod+Shift+Down move down
-bindsym $mod+Shift+Up move up
-bindsym $mod+Shift+Right move right
-
-bindsym $mod+h split h                            # split in horizontal orientation
-bindsym $mod+v split v                            # split in vertical orientation
-bindsym $mod+f fullscreen toggle                  # enter fullscreen mode for the focused container
-bindsym $mod+s layout stacking                    # change layout to stacked
-bindsym $mod+w layout tabbed                      # change layout to tabbed
-bindsym $mod+e layout toggle split                # toggle layout split (?)
-bindsym $mod+Shift+space floating toggle          # toggle tiling / floating
-bindsym $mod+space focus mode_toggle              # change focus between tiling / floating windows
-bindsym $mod+a focus parent                       # focus the parent container
-
-# focus the child container
-#bindsym $mod+d focus child
 
 # switch to workspace
 bindsym $mod+1 workspace 1
@@ -90,6 +50,88 @@ bindsym $mod+Shift+7 move container to workspace 7
 bindsym $mod+Shift+8 move container to workspace 8
 bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
+
+
+#############################################################################
+# monitor handling hotkeys
+
+# monitor modes
+bindsym $mod+Shift+Ctrl+s exec $HOME/bin/xrandr_lenovo solo
+bindsym $mod+Shift+Ctrl+d exec $HOME/bin/xrandr_lenovo docked
+bindsym $mod+Shift+Ctrl+p exec $HOME/bin/xrandr_lenovo presentation
+bindsym $mod+Shift+Ctrl+a exec $HOME/bin/xrandr_lenovo all
+
+
+#############################################################################
+# common i3 actions
+
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r restart
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'Exit i3?' -b 'Yes' 'gnome-session-quit --logout --no-prompt'"
+
+
+#############################################################################
+# volume handling (MOD-F11/12, MOD-F10)
+
+# control volume (needs amixer)
+bindsym $mod+F10 exec $HOME/bin/i3_volume_wrapper toggle_mute
+bindsym $mod+F11 exec $HOME/bin/i3_volume_wrapper vol_down
+bindsym $mod+F12 exec $HOME/bin/i3_volume_wrapper vol_up
+
+
+#############################################################################
+# program hotkeys
+
+# file manager
+bindsym $mod+n exec nautilus
+# lock screen
+bindsym $mod+l exec i3lock -d -c 000000
+# clipboard manager
+bindsym $mod+odiaeresis exec gpaste-client ui
+# start terminal
+bindsym $mod+Return exec i3-sensible-terminal
+# kill focused window
+bindsym $mod+Shift+k kill
+
+# Use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+
+# start dmenu (a program launcher)
+#bindsym $mod+d exec dmenu_run
+bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+
+# change focus
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# split in horizontal orientation
+bindsym $mod+h split h
+# split in vertical orientation
+bindsym $mod+v split v
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen toggle
+# change layout to stacked
+bindsym $mod+s layout stacking
+# change layout to tabbed
+bindsym $mod+w layout tabbed
+# toggle layout split (?)
+bindsym $mod+e layout toggle split
+# toggle tiling / floating
+bindsym $mod+Shift+space floating toggle
+# change focus between tiling / floating windows
+bindsym $mod+space focus mode_toggle
+# focus the parent container
+bindsym $mod+a focus parent
+
+# focus the child container
+#bindsym $mod+d focus child
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
