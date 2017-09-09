@@ -9,21 +9,22 @@ tap "homebrew/fuse"
 tap "neovim/neovim"
 
 
-# usable command line
+# replace Mac OS command line utils
 brew "findutils", args: ["with-default-names"]
 brew "gnu-sed", args: ["with-default-names"]
 brew "gnu-time", args: ["with-default-names"]
 brew "gnu-tar"
 brew "gnu-which"
-
-# common tools
-cask "vagrant"
+brew "vim"
+brew "emacs"
 brew "curl"
+
+# previously uninstalled command line utils
+cask "vagrant"
 brew "docker"
 brew "docker-machine"
 brew "docker-compose"
 brew "dos2unix"
-brew "emacs"
 brew "gnupg"
 brew "htop-osx"
 brew "xz"
@@ -34,7 +35,6 @@ brew "pv"
 brew "the_silver_searcher"      # "ag" :)
 brew "tmux"
 brew "unrar"
-brew "vim"
 brew "watch"
 brew "wget"
 
