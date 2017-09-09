@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+
+# maybe ... change later.
+DOTDIR="$HOME/.dotfiles"
+
+# general purpose
+TIMESTAMP="$(date +%Y%m%d.%H%M%S)"
+
+
+# $1 repo URL to be cloned
+# $2 target directory, must be set
+clone_or_update_repo() {
+  TMPFILE="$(mktemp $DOTDIR/tmp/XXXXXXXX)"
+  if ! [ -d "$2" ] ; then
+    echo -n "   * Cloning $1 -> $2 ... "
+    mkdir -p "$(dirname $2)"
+    git clone "$1" "$2" > "$TMPFILE" 2>&1 \
+      && echo "OK" \
+      || (echo "ERROR." ; cat "$TMPFILE")
+  else
+    echo -n "   * Pulling $2 ... "
+    export TMPFILE
+    (
+      cd "$2" && git pull > "$TMPFILE" 2>&1 \
+        && echo "OK" \
+        || (echo "ERROR." ; cat "$TMPFILE")
+    )
+  fi
+}
+
+update_basefiles() {
+  echo " * Updating base files ..."
+  (
+    cd "$DOTDIR/dotfiles"
+    find . -name "*_base" | while read BASEFILE ; do
+      FINALFILE="$HOME/${BASEFILE%_base}"
+      TMPFILE="$(mktemp $DOTDIR/tmp/XXXXXXXX)"
+      touch "$FINALFILE"
+      (cat "$BASEFILE" ; echo -e '\n#BASEEND') >> "$TMPFILE"
+      cat "$FINALFILE" | sed -r '1,/#BASEEND/d'  >> "$TMPFILE"
+      if ! diff "$FINALFILE" "$TMPFILE" ; then
+        echo "   * UPDATED:   $BASEFILE"
+        mv -f "$TMPFILE" "$FINALFILE"
+      else
+        echo "   * UNCHANGED: $BASEFILE"
+      fi
+    done
+  )
+}
+
+# move away all files that might be already present
+backup_existing_dotfiles() {
+  echo " * Backup of existing dotfiles ..."
+  (
+    cd "$DOTDIR/dotfiles"
+    BACKUP_BASE="$DOTDIR/backups/$TIMESTAMP"
+    echo "   * backup dir is: $BACKUP_BASE"
+    find . -type f | while read f ; do
+      CHECK_FILE="$HOME/$f"
+      BACKUP_DIR="$(dirname $BACKUP_BASE/$f)"
+      if [ -f "$CHECK_FILE" ] ; then
+        echo "   * BACKUP:       $CHECK_FILE"
+        mkdir -p "$BACKUP_DIR"
+        mv "$CHECK_FILE" "$BACKUP_DIR"
+      elif [ -L "$CHECK_FILE" ] ; then
+        echo "   * LINK DELETED: $CHECK_FILE ($(readlink -f $CHECK_FILE))"
+        echo rm -f "$CHECK_FILE"
+      fi
+    done
+  )
+}
+
+print_help() {
+  cat <<EOF
+
+USAGE: $(basename $0) [-f]
+       $(basename $0) -h
+
+  -f : force. move away existing dotfiles to replace them with the
+       versions from this repo
+
+  -h : print help and exit
+
+Without -h this script will:
+  * update the git repos for vundle, etc.
+  * re-construct the config files which may contain local changes
+  * OPTIONAL: with -f backup pre-existing dotfiles (or remove links to them)
+  * update all dotfile links
+
+EOF
+  exit 0
+}
+
+
+# ###########################################################################
+# START
+
+
+# check for help
+[ "$1" == "-h" ] && print_help
+
+# our private temp dir
+mkdir -p "$DOTDIR/tmp"
+
+# pull / update all repos we need
+echo " * Updating all dotfile requirements ..."
+clone_or_update_repo https://github.com/seebi/dircolors-solarized.git   "$HOME/.solarized"
+clone_or_update_repo https://github.com/gmarik/Vundle.vim.git           "$HOME/.vim/bundle/Vundle.vim"
+
+# update our "constructed" files
+echo " * Updating constructed files ..."
+update_basefiles
+
+# check whether we should move shit out of the way first
+[ "$1" == "-f" ] && backup_existing_dotfiles
+
+# actually link dotfiles
+STOW_LOG="$DOTDIR/logs/stow_$TIMESTAMP"
+mkdir -p "$(dirname $STOW_LOG)"
+echo -n " * Updating dotfiles ... "
+stow -v -t "$HOME" -d "$DOTDIR/dotfiles" . > "$STOW_LOG" 2>&1 \
+  && echo "OK" \
+  || echo "ERROR. See logs: $STOW_LOG"
+
+# clean up
+rm -rf "$DOTDIR/tmp"
