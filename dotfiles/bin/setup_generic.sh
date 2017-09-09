@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# this file is mainly for the one-time things which already
+# provide methods to update on their own.
+
+
 # $1 repo URL to be cloned
 # $2 target directory, must be set
 clone_repo_to() {
@@ -28,4 +32,7 @@ clone_repo_to https://github.com/tarjoilija/zgen.git          "${HOME}/.zgen"
 
 # now use stow to manage shit. :)
 # first, save what might be overwritten.
-exec "$HOME/.dotfiles/dotfiles/bin/dotfile-update" -f
+"$HOME/.dotfiles/dotfiles/bin/dotfile-update" -f
+
+echo -e "\n\nIMPORTANT NOTE\nPlease remember to switch your shell to zsh :)\n"
+echo -e "\n... and have fun :)\n\n"

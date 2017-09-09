@@ -39,7 +39,7 @@ update_basefiles() {
       touch "$FINALFILE"
       (cat "$BASEFILE" ; echo -e '\n#BASEEND') >> "$TMPFILE"
       cat "$FINALFILE" | sed -r '1,/#BASEEND/d'  >> "$TMPFILE"
-      if ! diff "$FINALFILE" "$TMPFILE" ; then
+      if ! diff "$FINALFILE" "$TMPFILE" > /dev/null 2>&1 ; then
         echo "   * UPDATED:   $BASEFILE"
         mv -f "$TMPFILE" "$FINALFILE"
       else

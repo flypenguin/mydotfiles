@@ -18,4 +18,4 @@ if [ ! -d "$HOME/.dotfiles" ] ; then
 fi
 
 # continue with generic items
-exec "$HOME/.dotfiles/dotfiles/bin/setup_generic.sh"
+"$HOME/.dotfiles/dotfiles/bin/setup_generic.sh"
