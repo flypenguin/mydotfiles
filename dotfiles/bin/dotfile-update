@@ -35,6 +35,7 @@ update_basefiles() {
     find . -name "*_base" | while read BASEFILE ; do
       FINALFILE="$HOME/${BASEFILE%_base}"
       TMPFILE="$(mktemp $DOTDIR/tmp/XXXXXXXX)"
+      mkdir -p "$(dirname $FINALFILE)"
       touch "$FINALFILE"
       (cat "$BASEFILE" ; echo -e '\n#BASEEND') >> "$TMPFILE"
       cat "$FINALFILE" | sed -r '1,/#BASEEND/d'  >> "$TMPFILE"
