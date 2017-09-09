@@ -78,7 +78,7 @@ sudo systemctl enable sshd
 sudo systemctl start sshd
 
 echo "Setting up rest ..."
-"$(dirname $0)/setup_generic.sh"
+"$(dirname $0)/generic.sh"
 
 
 # ============================================================================

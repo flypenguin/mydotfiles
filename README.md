@@ -9,10 +9,10 @@ Anyway, feel free to use it (as inspiration or just clone it).
 
 ```
 # for Mac
-curl https://raw.githubusercontent.com/flypenguin/mydotfiles/master/dotfiles/bin/setup_mac.sh  | bash
+curl https://raw.githubusercontent.com/flypenguin/mydotfiles/master/setup/mac.sh  | bash
 
-# for Arch Linux (currently untested)
-curl https://raw.githubusercontent.com/flypenguin/mydotfiles/master/dotfiles/bin/setup_arch.sh  | bash
+# for Arch Linux (currently untested & probably NOT WORKING)
+curl https://raw.githubusercontent.com/flypenguin/mydotfiles/master/setup/arch.sh  | bash
 ```
 
 
