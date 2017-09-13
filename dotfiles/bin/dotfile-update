@@ -61,7 +61,7 @@ backup_existing_dotfiles() {
       BACKUP_DIR="$(dirname $BACKUP_BASE/$f)"
       if [ -L "$CHECK_FILE" ] ; then
         echo "   * LINK DELETED: $CHECK_FILE ($(readlink -f $CHECK_FILE))"
-        echo rm -f "$CHECK_FILE"
+        rm -f "$CHECK_FILE"
       elif [ -f "$CHECK_FILE" ] ; then
         echo "   * BACKUP:       $CHECK_FILE"
         mkdir -p "$BACKUP_DIR"
