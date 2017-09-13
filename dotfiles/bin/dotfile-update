@@ -59,13 +59,13 @@ backup_existing_dotfiles() {
     find . -type f | while read f ; do
       CHECK_FILE="$HOME/$f"
       BACKUP_DIR="$(dirname $BACKUP_BASE/$f)"
-      if [ -f "$CHECK_FILE" ] ; then
+      if [ -L "$CHECK_FILE" ] ; then
+        echo "   * LINK DELETED: $CHECK_FILE ($(readlink -f $CHECK_FILE))"
+        echo rm -f "$CHECK_FILE"
+      elif [ -f "$CHECK_FILE" ] ; then
         echo "   * BACKUP:       $CHECK_FILE"
         mkdir -p "$BACKUP_DIR"
         mv "$CHECK_FILE" "$BACKUP_DIR"
-      elif [ -L "$CHECK_FILE" ] ; then
-        echo "   * LINK DELETED: $CHECK_FILE ($(readlink -f $CHECK_FILE))"
-        echo rm -f "$CHECK_FILE"
       fi
     done
   )
