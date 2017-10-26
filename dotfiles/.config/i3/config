@@ -11,6 +11,8 @@ set $mod Mod4
 
 exec --no-startup-id nm-applet
 exec --no-startup-id which gpaste-client && gpaste-client start
+# maybe not needed?!?
+exec --no-startup-id /usr/lib/gnome-settings-daemon/gsd-xsettings
 
 
 #############################################################################
