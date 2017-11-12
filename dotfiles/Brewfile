@@ -84,6 +84,7 @@ brew "mas"
 # (mac) ui appliccations
 #cask "flash-npapi"
 #cask "flash-player"
+cask "fontexplorer-x-pro"
 cask "jdownloader"
 cask "libreoffice"
 cask "phoenix-slides"
