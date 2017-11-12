@@ -4,8 +4,7 @@
 if ! which brew ; then
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   brew tap caskroom/cask
-  brew bundle                 # so much nicer :)
-  brew bundle                 # so much nicer :)
+  # we don't have the Brewfile cloned - yet. so ... wait.
 else
   echo "Skipping homebrew installation. Seems to be installed."
 fi
@@ -16,6 +15,9 @@ if [ ! -d "$HOME/.dotfiles" ] ; then
   # now we *definitively* have git ...
   git clone https://github.com/flypenguin/mydotfiles.git .dotfiles
 fi
+
+# NOW we have the brewfile :) . use it.
+brew bundle -f $HOME/.dotfiles/dotfiles/Brewfile
 
 # continue with generic items
 "$HOME/.dotfiles/setup/generic.sh"
