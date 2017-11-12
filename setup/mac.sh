@@ -3,7 +3,7 @@
 # install homebrew if needed
 if ! which brew ; then
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-  brew tap caskroom/bundle
+  brew tap caskroom/cask
   brew bundle                 # so much nicer :)
   brew bundle                 # so much nicer :)
 else
