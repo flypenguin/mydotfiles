@@ -74,10 +74,11 @@ brew "nomad"
 brew "terraform"
 
 # mac stuff
-cask "virtualbox"
+cask "fluor"
 cask "gpg-suite"
 cask "iterm2"
 cask "logitech-unifying"
+cask "virtualbox"
 brew "mas"
 
 # (mac) ui appliccations
