@@ -17,7 +17,7 @@ if [ ! -d "$HOME/.dotfiles" ] ; then
 fi
 
 # NOW we have the brewfile :) . use it.
-brew bundle -f $HOME/.dotfiles/dotfiles/Brewfile
+brew bundle --file=$HOME/.dotfiles/dotfiles/Brewfile
 
 # continue with generic items
 "$HOME/.dotfiles/setup/generic.sh"
