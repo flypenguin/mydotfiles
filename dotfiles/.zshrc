@@ -40,6 +40,11 @@ if ! zgen saved; then
   zgen   oh-my-zsh   "plugins/rvm"
   zgen   oh-my-zsh   "plugins/common-aliases"
 
+  if whence fzf >/dev/null; then
+    zgen load junegunn/fzf shell/completion.zsh
+    zgen load junegunn/fzf shell/key-bindings.zsh
+  fi
+
   for system in "" ".$UNAME" ; do
     for plug in $HOME/.shell/*.sh${system} ; do
       # don't add dummy files :)
