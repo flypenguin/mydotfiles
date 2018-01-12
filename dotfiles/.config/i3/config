@@ -87,8 +87,8 @@ bindsym $mod+F12 exec $HOME/bin/i3_volume_wrapper vol_up
 # file manager
 bindsym $mod+n exec nautilus
 # lock screen
-#bindsym $mod+l exec i3lock -d -c 000000
-bindsym $mod+l exec gnome-screensaver-command --lock
+bindsym $mod+l exec i3lock -d -c 000000
+#bindsym $mod+l exec gnome-screensaver-command --lock
 # clipboard manager
 bindsym $mod+odiaeresis exec gpaste-client ui
 # start terminal
