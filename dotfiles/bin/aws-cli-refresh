@@ -35,10 +35,6 @@ set_refresh_parameters() {
   else
     SOURCE_PROFILE="$1"
   fi
-  echo "DEBUG ::::::::::::::"
-  echo "\$1 = $1"
-  echo "\$2 = $2"
-  echo "DEBUG ::::::::::::::"
   [ -z "$2" ] && TARGET_PROFILE='default' || TARGET_PROFILE="$2"
 
   eval MFA_ARN=\$MFA_$SOURCE_PROFILE
@@ -229,7 +225,7 @@ aws_session_token=$(echo $CREDS | jq '.Credentials.SessionToken' -r)
 EOF
 
   # append filtered credentials file to tmp file
-  cat "$CREDENTIALS_FILE" | sed -r "/\[$TARGET_PROFILE\]/,/^ *$/d" >> $TMPFILE
+  cat "$CREDENTIALS_FILE" | sed -E "/\[$TARGET_PROFILE\]/,/^ *$/d" >> $TMPFILE
 
   echo "DEBUG ============"
   cat "$TMPFILE"
