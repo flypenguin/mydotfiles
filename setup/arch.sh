@@ -10,6 +10,30 @@ PACMAN_PACKAGES="stow python2-pip python-pip python-virtualenvwrapper docker doc
 
 
 # ============================================================================
+echo -e "\n\n Some preliminary checks ...\n"
+
+set -e
+echo -n " * checking if $WANT_SHELL exists ... "
+test -x "$WANT_SHELL" && echo "ok" || echo "XX" && false
+
+# ============================================================================
+echo -e "\n\n Installing yaourt ...\n"
+
+if ! which yaourt >/dev/null 2>&1 ; then
+    TMP=$(mktemp -d)
+    cd "$TMP"
+    for pkg in package-query yaourt ; do
+        curl -O "https://aur.archlinux.org/cgit/aur.git/snapshot/${pkg}.tar.gz"
+        tar xzf "${pkg}.tar.gz"
+        cd "${pkg}"
+        makepkg -si
+        cd ..
+    done
+else
+    echo " * Skipping yaourt installation, seems to be already present."
+fi
+
+# ============================================================================
 echo -e "\n\n Installing sudo rules ... \n"
 
 if ! sudo cat /etc/sudoers | egrep "${SUDO_MATCHR}" > /dev/null ; then
