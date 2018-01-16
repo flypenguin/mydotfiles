@@ -3,8 +3,8 @@
 #
 
 # UN-aliases
-unalias rm
-unalias cp
+alias rm >/dev/null 2>&1 && unalias rm
+alias cp >/dev/null 2>&1 && unalias cp
 
 # console helpers
 alias -g WL=' | wc -l'
