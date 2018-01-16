@@ -72,7 +72,7 @@ echo -e "\n\n * Setting shell ... \n"
 
 if [ ! "$(getent passwd $USER | cut -d: -f7)" = "$WANT_SHELL" ] ; then
     echo "   * Changing shell to $WANT_SHELL ..."
-    chsh -s /usr/bin/zsh
+    chsh -s "$WANT_SHELL"
 else
     echo "   * Shell already set to $WANT_SHELL"
 fi
