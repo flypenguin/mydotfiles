@@ -6,15 +6,32 @@ SUDO_STRING="%wheel ALL=(ALL) NOPASSWD: ALL"
 SUDO_MATCHR='^%wheel ALL=\(ALL\) NOPASSWD: ALL$'
 WANT_SHELL="/usr/bin/zsh"
 YAOURT_PACKAGES=""
-PACMAN_PACKAGES="stow python2-pip python-pip python-virtualenvwrapper docker docker-compose jq zsh vim rsync"
+PACMAN_PACKAGES="stow python2-pip python-pip python-virtualenvwrapper docker docker-compose jq zsh vim rsync base-devel"
 
+die() {
+    echo "$@"
+    exit -1
+}
 
 # ============================================================================
 echo -e "\n\n Some preliminary checks ...\n"
 
-set -e
+set -euo pipefail
+
 echo -n " * checking if $WANT_SHELL exists ... "
-test -x "$WANT_SHELL" && echo "ok" || echo "XX" && false
+test -x "$WANT_SHELL" && echo "ok" || die "XX"
+
+# ============================================================================
+echo -e "\n\n Installing pacman packages ...\n"
+
+for p in $PACMAN_PACKAGES ; do
+    if ! pacman -Qs $p > /dev/null ; then
+        echo "   * Pacman: installing $p"
+        sudo pacman -S --noconfirm $p
+    else
+        echo "   * Pacman: package already installed: $p"
+    fi
+done
 
 # ============================================================================
 echo -e "\n\n Installing yaourt ...\n"
@@ -54,15 +71,6 @@ for p in $YAOURT_PACKAGES ; do
         yaourt -S --noconfirm $p
     else
         echo "   * Yaourt: package already installed: $p"
-    fi
-done
-
-for p in $PACMAN_PACKAGES ; do
-    if ! pacman -Qs $p > /dev/null ; then
-        echo "   * Pacman: installing $p"
-        sudo pacman -S --noconfirm $p
-    else
-        echo "   * Pacman: package already installed: $p"
     fi
 done
 
