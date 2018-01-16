@@ -6,7 +6,7 @@ SUDO_STRING="%wheel ALL=(ALL) NOPASSWD: ALL"
 SUDO_MATCHR='^%wheel ALL=\(ALL\) NOPASSWD: ALL$'
 WANT_SHELL="/usr/bin/zsh"
 YAOURT_PACKAGES=""
-PACMAN_PACKAGES="stow python2-pip python-pip python-virtualenvwrapper docker docker-compose jq zsh terminator vim rsync"
+PACMAN_PACKAGES="stow python2-pip python-pip python-virtualenvwrapper docker docker-compose jq zsh vim rsync"
 
 
 # ============================================================================
