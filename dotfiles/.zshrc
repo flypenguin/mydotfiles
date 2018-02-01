@@ -11,7 +11,7 @@ UNAME=$(uname -s)
 
 # otherwise we don't have a path. super creepy.
 typeset -Ug path
-export path=("$HOME/bin" "/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
+export path=("$HOME/bin" "$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
 
 # fix VIRTUALENVWRAPPER on OS X
 _PY_CHECK="/usr/local/bin/python2"
