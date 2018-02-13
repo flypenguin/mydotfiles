@@ -36,8 +36,10 @@ alias gll="git log --pretty=format:'%C(yellow)%h %C(white)%aD %Cred%d %Creset%s%
 alias gld="git log --pretty=format:'%C(yellow reverse)%h%C(reset) %C(yellow reverse)%ad%C(red reverse)%d%C(reset) %C(white reverse)%s%C(reset)%Cblue [%cn]' --decorate --date=short -p"
 alias gds="git --no-pager diff --stat"
 alias glf="git log --stat --oneline --pretty='%n%C(yellow reverse)%h%C(reset) %C(yellow)%ad%C(red)%d%C(reset) %C(white)%s%C(reset) %C(blue)[%cn]%C(reset)'"
-alias git-branch-clean="git remote update && git fetch -a && git remote prune origin && git fetch origin 'refs/tags/*:refs/tags/*' --prune && git branch --merged | grep / | grep -v \* | cut -b3- | xargs -r git branch -d && git branch -vv"
 alias gpb="git push --set-upstream origin \$(git rev-parse --abbrev-ref HEAD)"
+# from here: https://stackoverflow.com/a/38404202/902327
+alias git-branch-clean="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -d"
+alias git-branch-clean-f="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -D"
 
 # ls
 alias ls="ls --color=auto"
