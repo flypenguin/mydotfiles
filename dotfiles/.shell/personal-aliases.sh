@@ -7,8 +7,12 @@ alias rm >/dev/null 2>&1 && unalias rm
 alias cp >/dev/null 2>&1 && unalias cp
 
 # python virtualenv - Create VIrtualenv, WorkOn
-alias cvi="virtualenv -p \$(which python3) .ve-\$(basename \$(pwd))"
-alias wo="source .ve-\$(basename \$(pwd))/bin/activate"
+# using mkvirtualenv
+alias cvi="mkvirtualenv -p \$(which python3) \$(basename \$(pwd))"
+alias wo="workon \$(basename \$(pwd))"
+# local aliases
+#alias cvi="virtualenv -p \$(which python3) .ve-\$(basename \$(pwd))"
+#alias wo="source .ve-\$(basename \$(pwd))/bin/activate"
 
 # console helpers
 alias -g WL=' | wc -l'
