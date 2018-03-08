@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ "$2" == "" ]; then
+  cat <<EOF
+USAGE: $(basename $0) WHAT VERSION
+
+This script will install the software WHAT in a given VERSION.
+
+WHAT can currently be:
+
+  - kops
+
+The VERSION must exist on the remote side (e.g. GitHub). Installation
+will always be in \$HOME/clis/WHAT.
+EOF
+  exit -1
+fi
+
+WHAT="$1"
+VERSION="$2"
+TDIR="$HOME/clis/$WHAT"
+
+# determine mac vs. linux
+ST=$(uname | tr '[[:upper:]]' '[[:lower:]]')
+
+
+SRCFILE=""
+case $WHAT in 
+  kops)
+    URL="https://github.com/kubernetes/kops/releases/download/$VERSION/kops-$ST-amd64"
+    BIN="kops-$ST-$VERSION"
+    LINK="kops"
+    ;;
+  rancher)
+    URL="https://github.com/rancher/cli/releases/download/v$VERSION/rancher-$ST-amd64-v$VERSION.tar.xz"
+    BIN="rancher-$ST-$VERSION"
+    LINK="rancher"
+    SRCFILE="rancher-v$VERSION/rancher"
+    ;;
+  *)
+    echo "Unknown software: '$WHAT'. Aborting."
+    exit -1
+    ;;
+esac
+
+# determine decompression ONLY
+_UNTAR="tar -xf -"
+UNPACK="cat"
+UNTAR=""
+case $URL in
+
+  # tar AND compression
+
+  *.tb2) ;&     # fallthrough :)
+  *.tar.bz2)
+    UNPACK="bunzip2 -dc"
+    UNTAR=$_UNTAR
+    ;;
+  *.txz) ;&
+  *.tar.xz)
+    UNPACK="xz -dc -"
+    UNTAR=$_UNTAR
+    ;;
+  *.tgz) ;&
+  *.tar.gz)
+    UNPACK="gunzip -dc -"
+    UNTAR=$_UNTAR
+    ;;
+
+  # now decompress ONLY
+  
+  *.bz2)
+    UNPACK="bunzip2 -dc -"
+    ;;
+  *.gz)
+    UNPACK="gunzip -dc -"
+    ;;
+  *.xz)
+    UNPACK="xz -dc -"
+    ;;
+
+esac
+
+echo "UNPACK=$UNPACK"
+echo "UNTAR=$UNTAR"
+
+# finally start.
+
+mkdir -p "$TDIR"
+
+if [ -f "$BIN" ]; then
+
+  echo "Skipping download, file seems to exist."
+
+else
+
+  if [[ -z "$UNTAR" ]] ; then
+
+    cd "$TDIR"
+    curl -#L "$URL" | $UNPACK > "$BIN"
+
+  else
+    
+    TMP=$(mktemp -d)
+    cd "$TMP"
+    curl -#L "$URL" | $UNPACK | $UNTAR
+
+    cd "$TDIR"
+    mv "$TMP/$SRCFILE" "./$BIN"
+    rm -rf "$TMP"
+
+  fi
+fi
+
+[ -f "$BIN" ] && chmod a+x "$BIN"
+ln -sf "$BIN" "$LINK"
+
+echo "Done."
