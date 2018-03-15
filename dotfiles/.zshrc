@@ -34,6 +34,7 @@ if ! zgen saved; then
 #  zgen   oh-my-zsh   "lib/completion"
 #  zgen   oh-my-zsh   "lib/key-bindings"
 #  zgen   oh-my-zsh   "lib/history"
+  zgen   oh-my-zsh   "plugins/kubectl"
   zgen   oh-my-zsh   "plugins/docker"
   zgen   oh-my-zsh   "plugins/virtualenv"
   zgen   oh-my-zsh   "plugins/virtualenvwrapper"
