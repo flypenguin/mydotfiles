@@ -20,6 +20,26 @@ alias -g WL=' | wc -l'
 # ssh
 alias ssr="ssh -l root"
 alias ssp="ssh -o PubkeyAuthentication=no"
+# $1 = name of the identity file, $@ = ssh parameters
+ssi() {
+  if [ -z "$2" ] ; then
+    echo "USAGE: ssi filename ssh_param [ssh_param ...]"
+    return
+  fi
+  local IDFILE="$1"
+  if [[ ! "$IDFILE" =~ /.* ]]; then
+    IDFILE="$HOME/.ssh/$IDFILE"
+  fi
+  if [[ ! -f "$IDFILE" ]]; then
+    echo "File '$IDFILE' not found, aborting."
+    return
+  else
+    echo "Using ID file: $IDFILE"
+  fi
+  local IDFILE=$1
+  shift
+  ssh -i $HOME/.ssh/$IDFILE -o IdentitiesOnly=yes "$@"
+}
 
 # git
 alias gco="git checkout"
