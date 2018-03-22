@@ -80,6 +80,9 @@ alias  tfa="terraform apply"
 alias tfps="terraform plan -out=terraform.plan"
 alias tfas="terraform apply terraform.plan; rm -f terraform.plan"
 
+# JSON conversion with pipes
+alias _yml="python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)'"
+
 # OPS AWS
 alias aws-list-instances="aws ec2 describe-instances | jq '.Reservations[].Instances[] | {IP: .PrivateIpAddress, ID: .InstanceId, Name: .Tags[] | select(.Key==\"Name\").Value}'"
 alias aws-list-tagged-volumes="aws ec2 describe-volumes | jq '.Volumes[] | select(has(\"Tags\")) | {ID: .VolumeId, Size: .Size, Name: .Tags[] | select(.Key==\"Name\").Value}'"
