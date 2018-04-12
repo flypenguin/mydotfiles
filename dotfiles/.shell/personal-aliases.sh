@@ -11,8 +11,8 @@ alias cp >/dev/null 2>&1 && unalias cp
 alias cvi="mkvirtualenv -p \$(which python3) \$(basename \$(pwd))"
 alias wo="workon \$(basename \$(pwd))"
 # local aliases
-#alias cvi="virtualenv -p \$(which python3) .ve-\$(basename \$(pwd))"
-#alias wo="source .ve-\$(basename \$(pwd))/bin/activate"
+alias cvil="virtualenv -p \$(which python3) .ve-\$(basename \$(pwd))"
+alias wol="source .ve-\$(basename \$(pwd))/bin/activate"
 
 # console helpers
 alias -g WL=' | wc -l'
