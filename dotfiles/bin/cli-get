@@ -10,6 +10,7 @@ This script will install the software WHAT in a given VERSION.
 
 WHAT can currently be:
 
+  - joe
   - kops
   - rancher
 
@@ -39,6 +40,11 @@ case $WHAT in
     BIN="rancher-$ST-$VERSION"
     LINK="rancher"
     SRCFILE="rancher-v$VERSION/rancher"
+    ;;
+  joe)
+    URL="https://github.com/karan/joe/releases/download/$VERSION/joe-$ST"
+    BIN="joe-$ST"
+    LINK="joe"
     ;;
   *)
     echo "Unknown software: '$WHAT'. Aborting."
