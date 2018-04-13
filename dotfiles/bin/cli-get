@@ -11,6 +11,7 @@ This script will install the software WHAT in a given VERSION.
 WHAT can currently be:
 
   - kops
+  - rancher
 
 The VERSION must exist on the remote side (e.g. GitHub). Installation
 will always be in \$HOME/bin.
