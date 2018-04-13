@@ -13,14 +13,14 @@ WHAT can currently be:
   - kops
 
 The VERSION must exist on the remote side (e.g. GitHub). Installation
-will always be in \$HOME/clis/WHAT.
+will always be in \$HOME/bin.
 EOF
   exit -1
 fi
 
 WHAT="$1"
 VERSION="$2"
-TDIR="$HOME/clis/$WHAT"
+TDIR="$HOME/bin"
 
 # determine mac vs. linux
 ST=$(uname | tr '[[:upper:]]' '[[:lower:]]')
@@ -115,6 +115,6 @@ else
 fi
 
 [ -f "$BIN" ] && chmod a+x "$BIN"
-ln -sf "$BIN" "$LINK"
+ln -sf "./$BIN" "$HOME/bin/$LINK"
 
 echo "Done."
