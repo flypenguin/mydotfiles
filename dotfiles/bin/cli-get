@@ -53,18 +53,15 @@ case $URL in
 
   # tar AND compression
 
-  *.tb2) ;&     # fallthrough :)
-  *.tar.bz2)
+  *.tb2 | *.tar.bz2)
     UNPACK="bunzip2 -dc"
     UNTAR=$_UNTAR
     ;;
-  *.txz) ;&
-  *.tar.xz)
+  *.txz | *.tar.xz)
     UNPACK="xz -dc -"
     UNTAR=$_UNTAR
     ;;
-  *.tgz) ;&
-  *.tar.gz)
+  *.tgz | *.tar.gz)
     UNPACK="gunzip -dc -"
     UNTAR=$_UNTAR
     ;;
