@@ -106,3 +106,31 @@ alias _yml="python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdi
 # OPS AWS
 alias aws-list-instances="aws ec2 describe-instances | jq '.Reservations[].Instances[] | {IP: .PrivateIpAddress, ID: .InstanceId, Name: .Tags[] | select(.Key==\"Name\").Value}'"
 alias aws-list-tagged-volumes="aws ec2 describe-volumes | jq '.Volumes[] | select(has(\"Tags\")) | {ID: .VolumeId, Size: .Size, Name: .Tags[] | select(.Key==\"Name\").Value}'"
+
+
+# create hash for ssh (public) keys, mainly for AWS
+# see here: https://serverfault.com/a/603983
+ssh-key-hash() {
+  if [ -z "$1" ]; then
+    echo "USAGE: ssh-key-hash PUB_KEY_FILE"
+    return
+  fi
+  if grep -q BEGIN "$1" ; then
+    # we have a private key :)
+    echo "Found private key."
+
+    echo -n "PUBkey  MD5  openssl:     "
+    openssl pkey -in "$1" -pubout -outform DER | openssl md5 -c \
+      | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
+
+    echo -n "PRIVkey SHA1 openssl:     "
+    openssl pkcs8 -in "$1" -nocrypt -topk8 -outform DER | openssl sha1 -c \
+      | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
+  else
+    # we have a public key
+    echo "Found public key."
+    echo "Use private keys for AWS."
+    echo -n "PUBkey  MD5  ssh-keygen:  "
+    ssh-keygen -E md5 -lf "$1" | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
+  fi
+}
