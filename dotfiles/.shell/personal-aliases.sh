@@ -36,9 +36,8 @@ ssi() {
   else
     echo "Using ID file: $IDFILE"
   fi
-  local IDFILE=$1
   shift
-  ssh -i $HOME/.ssh/$IDFILE -o IdentitiesOnly=yes "$@"
+  ssh -i "$IDFILE" -o IdentitiesOnly=yes "$@"
 }
 
 # git
