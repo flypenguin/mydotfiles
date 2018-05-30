@@ -27,11 +27,9 @@ ssi() {
     return
   fi
   local IDFILE="$1"
-  if [[ ! "$IDFILE" =~ /.* ]]; then
-    IDFILE="$HOME/.ssh/$IDFILE"
-  fi
-  if [[ ! -f "$IDFILE" ]]; then
-    echo "File '$IDFILE' not found, aborting."
+  [ ! -f "$IDFILE" ] && IDFILE="$HOME/.ssh/$IDFILE"
+  if [ ! -f "$IDFILE" ] ; then
+    echo "File '$IDFILE' not found. Looked in: ['.', '~/.ssh']"
     return
   else
     echo "Using ID file: $IDFILE"
