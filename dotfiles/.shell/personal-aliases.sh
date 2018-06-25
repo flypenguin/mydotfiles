@@ -16,6 +16,7 @@ alias wol="source .ve-\$(basename \$(pwd))/bin/activate"
 
 # console helpers
 alias -g WL=' | wc -l'
+alias    tma="tmux attach"
 
 # ssh
 alias ssr="ssh -l root"
