@@ -30,6 +30,12 @@ ST=$(uname | tr '[[:upper:]]' '[[:lower:]]')
 
 SRCFILE=""
 case $WHAT in 
+  calicoctl)
+    URL="https://github.com/projectcalico/calicoctl/releases/download/v${VERSION}/calicoctl-${ST}-amd64"
+    SRCFILE="calicoctl-${ST}-amd64"
+    BIN="calicoctl-${VERSION}"
+    LINK="calicoctl"
+    ;;
   kops)
     URL="https://github.com/kubernetes/kops/releases/download/$VERSION/kops-$ST-amd64"
     BIN="kops-$ST-$VERSION"
