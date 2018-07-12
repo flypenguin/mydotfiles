@@ -89,6 +89,8 @@ alias ysu="yaourt -Syu --aur"
 alias kgds="k get daemonset"
 alias kdds="k describe daemonset"
 alias kd="k describe"
+alias kg="k get"
+alias kdel="k delete"
 
 # docker
 alias docker_clean_images="docker images | grep '<none>' | awk '{print \$3}' | xargs docker rmi"
