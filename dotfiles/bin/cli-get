@@ -11,6 +11,7 @@ This script will install the software WHAT in a given VERSION.
 WHAT can currently be:
 
   - joe
+  - helmsman
   - kops
   - rancher
 
@@ -35,6 +36,12 @@ case $WHAT in
     SRCFILE="calicoctl-${ST}-amd64"
     BIN="calicoctl-${VERSION}"
     LINK="calicoctl"
+    ;;
+  helmsman)
+    URL="https://github.com/Praqma/helmsman/releases/download/v${VERSION}/Helmsman_${VERSION}_${ST}_amd64.tar.gz"
+    SRCFILE="helmsman"
+    BIN="helmsman-$VERSION"
+    LINK="helmsman"
     ;;
   kops)
     URL="https://github.com/kubernetes/kops/releases/download/$VERSION/kops-$ST-amd64"
