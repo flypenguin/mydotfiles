@@ -37,6 +37,7 @@ if ! zgen saved; then
   zgen   oh-my-zsh   "plugins/kubectl"
   zgen   oh-my-zsh   "plugins/helm"
   zgen   oh-my-zsh   "plugins/docker"
+  zgen   oh-my-zsh   "plugins/pyenv"
   zgen   oh-my-zsh   "plugins/virtualenv"
   zgen   oh-my-zsh   "plugins/virtualenvwrapper"
   zgen   oh-my-zsh   "plugins/git"
