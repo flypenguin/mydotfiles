@@ -86,13 +86,14 @@ alias  yi="yaourt -S"
 alias ysu="yaourt -Syu --aur"
 
 # kubernetes (we already have aliases from ... somewhere, so just add missing)
-alias kd="k describe"
+alias   kd="k describe"
 alias kdds="k describe daemonset"
-alias kg="k get"
-alias kgi="k get ingress"
+alias   kg="k get"
+alias  kgi="k get ingress"
 alias kgds="k get daemonset"
 alias kdel="k delete"
-alias ka="k --all-namespaces"
+alias kg-a="k get --all-namespaces"
+alias kd-a="k describe --all-namespaces"
 
 # docker
 alias docker_clean_images="docker images | grep '<none>' | awk '{print \$3}' | xargs docker rmi"
