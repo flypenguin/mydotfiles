@@ -13,9 +13,13 @@ UNAME=$(uname -s)
 typeset -Ug path
 export path=("$HOME/bin" "$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
 
-# fix VIRTUALENVWRAPPER on OS X
-_PY_CHECK="/usr/local/bin/python2"
-[[ -x "$_PY_CHECK" ]] && export VIRTUALENVWRAPPER_PYTHON="$_PY_CHECK"
+if [ "$UNAME" = "Darwin" ] ; then
+  # fix VIRTUALENVWRAPPER on OS X
+  export WORKON_HOME=$HOME/.virtualenvs
+  export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python
+  export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+  export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
+fi
 
 
 # source zgen
