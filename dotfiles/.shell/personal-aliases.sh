@@ -6,6 +6,10 @@
 alias rm >/dev/null 2>&1 && unalias rm
 alias cp >/dev/null 2>&1 && unalias cp
 
+# those nifgy G, L etc aliases :)
+alias -g WCL=' | wc -l'
+alias -g   S=' | sort'
+
 # python virtualenv - Create VIrtualenv, WorkOn
 # using mkvirtualenv
 alias cvi="mkvirtualenv -p \$(which python3) \$(basename \$(pwd))"
@@ -15,7 +19,6 @@ alias cvil="virtualenv -p \$(which python3) .ve-\$(basename \$(pwd))"
 alias wol="source .ve-\$(basename \$(pwd))/bin/activate"
 
 # console helpers
-alias -g WL=' | wc -l'
 alias    tma="tmux attach"
 
 # ssh
