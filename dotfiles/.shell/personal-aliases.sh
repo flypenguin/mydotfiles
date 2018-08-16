@@ -10,13 +10,14 @@ alias cp >/dev/null 2>&1 && unalias cp
 alias -g WCL=' | wc -l'
 alias -g   S=' | sort'
 
-# python virtualenv - Create VIrtualenv, WorkOn
-# using mkvirtualenv
+### DEVELOPMENT related aliases
+# PYTHON    - VIRTUALENV
 alias cvi="mkvirtualenv -p \$(which python3) \$(basename \$(pwd))"
 alias wo="workon \$(basename \$(pwd))"
-# local aliases
 alias cvil="virtualenv -p \$(which python3) .ve-\$(basename \$(pwd))"
 alias wol="source .ve-\$(basename \$(pwd))/bin/activate"
+# PYTHON    - DJANGO
+alias pm="python manage.py"
 
 # console helpers
 alias    tma="tmux attach"
