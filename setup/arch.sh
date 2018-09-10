@@ -44,20 +44,19 @@ for p in $PACMAN_PACKAGES ; do
 done
 
 # ============================================================================
-echo -e "\n\n Installing yaourt ...\n"
+echo -e "\n\n Installing pikaur ...\n"
 
-if ! which yaourt >/dev/null 2>&1 ; then
+if ! which pikaur >/dev/null 2>&1 ; then
+    OLD_TMP=$(pwd)
     TMP=$(mktemp -d)
     cd "$TMP"
-    for pkg in package-query yaourt ; do
-        runme curl -sLO "https://aur.archlinux.org/cgit/aur.git/snapshot/${pkg}.tar.gz"
-        runme tar xzf "${pkg}.tar.gz"
-        runme cd "${pkg}"
-        runme makepkg --noconfirm -si
-        runme cd ..
-    done
+    git clone https://aur.archlinux.org/pikaur.git
+    cd pikaur
+    makepkg -fsri
+    cd "$OLD_TMP"
+    rm -rf "$TMP"
 else
-    echo " * Skipping yaourt installation, seems to be already present."
+    echo " * Skipping pikaur installation, seems to be already present."
 fi
 
 # ============================================================================
