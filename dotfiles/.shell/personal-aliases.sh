@@ -72,10 +72,20 @@ alias git-branch-clean="git fetch -p && git branch -vv | awk '/: gone]/{print \$
 alias git-branch-clean-f="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -D"
 
 # ls
-alias ls="ls --color=auto"
-alias dir="ls -lh"
-alias  ll="ls -lh"
-alias  la="ls -lha"
+if which exa >/dev/null 2>&1 ; then
+  unalias ls
+  alias  ls="exa"
+  alias  ll="exa -lFh"
+  alias  la="ll -a"
+  alias  lg="ll -G"
+  alias dir="lg"
+else
+  unalias ls
+  alias ls="ls --color=auto"
+  alias dir="ls -lh"
+  alias  ll="ls -lh"
+  alias  la="ls -lha"
+fi
 
 # arch
 alias  pi="sudo pacman -S"
