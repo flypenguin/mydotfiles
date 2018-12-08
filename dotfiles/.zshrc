@@ -41,12 +41,11 @@ if ! zgen saved; then
   zgen   oh-my-zsh   "plugins/kubectl"
   zgen   oh-my-zsh   "plugins/helm"
   zgen   oh-my-zsh   "plugins/docker"
-  zgen   oh-my-zsh   "plugins/pyenv"
   zgen   oh-my-zsh   "plugins/virtualenv"
   zgen   oh-my-zsh   "plugins/virtualenvwrapper"
   zgen   oh-my-zsh   "plugins/git"
-  zgen   oh-my-zsh   "plugins/rvm"
   zgen   oh-my-zsh   "plugins/common-aliases"
+  zgen   oh-my-zsh   "plugins/dotenv"
 
   if whence fzf >/dev/null; then
     zgen load junegunn/fzf shell/completion.zsh
