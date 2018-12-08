@@ -164,3 +164,7 @@ ssh-key-hash() {
     ssh-keygen -E md5 -lf "$1" | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
   fi
 }
+
+
+# gitignore service :)
+function giti() { curl -L -s https://www.gitignore.io/api/\$@ ;}
