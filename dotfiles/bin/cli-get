@@ -1,69 +1,69 @@
 #!/usr/bin/env bash
 
-set -e
+set -o pipefail
 
-if [ "$2" == "" ]; then
+if [ "$1" == "" ]; then
   cat <<EOF
-USAGE: $(basename $0) WHAT VERSION
+USAGE: $(basename $0) WHAT
 
-This script will install the software WHAT in a given VERSION.
+This script will install the software WHAT in the latest release version.
 
-WHAT can currently be:
+WHAT regocnizes anything in github's USER/REPO format, and also those
+short forms:
 
   - joe
   - helmsman
   - kops
+  - pack
   - rancher
 
-The VERSION must exist on the remote side (e.g. GitHub). Installation
-will always be in \$HOME/bin.
 EOF
   exit -1
 fi
 
 WHAT="$1"
-VERSION="$2"
 TDIR="$HOME/bin"
+
+SRCFILE=""
+case $WHAT in
+  calicoctl)    REPO="projectcalico/calicoctl" ;;
+  helmsman)     REPO="Praqma/helmsman" ;;
+  kops)         REPO="kubernetes/kops" ;;
+  rancher)      REPO="rancher/cli" ;;
+  joe)          REPO="karan/joe" ;;
+  pack)         REPO="buildpack/pack" ;;
+  *)
+    if echo $WHAT | grep -q / ; then
+      REPO="$WHAT"
+      WHAT=$(echo $WHAT | cut -d/ -f2)
+    else
+      echo "ERROR: don't recognize short form '$WHAT'!"
+      exit
+    fi
+    ;;
+esac
 
 # determine mac vs. linux
 ST=$(uname | tr '[[:upper:]]' '[[:lower:]]')
+[ "$ST" == "darwin" ] && GREP_ST="(macos|darwin)" || GREP_ST="$ST"
 
+# get download url from github
+URL=$(curl --fail -s "https://api.github.com/repos/$REPO/releases" \
+  | grep browser_download \
+  | awk '{print $2}' \
+  | grep -E $GREP_ST \
+  | grep -Ev '/v?[^/]+(-rc|-alpha|-beta)[^/]*/' \
+  | grep -Ev -- '-(sha[0-9]*|md5)' \
+  | tr -d \" \
+  | sort -V | tail -n1)
 
-SRCFILE=""
-case $WHAT in 
-  calicoctl)
-    URL="https://github.com/projectcalico/calicoctl/releases/download/v${VERSION}/calicoctl-${ST}-amd64"
-    SRCFILE="calicoctl-${ST}-amd64"
-    BIN="calicoctl-${VERSION}"
-    LINK="calicoctl"
-    ;;
-  helmsman)
-    URL="https://github.com/Praqma/helmsman/releases/download/v${VERSION}/Helmsman_${VERSION}_${ST}_amd64.tar.gz"
-    SRCFILE="helmsman"
-    BIN="helmsman-$VERSION"
-    LINK="helmsman"
-    ;;
-  kops)
-    URL="https://github.com/kubernetes/kops/releases/download/$VERSION/kops-$ST-amd64"
-    BIN="kops-$ST-$VERSION"
-    LINK="kops"
-    ;;
-  rancher)
-    URL="https://github.com/rancher/cli/releases/download/v$VERSION/rancher-$ST-amd64-v$VERSION.tar.xz"
-    BIN="rancher-$ST-$VERSION"
-    LINK="rancher"
-    SRCFILE="rancher-v$VERSION/rancher"
-    ;;
-  joe)
-    URL="https://github.com/karan/joe/releases/download/$VERSION/joe-$ST"
-    BIN="joe-$ST"
-    LINK="joe"
-    ;;
-  *)
-    echo "Unknown software: '$WHAT'. Aborting."
-    exit -1
-    ;;
-esac
+if [ ! "$?" == "0" -o -z "$URL" ] ; then
+  echo "Unable to determine download URL for $REPO. Exiting."
+  exit -1
+fi
+
+VERSION=$(echo $URL | sed -Ee 's%.+/download/v?([^/]+)/.+%\1%g')
+echo Found latest stable version "$VERSION".
 
 # determine decompression ONLY
 _UNTAR="tar -xf -"
@@ -87,7 +87,7 @@ case $URL in
     ;;
 
   # now decompress ONLY
-  
+
   *.bz2)
     UNPACK="bunzip2 -dc -"
     ;;
@@ -100,38 +100,54 @@ case $URL in
 
 esac
 
-echo "UNPACK=$UNPACK"
-echo "UNTAR=$UNTAR"
-
 # finally start.
 
 mkdir -p "$TDIR"
 
-if [ -f "$BIN" ]; then
+# always the same :)
+FINAL_NAME="$WHAT-$VERSION"
+LINK_NAME="$WHAT"
 
-  echo "Skipping download, file seems to exist."
+if [ -f "$TDIR/$FINAL_NAME" ]; then
+
+  echo "File seems to exist, exiting."
 
 else
 
   if [[ -z "$UNTAR" ]] ; then
 
     cd "$TDIR"
-    curl -#L "$URL" | $UNPACK > "$BIN"
+    curl --fail -#L "$URL" | $UNPACK > "$FINAL_NAME"
+    if [ ! "$?" == "0" ] ; then
+      echo "ERROR: Unable to download '$URL'. Exiting."
+      exit -1
+    fi
 
   else
-    
+
     TMP=$(mktemp -d)
     cd "$TMP"
-    curl -#L "$URL" | $UNPACK | $UNTAR
+    curl --fail -#L "$URL" | $UNPACK | $UNTAR
+    if [ ! "$?" == "0" ] ; then
+      echo "ERROR: Unable to download '$URL'. Exiting."
+      exit -1
+    fi
+
+    # magic - use the "largest file" as binary :)
+    SRCFILE=$(ls -S | head -n1)
+    echo "found unpacked binary '$SRCFILE'"
 
     cd "$TDIR"
-    mv "$TMP/$SRCFILE" "./$BIN"
+    mv "$TMP/$SRCFILE" "./$FINAL_NAME"
     rm -rf "$TMP"
 
   fi
+
+  if [ -f "$FINAL_NAME" ] ; then
+    chmod a+x "$FINAL_NAME"
+    ln -sf "./$FINAL_NAME" "$HOME/bin/$LINK_NAME"
+  fi
+
+  echo "Done."
+
 fi
-
-[ -f "$BIN" ] && chmod a+x "$BIN"
-ln -sf "./$BIN" "$HOME/bin/$LINK"
-
-echo "Done."
