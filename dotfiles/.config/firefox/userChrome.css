@@ -1,0 +1,10 @@
+.tabbrowser-tab:not([selected]):not([pinned]) .tab-close-button {
+        visibility: hidden !important;
+        margin-left: -16px !important;
+}
+
+.tabbrowser-tab:not([selected]):not([pinned]):hover .tab-close-button {
+        visibility: visible !important; 
+        margin-left: 0px !important;
+        display: -moz-box !important;
+}
