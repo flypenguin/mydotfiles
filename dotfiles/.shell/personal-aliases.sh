@@ -169,4 +169,4 @@ ssh-key-hash() {
 
 
 # gitignore service :)
-function giti() { curl -L -s https://www.gitignore.io/api/\$@ ;}
+function giti() { curl -L -s https://www.gitignore.io/api/$@ ;}
