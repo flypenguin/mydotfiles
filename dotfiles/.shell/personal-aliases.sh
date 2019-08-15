@@ -137,6 +137,8 @@ alias _yml="python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdi
 alias aws-list-instances="aws ec2 describe-instances | jq '.Reservations[].Instances[] | {IP: .PrivateIpAddress, ID: .InstanceId, Name: .Tags[] | select(.Key==\"Name\").Value}'"
 alias aws-list-tagged-volumes="aws ec2 describe-volumes | jq '.Volumes[] | select(has(\"Tags\")) | {ID: .VolumeId, Size: .Size, Name: .Tags[] | select(.Key==\"Name\").Value}'"
 
+# azure
+alias azgroups="az group list --query '[].name'"
 
 # create hash for ssh (public) keys, mainly for AWS
 # see here: https://serverfault.com/a/603983
