@@ -3,3 +3,7 @@
 
 # direnv - https://direnv.net/
 which -s direnv > /dev/null 2>&1 && eval "$(direnv hook zsh)"
+
+# nvm - the Node Version Manager
+export NVM_DIR="$HOME/.nvm"
+[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
