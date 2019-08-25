@@ -35,7 +35,7 @@ test -x "$WANT_SHELL" && echo "ok" || die "XX"
 echo -e "\n\n Installing pacman packages ...\n"
 
 for p in $PACMAN_PACKAGES ; do
-    if ! pacman -Q $p | cut -d" " -f 1 | grep -qE "^$p$" ; then
+    if ! pacman -Qi $p > /dev/null 2>&1 ; then
         echo "   * Pacman: installing $p"
         runme sudo pacman -S --noconfirm $p
     else
