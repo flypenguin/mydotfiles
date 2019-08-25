@@ -46,6 +46,7 @@ if ! zgen saved; then
   zgen   oh-my-zsh   "plugins/git"
   zgen   oh-my-zsh   "plugins/common-aliases"
   zgen   oh-my-zsh   "plugins/dotenv"
+  zgen   oh-my-zsh   "plugins/fasd"
 
   if whence fzf >/dev/null; then
     zgen load junegunn/fzf shell/completion.zsh
