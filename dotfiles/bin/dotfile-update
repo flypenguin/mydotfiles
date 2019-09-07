@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# directories that may not be symlinks and must be directories
+# relative to $HOME
+MUST_BE_DIR=".config"
+
 # maybe ... change later.
 DOTDIR="$HOME/.dotfiles"
 
@@ -99,6 +103,12 @@ EOF
 
 # check for help
 [ "$1" == "-h" ] && print_help
+
+# ensure MUST_BE_DIRs are actually directories :)
+for dir in $MUST_BE_DIR ; do
+  rm -f "$HOME/$dir"
+  mkdir -p "$HOME/$dir"
+done
 
 # our private temp dir
 mkdir -p "$DOTDIR/tmp"
