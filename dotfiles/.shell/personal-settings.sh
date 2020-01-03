@@ -9,7 +9,9 @@ export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=on'
 export EDITOR='vim'
 
 # I *WANT* the virtualenv prompt
-unset VIRTUAL_ENV_DISABLE_PROMPT
+#unset VIRTUAL_ENV_DISABLE_PROMPT
+# now I DON'T want it ;)
+export VIRTUAL_ENV_DISABLE_PROMPT=1
 
 # ZSH settings
 

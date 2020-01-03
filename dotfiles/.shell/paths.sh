@@ -9,7 +9,7 @@ fi
 
 # snaps :)
 
-for PATH_SEARCH in "/var/lib/snapd/snap/bin" "/snap/bin" "$HOME/Dev/frameworks/flutter" ; do
+for PATH_SEARCH in "/var/lib/snapd/snap/bin" "/snap/bin" "$HOME/Dev/frameworks/flutter/bin" ; do
   if [ -d "$PATH_SEARCH" ]; then
     path=("$path[@]" "$PATH_SEARCH")
     break
