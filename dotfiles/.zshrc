@@ -7,11 +7,10 @@
 #   $ZDOTDIR/.zlogout                   # login-shells (on exit)
 # see here: http://bit.ly/1sGzo6g
 
-UNAME=$(uname -s)
+# add $HOME/bin to the path.
+path=("$HOME/bin" $path)
 
-# otherwise we don't have a path. super creepy.
-typeset -Ug path
-export path=("$HOME/bin" "$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin" "$path[@]")
+UNAME=$(uname -s)
 
 if [ "$UNAME" = "Darwin" ] ; then
   # fix VIRTUALENVWRAPPER on OS X
