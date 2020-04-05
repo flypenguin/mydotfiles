@@ -30,13 +30,13 @@ if ! zgen saved; then
   zgen   oh-my-zsh
 
   # specify plugins here
-#  zgen   oh-my-zsh   "lib/directories"
-#  zgen   oh-my-zsh   "lib/grep"
-#  zgen   oh-my-zsh   "lib/termsupport"
-#  zgen   oh-my-zsh   "lib/completion"
-#  zgen   oh-my-zsh   "lib/key-bindings"
-#  zgen   oh-my-zsh   "lib/history"
-#   zgen   load        "denysdovhan/spaceship-prompt" spaceship
+  #zgen   oh-my-zsh   "lib/directories"
+  #zgen   oh-my-zsh   "lib/grep"
+  #zgen   oh-my-zsh   "lib/termsupport"
+  #zgen   oh-my-zsh   "lib/completion"
+  #zgen   oh-my-zsh   "lib/key-bindings"
+  #zgen   oh-my-zsh   "lib/history"
+  #zgen   load        "denysdovhan/spaceship-prompt" spaceship
   zgen   oh-my-zsh   "themes/jreese"
   zgen   oh-my-zsh   "plugins/kubectl"
   zgen   oh-my-zsh   "plugins/helm"
@@ -46,7 +46,7 @@ if ! zgen saved; then
   zgen   oh-my-zsh   "plugins/git"
   zgen   oh-my-zsh   "plugins/common-aliases"
   zgen   oh-my-zsh   "plugins/dotenv"
-#  zgen   oh-my-zsh   "plugins/fasd"
+  #zgen   oh-my-zsh   "plugins/fasd"
 
   if whence fzf >/dev/null; then
     zgen load junegunn/fzf shell/completion.zsh
@@ -66,21 +66,3 @@ if ! zgen saved; then
 
 fi
 
-# from here: https://unix.stackexchange.com/a/408068
-# or here: https://www.topbug.net/?p=881
-#(( $+commands[starship] )) && eval "$(starship init zsh)"
-
-#export SPACESHIP_VENV_PREFIX="ve:"
-#export SPACESHIP_VENV_SUFFIX=""
-#export SPACESHIP_PROMPT_DEFAULT_PREFIX=""
-#export SPACESHIP_PROMPT_SEPARATE_LINE=false
-#export SPACESHIP_PROMPT_ORDER=(
-#  user          # Username section
-#  dir           # Current directory section
-#  host          # Hostname section
-#  git           # Git section (git_branch + git_status)
-#  venv          # virtualenv section
-#  exec_time     # Execution time
-#  exit_code     # Exit code section
-#  char          # Prompt character
-#)
