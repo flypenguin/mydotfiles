@@ -5,9 +5,7 @@
 which -s direnv > /dev/null 2>&1 && eval "$(direnv hook zsh)"
 
 # nvm - the Node Version Manager
-export NVM_DIR="$HOME/.nvm"
-[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
-
+# use the oh-my-zsh "nvm" plugin for "stupid" initialization, or use lazy loading here.
 
 # PKD
 pkd-site-of() { okta-cli users list -s "profile.pkUsername eq \"$1\"" --output-fields profile.site }
