@@ -104,6 +104,7 @@ alias       kd="k describe"
 alias     kdds="k describe daemonset"
 alias       kg="k get"
 alias      kgi="k get ingress"
+alias     kgpv="k get pv"
 alias     kgds="k get daemonset"
 alias     kdel="k delete"
 
@@ -116,6 +117,14 @@ alias     kg-a="k get --all-namespaces"
 alias    kgi-a="k get --all-namespaces ingress"
 alias    kgp-a="k get --all-namespaces pods"
 alias   kgds-a="k get --all-namespaces daemonset"
+
+alias       kc="k config"
+alias    kcsnd="k config set-context --current --namespace=default"
+
+# k config set namespace
+kcsns() {
+  k config set-context --current --namespace=$1
+}
 
 # docker
 alias docker_clean_images="docker images | grep '<none>' | awk '{print \$3}' | xargs docker rmi"
