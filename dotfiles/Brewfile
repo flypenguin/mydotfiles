@@ -1,31 +1,29 @@
 # by https://github.com/Homebrew/homebrew-bundle
 tap "buo/cask-upgrade"
-tap "caskroom/cask"
-tap "caskroom/drivers"
-tap "caskroom/versions"
-tap "caskroom/fonts"
+tap "homebrew/cask-cask"
+tap "homebrew/cask-drivers"
+tap "homebrew/cask-fonts"
+tap "homebrew/cask-versions"
 tap "homebrew/bundle"
 tap "homebrew/core"
-tap "homebrew/fuse"
 tap "neovim/neovim"
 
 
 # replace Mac OS command line utils
 brew "curl"
 brew "emacs"
-brew "findutils", args: ["with-default-names"]
-brew "gnu-sed", args: ["with-default-names"]
+brew "findutils"
+brew "gnu-sed"
 brew "gnu-tar"
-brew "gnu-time", args: ["with-default-names"]
+brew "gnu-time"
 brew "gnu-which"
 brew "stow"
 brew "vim"
+brew "coreutils"
+brew "openssl"
 
 # previously uninstalled command line utils
-cask "vagrant"
-brew "docker"
-brew "docker-machine"
-brew "docker-compose"
+brew "exa"
 brew "dos2unix"
 brew "fzf"
 brew "fzy"
@@ -42,36 +40,27 @@ brew "tmux"
 brew "unrar"
 brew "watch"
 brew "wget"
+brew "fish"
+brew "git"
+
+# docker & friends
+brew "docker"
+brew "docker-machine"
+brew "docker-compose"
 
 # coding
-cask "java"
 cask "visual-studio-code"
 brew "autoenv"
 brew "bfg"
-brew "git"
-brew "git-secret"
-brew "git-secrets"
-brew "go"
-brew "leiningen"
 brew "node"
 brew "python3"
-brew "pyenv"
-brew "pyenv-virtualenvwrapper"
-brew "ruby"
-brew "rust"
 brew "tig"
 
 # misc applications
 brew "hugo"
-brew "midnight-commander"
 
 # cloud shit
 brew "awscli"
-brew "coreutils"
-brew "fish"
-brew "openssl"
-brew "kops"
-brew "nomad"
 brew "terraform"
 
 # mac stuff
@@ -83,35 +72,21 @@ cask "virtualbox"
 brew "mas"
 
 # (mac) ui appliccations
-#cask "flash-npapi"
-#cask "flash-player"
 cask "fontexplorer-x-pro"
 cask "jdownloader"
 cask "libreoffice"
-cask "phoenix-slides"
 cask "sublime-text-dev"
 cask "wireshark"
+cask "pastebot"
+cask "cyberduck"
 
 # mac app store applications
 mas "Amphetamine", id: 937984704
-mas "2Do", id: 477670270
 mas "Affinity Photo", id: 824183456
 mas "Banking 4X", id: 926711151
 mas "BetterSnapTool", id: 417375580
 mas "ForkLift", id: 412448059
-#mas "GrimFandango", id: 1022841309
-mas "Image Viewer", id: 720757938
-#mas "iPack", id: 433386677
-#mas "Keynote", id: 409183694
 mas "Keka", id: 470158793
 mas "MoneyMoney", id: 872698314
-mas "MPlayerX", id: 421131143
 mas "PhotoSync", id: 418818452
-#mas "Tagr", id: 903733783
 mas "The Unarchiver", id: 425424353
-#mas "Twitter", id: 409789998
-#mas "Xcode", id: 497799835
-#mas "Xee³", id: 639764244
-
-# obsolete ?
-# mas "GIF Brewery 3", id: 1081413713
