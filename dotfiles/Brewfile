@@ -69,6 +69,7 @@ cask "gpg-suite"
 cask "iterm2"
 cask "logitech-unifying"
 cask "virtualbox"
+cask "hazel"
 brew "mas"
 
 # (mac) ui appliccations
