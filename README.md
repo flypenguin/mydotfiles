@@ -20,6 +20,14 @@ curl https://raw.githubusercontent.com/flypenguin/mydotfiles/master/setup/arch.s
 ```
 
 
-## Plans
+## Notes
 
-Maybe create a "setup_linux.sh" command. So far this works pretty well for me.
+### Coding fonts
+
+- [Fira Code](https://github.com/tonsky/FiraCode) - brew cask: `font-fira-code`
+- [Hack](https://sourcefoundry.org/hack/) - brew cask: `font-hack`
+- [Monoid](https://larsenwork.com/monoid/) - brew cask: `font-monoid`
+- [Iosevka](https://github.com/be5invis/Iosevka) - brew cask: `font-iosevka`
+- Inconsolata - brew cask: `font-inconsolata` (broken?!)
+- Source Code Pro - brew cask: `font-source-code-pro`
+

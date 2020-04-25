@@ -43,6 +43,13 @@ brew "wget"
 brew "fish"
 brew "git"
 
+# fonts
+cask "font-fira-code"
+cask "font-hack"
+cask "font-monoid"
+cask "font-inconsolata"
+cask "font-source-code-pro"
+
 # docker & friends
 brew "docker"
 brew "docker-machine"
