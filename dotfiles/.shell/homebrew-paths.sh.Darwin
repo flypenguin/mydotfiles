@@ -1,8 +1,0 @@
-# mac os & homebrew - if the coreutils are installed, use them instead of the OS X ones.
-# see "brew info coreutils"
-
-# from: https://apple.stackexchange.com/a/371984
-for gnu_dir in /usr/local/opt/*/libexec/gnubin; do
-  path=("$gnu_dir" $path)
-  manpath=("${gnu_dir/gnubin/gnuman}" $manpath)
-done
