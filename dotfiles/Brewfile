@@ -49,6 +49,7 @@ cask "font-hack"
 cask "font-monoid"
 cask "font-inconsolata"
 cask "font-source-code-pro"
+cask "font-jetbrains-mono"
 
 # docker & friends
 brew "docker"

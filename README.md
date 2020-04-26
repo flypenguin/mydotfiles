@@ -30,4 +30,4 @@ curl https://raw.githubusercontent.com/flypenguin/mydotfiles/master/setup/arch.s
 - [Iosevka](https://github.com/be5invis/Iosevka) - brew cask: `font-iosevka`
 - Inconsolata - brew cask: `font-inconsolata` (broken?!)
 - Source Code Pro - brew cask: `font-source-code-pro`
-
+- [Jetbrains Mono](https://www.jetbrains.com/de-de/lp/mono/) - brew cask: `font-jetbrains-mono`
