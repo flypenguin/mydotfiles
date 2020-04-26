@@ -15,9 +15,8 @@ UNAME=$(uname -s)
 if [ "$UNAME" = "Darwin" ] ; then
   # fix VIRTUALENVWRAPPER on OS X
   export WORKON_HOME=$HOME/.virtualenvs
-  export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python
+  export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
   export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-  export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
 fi
 
 # source zgen
