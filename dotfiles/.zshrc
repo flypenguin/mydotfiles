@@ -52,13 +52,14 @@ if ! zgen saved; then
     zgen load junegunn/fzf shell/key-bindings.zsh
   fi
 
+  # suppress "no matches found: *.sh.Darwin" message
+  setopt nullglob
   for system in "" ".$UNAME" ; do
     for plug in $HOME/.shell/*.sh${system} ; do
-      # don't add dummy files :)
-      if echo $plug | grep -q dummy ; then continue ; fi
       zgen load "$plug"
     done
   done
+  unsetopt nullglob
 
   # generate the init script from plugins above
   zgen save

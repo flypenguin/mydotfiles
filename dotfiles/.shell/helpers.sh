@@ -2,7 +2,7 @@
 [ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh
 
 # direnv - https://direnv.net/
-which -s direnv > /dev/null 2>&1 && eval "$(direnv hook zsh)"
+whence direnv > /dev/null 2>&1 && eval "$(direnv hook zsh)"
 
 # nvm - the Node Version Manager
 # use the oh-my-zsh "nvm" plugin for "stupid" initialization, or use lazy loading here.
