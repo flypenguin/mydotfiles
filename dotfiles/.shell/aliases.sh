@@ -131,6 +131,7 @@ alias docker_clean_images="docker images | grep '<none>' | awk '{print \$3}' | x
 alias docker_rm_all="docker ps -a | grep Exited | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker rm -f"
 alias docker_stop_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker stop"
 alias docker_kill_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker kill"
+alias dockify="eval \$(docker-machine env default)"
 
 # OPS
 alias   tf="terraform"
