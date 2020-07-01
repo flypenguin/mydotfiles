@@ -22,6 +22,16 @@ for PATH_SEARCH in \
   fi
 done
 
+# PREpended to path (java - on mac ...)
+for PATH_SEARCH in \
+  "/usr/local/opt/openjdk/bin" \
+  ; do
+  if [ -d "$PATH_SEARCH" ]; then
+    path=("$PATH_SEARCH" $path)
+    break
+  fi
+done
+
 
 
 
