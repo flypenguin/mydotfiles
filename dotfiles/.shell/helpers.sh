@@ -1,5 +1,5 @@
-# autojump
-[ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh
+# jump (autojump seems dead) - don't forget QUOTING!! :)
+whence jump >/dev/null 2>&1 && eval "$(jump shell zsh)"
 
 # direnv - https://direnv.net/
 whence direnv > /dev/null 2>&1 && eval "$(direnv hook zsh)"
