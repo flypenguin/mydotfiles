@@ -9,7 +9,7 @@ if [ -d "$HOME/clis" ] ; then
   done
 fi
 
-# snaps :)
+# APPENDED to path
 for PATH_SEARCH in \
   "/var/lib/snapd/snap/bin" \
   "/snap/bin" \
