@@ -21,6 +21,7 @@ brew "stow"
 brew "vim"
 brew "coreutils"
 brew "openssl"
+brew "bash"
 
 # previously uninstalled command line utils
 brew "exa"
