@@ -43,6 +43,7 @@ brew "watch"
 brew "wget"
 brew "fish"
 brew "git"
+brew "jump"
 
 # fonts
 cask "font-fira-code"
