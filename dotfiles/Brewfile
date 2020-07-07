@@ -96,6 +96,7 @@ cask "fontexplorer-x-pro"
 cask "jdownloader"
 cask "libreoffice"
 cask "sublime-text-dev"
+cask "pycharm"
 cask "wireshark"
 cask "cyberduck"
 cask "telegram"           # the correct one
