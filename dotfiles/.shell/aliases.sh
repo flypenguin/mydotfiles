@@ -22,6 +22,15 @@ alias pm="python manage.py"
 # console helpers
 alias    tma="tmux attach"
 
+# brew - m1 vs. x86
+ibrew() {
+  if [ -x /usr/local/bin/brew ] ; then
+    /usr/local/bin/brew "$@"
+  else
+    brew "$@"
+  fi
+}
+
 # ssh
 alias ssr="ssh -l root"
 alias ssp="ssh -o PubkeyAuthentication=no"

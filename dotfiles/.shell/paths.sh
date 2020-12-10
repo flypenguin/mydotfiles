@@ -23,25 +23,17 @@ for PATH_SEARCH in \
 done
 
 # PREpended to path (java - on mac ...)
+# later = higher preference
 for PATH_SEARCH in \
+  "$HOME/linuxbrew/bin" \
+  "/usr/local/bin" \
+  "/opt/homebrew/bin" \
   "/usr/local/opt/openjdk/bin" \
   ; do
   if [ -d "$PATH_SEARCH" ]; then
     path=("$PATH_SEARCH" $path)
-    break
   fi
 done
-
-
-
-
-## LINUX ###################################################
-
-
-# linux homebrew (yes, this is a thing ;) path settings
-# should not have an effect on mac.
-[ -d $HOME/.linuxbrew ] && path=("$HOME/.linuxbrew/bin" $path)
-
 
 
 
@@ -51,7 +43,7 @@ done
 # mac os & homebrew - if the coreutils are installed, use them instead of the OS X ones.
 # see "brew info coreutils". should not have an effect on linux ;)
 # from: https://apple.stackexchange.com/a/371984
-for gnu_dir in /usr/local/opt/*/libexec/gnubin; do
+find /opt/homebrew /usr/local -type d -name gnubin | while read gnu_dir; do
   path=("$gnu_dir" $path)
   manpath=("${gnu_dir/gnubin/gnuman}" $manpath)
 done
