@@ -19,7 +19,7 @@ fi
 brew bundle --file=$HOME/.dotfiles/dotfiles/Brewfile
 
 # install virtualenvwrapper for the oh-my-zsh plugin
-pip2 install virtualenvwrapper
+pip3 install virtualenvwrapper
 
 # continue with generic items
 "$HOME/.dotfiles/setup/generic.sh"
