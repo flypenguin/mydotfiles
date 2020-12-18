@@ -14,3 +14,5 @@
 	editor = vim
 [merge]
 	tool = meld
+[pull]
+	rebase = true
