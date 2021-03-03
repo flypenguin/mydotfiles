@@ -1,0 +1,5 @@
+default_context:
+    full_name: "Axel Bock"
+    email: "mr.axel.bock@gmail.com"
+    github_username: "flypenguin"
+cookiecutters_dir: "~/.cookiecutters/"
