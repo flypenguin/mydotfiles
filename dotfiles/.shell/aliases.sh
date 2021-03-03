@@ -59,6 +59,41 @@ ibrew() {
   fi
 }
 
+#
+# file operations
+
+# convert a file to utf8
+# $1 - original encoding
+# $2... - filename(s)
+file2utf8() {
+  if [[ -z "$1" || "$1" -eq "-h" ]] ; then
+    echo "Convert a file from a given encoding to UTF-8."
+    echo "USAGE: file2utf8 FROM_ENCODING FILENAME"
+    return
+  fi
+  FROM_ENC="$1"
+  shift
+  for convfile in "$@" ; do
+    echo "Converting: $convfile"
+    iconv -f $FROM_ENC -t utf-8 "$convfile" > "$convfile.utf8"
+    mv -f "$FILE.utf8" "$convfile"
+  done
+}
+
+# trim trailing whitespaces in file
+# $1 - filename
+trim() {
+  if [[ -z "$1" || "$1" -eq "-h" ]] ; then
+    echo "Trim trailing whitespaces from each line in a file."
+    echo "USAGE: trim FILENAME"
+    return
+  fi
+  for trimfile in in "$@" ; do
+    echo "Trimming: $trimfile"
+    sed -Ei 's/^[ \t]+$//;s/[ \t]+$//' "$trimfile"
+  done
+}
+
 # ssh
 alias ssr="ssh -l root"
 alias ssp="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no"
