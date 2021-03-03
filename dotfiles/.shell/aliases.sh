@@ -33,7 +33,7 @@ ibrew() {
 
 # ssh
 alias ssr="ssh -l root"
-alias ssp="ssh -o PubkeyAuthentication=no"
+alias ssp="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no"
 # $1 = name of the identity file, $@ = ssh parameters
 ssi() {
   if [ -z "$2" ] ; then
