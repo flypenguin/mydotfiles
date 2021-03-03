@@ -29,12 +29,12 @@ clone_repo_to() {
 #fi
 
 
-# install zplug - zsh plugin manager
 echo -e "\n\n * Installing zsh manager(s) ..."
-clone_repo_to https://github.com/tarjoilija/zgen.git          "${HOME}/.zgen"
+# from ohmyz.sh website
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+#clone_repo_to https://github.com/tarjoilija/zgen.git          "${HOME}/.zgen"
 #clone_repo_to https://github.com/zplug/zplug                  "$HOME/.zplug"
-#clone_repo_to https://github.com/robbyrussell/oh-my-zsh.git   "$HOME/.oh-my-zsh"
-
+# clone_repo_to https://github.com/robbyrussell/oh-my-zsh.git   "$HOME/.oh-my-zsh"
 
 # now use stow to manage shit. :)
 # first, save what might be overwritten.

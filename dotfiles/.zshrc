@@ -9,9 +9,6 @@
 
 # add $HOME/bin to the path.
 path=("$HOME/bin" $path)
-
-UNAME=$(uname -s)
-
 if [ "$UNAME" = "Darwin" ] ; then
   # fix VIRTUALENVWRAPPER on OS X
   export WORKON_HOME=$HOME/.virtualenvs
@@ -19,49 +16,31 @@ if [ "$UNAME" = "Darwin" ] ; then
   export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
 fi
 
-# source zgen
-source "${HOME}/.zgen/zgen.zsh"
+export ZSH="/Users/tm/.oh-my-zsh"
+export UPDATE_ZSH_DAYS=13
 
-# if the init scipt doesn't exist
-if ! zgen saved; then
+ZSH_THEME="robbyrussell"
 
-  zgen   oh-my-zsh
+DISABLE_UPDATE_PROMPT="true"
+HIST_STAMPS="yyyy-mm-dd"
 
-  # specify plugins here
-  #zgen   oh-my-zsh   "lib/directories"
-  #zgen   oh-my-zsh   "lib/grep"
-  #zgen   oh-my-zsh   "lib/termsupport"
-  #zgen   oh-my-zsh   "lib/completion"
-  #zgen   oh-my-zsh   "lib/key-bindings"
-  #zgen   oh-my-zsh   "lib/history"
-  #zgen   load        "denysdovhan/spaceship-prompt" spaceship
-  zgen   oh-my-zsh   "themes/jreese"
-  #zgen   oh-my-zsh   "plugins/kubectl"
-  #zgen   oh-my-zsh   "plugins/helm"
-  zgen   oh-my-zsh   "plugins/docker"
-  zgen   oh-my-zsh   "plugins/virtualenv"
-  zgen   oh-my-zsh   "plugins/virtualenvwrapper"
-  zgen   oh-my-zsh   "plugins/git"
-  zgen   oh-my-zsh   "plugins/common-aliases"
-  zgen   oh-my-zsh   "plugins/dotenv"
-  #zgen   oh-my-zsh   "plugins/fasd"
+plugins=(git docker virtualenv virtualenvwrapper git common-aliases dotenv kubectl fzf)
 
-  if whence fzf >/dev/null; then
-    zgen load junegunn/fzf shell/completion.zsh
-    zgen load junegunn/fzf shell/key-bindings.zsh
-  fi
+# CASE_SENSITIVE="true"
+# DISABLE_AUTO_UPDATE="true"
+# DISABLE_MAGIC_FUNCTIONS="true"
+# DISABLE_AUTO_TITLE="true"
+# ENABLE_CORRECTION="true"
+# COMPLETION_WAITING_DOTS="true"
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+# ZSH_CUSTOM=/path/to/new-custom-folder
 
-  # suppress "no matches found: *.sh.Darwin" message
-  setopt nullglob
-  for system in "" ".$UNAME" ; do
-    for plug in $HOME/.shell/*.sh${system} ; do
-      zgen load "$plug"
-    done
-  done
-  unsetopt nullglob
+source $ZSH/oh-my-zsh.sh
 
-  # generate the init script from plugins above
-  zgen save
+# ===========================================================================
+# User configuration
 
-fi
+export LANG=en_US.UTF-8
 
+UNAME=$(uname -s)
+source $HOME/.shell/*.sh{,.$UNAME}
