@@ -22,6 +22,34 @@ alias pm="python manage.py"
 # console helpers
 alias    tma="tmux attach"
 
+# mac os & homebrew - if the coreutils are installed, use them instead of the OS X ones.
+# see "brew info coreutils". should not have an effect on linux ;)
+# from: https://apple.stackexchange.com/a/371984
+update_dynamic_paths() {
+  local DYNPATH="$HOME/.shell/dynamic-paths.sh"
+  echo "Purging $DYNPATH"
+  echo "# Last update: $(date +%Y-%m-%d\ %H:%M:%S)" > "$DYNPATH"
+  for a in \
+    /opt/homebrew \
+    /usr/local \
+  ; do if [[ -d "$a" ]] ; then
+      find "$a" -type d -name gnubin | while read gnu_dir; do
+        echo "Adding bin dir: $gnu_dir"
+        echo "path=(\"$gnu_dir\" \$path)"                         >> "$DYNPATH"
+        local MANPATH=${gnu_dir//gnubin/gnuman}
+        echo "Adding man dir: $MANPATH"
+        echo "manpath=(\"${gnu_dir//gnubin/gnuman}\" \$manpath)"   >> "$DYNPATH"
+      done
+    fi
+  done
+}
+
+# update dynamic paths after brew operations ...
+brew() {
+  command brew "$@"
+  update_dynamic_paths
+}
+
 # brew - m1 vs. x86
 ibrew() {
   if [ -x /usr/local/bin/brew ] ; then
