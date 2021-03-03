@@ -1,12 +1,12 @@
 # IMPORTANT NOTICE
 
-You have to enable this folder by ...
+CHANGE the iTerm config folder to $HOME/Synched/Appconfigs/iTerm by ...
 
 * iTerm -> Settings
 * First page "General"
 * bottom, "Preferences"
 * check "Load preferences from a custom folder or URL"
-* then select this location
+* then select the above location
 * then you're done.
 
 Just so you remember.
