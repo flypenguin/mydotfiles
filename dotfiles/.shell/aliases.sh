@@ -66,7 +66,7 @@ ibrew() {
 # $1 - original encoding
 # $2... - filename(s)
 file2utf8() {
-  if [[ -z "$1" || "$1" -eq "-h" ]] ; then
+  if [[ -z "$2" || "$1" = "-h" ]] ; then
     echo "Convert a file from a given encoding to UTF-8."
     echo "USAGE: file2utf8 FROM_ENCODING FILENAME"
     return
@@ -74,21 +74,24 @@ file2utf8() {
   FROM_ENC="$1"
   shift
   for convfile in "$@" ; do
+    if [ ! -f "$convfile" ] ; then continue ; fi
     echo "Converting: $convfile"
-    iconv -f $FROM_ENC -t utf-8 "$convfile" > "$convfile.utf8"
-    mv -f "$FILE.utf8" "$convfile"
+    iconv -f $FROM_ENC -t utf-8 "$convfile" > "$convfile.utf8" \
+      && mv -f "$convfile.utf8" "$convfile"
+    rm -f "$convfile.utf8"
   done
 }
 
 # trim trailing whitespaces in file
 # $1 - filename
 trim() {
-  if [[ -z "$1" || "$1" -eq "-h" ]] ; then
+  if [[ -z "$1" || "$1" = "-h" ]] ; then
     echo "Trim trailing whitespaces from each line in a file."
     echo "USAGE: trim FILENAME"
     return
   fi
-  for trimfile in in "$@" ; do
+  for trimfile in "$@" ; do
+    if [ ! -f "$trimfile" ] ; then continue ; fi
     echo "Trimming: $trimfile"
     sed -Ei 's/^[ \t]+$//;s/[ \t]+$//' "$trimfile"
   done
