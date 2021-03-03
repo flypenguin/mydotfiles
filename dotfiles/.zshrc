@@ -43,4 +43,6 @@ source $ZSH/oh-my-zsh.sh
 export LANG=en_US.UTF-8
 
 UNAME=$(uname -s)
-source $HOME/.shell/*.sh{,.$UNAME}
+for sourceme in $HOME/.shell/*.sh{,.$UNAME} ; do
+  source "$sourceme"
+done
