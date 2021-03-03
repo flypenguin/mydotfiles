@@ -16,3 +16,5 @@
 	tool = meld
 [pull]
 	rebase = true
+[init]
+	defaultBranch = main
