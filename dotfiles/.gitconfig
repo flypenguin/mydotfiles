@@ -12,6 +12,8 @@
 [core]
 	excludesfile = /Users/tm/.gitignore_global
 	editor = vim
+	eol = lf
+	autocrlf = input
 [merge]
 	tool = meld
 [pull]
