@@ -31,7 +31,8 @@ brew() {
 # brew - m1 vs. x86
 ibrew() {
   if [ -x /usr/local/bin/brew ] ; then
-    /usr/local/bin/brew "$@"
+    echo "Using 'legacy' brew ..."
+    arch -x86_64 /usr/local/bin/brew "$@"
   else
     brew "$@"
   fi
