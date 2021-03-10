@@ -16,7 +16,7 @@ if [ "$UNAME" = "Darwin" ] ; then
   export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
 fi
 
-export ZSH="/Users/tm/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 export UPDATE_ZSH_DAYS=13
 
 ZSH_THEME="robbyrussell"
