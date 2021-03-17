@@ -13,7 +13,6 @@ alias -g   S=' | sort'
 ### DEVELOPMENT related aliases
 # PYTHON    - VIRTUALENV
 alias cvi="mkvirtualenv -p \$(which python3) \$(basename \$(pwd))"
-alias wo="workon \$(basename \$(pwd))"
 alias cvil="virtualenv -p \$(which python3) .ve-\$(basename \$(pwd))"
 alias wol="source .ve-\$(basename \$(pwd))/bin/activate"
 # PYTHON    - DJANGO
@@ -22,80 +21,10 @@ alias pm="python manage.py"
 # console helpers
 alias    tma="tmux attach"
 
-# update dynamic paths after brew operations ...
-brew() {
-  command brew "$@"
-  update_dynamic_paths
-}
-
-# brew - m1 vs. x86
-ibrew() {
-  if [ -x /usr/local/bin/brew ] ; then
-    echo "Using 'legacy' brew ..."
-    arch -x86_64 /usr/local/bin/brew "$@"
-  else
-    brew "$@"
-  fi
-}
-
 #
-# file operations
-
-# convert a file to utf8
-# $1 - original encoding
-# $2... - filename(s)
-file2utf8() {
-  if [[ -z "$2" || "$1" = "-h" ]] ; then
-    echo "Convert a file from a given encoding to UTF-8."
-    echo "USAGE: file2utf8 FROM_ENCODING FILENAME"
-    return
-  fi
-  FROM_ENC="$1"
-  shift
-  for convfile in "$@" ; do
-    if [ ! -f "$convfile" ] ; then continue ; fi
-    echo "Converting: $convfile"
-    iconv -f $FROM_ENC -t utf-8 "$convfile" > "$convfile.utf8" \
-      && mv -f "$convfile.utf8" "$convfile"
-    rm -f "$convfile.utf8"
-  done
-}
-
-# trim trailing whitespaces in file
-# $1 - filename
-trim() {
-  if [[ -z "$1" || "$1" = "-h" ]] ; then
-    echo "Trim trailing whitespaces from each line in a file."
-    echo "USAGE: trim FILENAME"
-    return
-  fi
-  for trimfile in "$@" ; do
-    if [ ! -f "$trimfile" ] ; then continue ; fi
-    echo "Trimming: $trimfile"
-    sed -Ei 's/^[ \t]+$//;s/[ \t]+$//' "$trimfile"
-  done
-}
-
 # ssh
 alias ssr="ssh -l root"
 alias ssp="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no"
-# $1 = name of the identity file, $@ = ssh parameters
-ssi() {
-  if [ -z "$2" ] ; then
-    echo "USAGE: ssi filename ssh_param [ssh_param ...]"
-    return
-  fi
-  local IDFILE="$1"
-  [ ! -f "$IDFILE" ] && IDFILE="$HOME/.ssh/$IDFILE"
-  if [ ! -f "$IDFILE" ] ; then
-    echo "File '$IDFILE' not found. Looked in: ['.', '~/.ssh']"
-    return
-  else
-    echo "Using ID file: $IDFILE"
-  fi
-  shift
-  ssh -i "$IDFILE" -o IdentitiesOnly=yes "$@"
-}
 
 # git
 alias gco="git checkout"
@@ -175,11 +104,6 @@ alias   kgds-a="k get --all-namespaces daemonset"
 alias       kc="k config"
 alias    kcsnd="k config set-context --current --namespace=default"
 
-# k config set namespace
-kcsns() {
-  k config set-context --current --namespace=$1
-}
-
 # docker
 alias docker_clean_images="docker images | grep '<none>' | awk '{print \$3}' | xargs docker rmi"
 alias docker_rm_all="docker ps -a | grep Exited | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker rm -f"
@@ -203,38 +127,6 @@ alias aws-list-tagged-volumes="aws ec2 describe-volumes | jq '.Volumes[] | selec
 
 # azure
 alias azgroups="az group list --query '[].name'"
-
-# create hash for ssh (public) keys, mainly for AWS
-# see here: https://serverfault.com/a/603983
-ssh-key-hash() {
-  if [ -z "$1" ]; then
-    echo "USAGE: ssh-key-hash PUB_KEY_FILE"
-    return
-  fi
-  if grep -q BEGIN "$1" ; then
-    # we have a private key :)
-    echo "Found private key."
-
-    echo -n "PUBkey  MD5  openssl:     "
-    openssl pkey -in "$1" -pubout -outform DER | openssl md5 -c \
-      | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
-
-    echo -n "PRIVkey SHA1 openssl:     "
-    openssl pkcs8 -in "$1" -nocrypt -topk8 -outform DER | openssl sha1 -c \
-      | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
-  else
-    # we have a public key
-    echo "Found public key."
-    echo "Use private keys for AWS."
-    echo -n "PUBkey  MD5  ssh-keygen:  "
-    ssh-keygen -E md5 -lf "$1" | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
-  fi
-}
-
-
-# gitignore service :)
-function giti() { curl -L -s https://www.gitignore.io/api/$@ ;}
-
 
 ## SINCE WE'RE NOT USING KUBECTL PLUGIN FROM ZSH ANY MORE (too high startup time on mac)
 ## HERE ARE THE ALIASES ...

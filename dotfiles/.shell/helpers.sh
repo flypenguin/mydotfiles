@@ -1,3 +1,8 @@
+# ###########################################################################
+#
+# configure generic helpers
+#
+
 # jump (autojump seems dead) - don't forget QUOTING!! :)
 whence jump >/dev/null 2>&1 && eval "$(jump shell zsh)"
 
@@ -11,6 +16,145 @@ whence direnv > /dev/null 2>&1 && eval "$(direnv hook zsh)"
 # from arch :)
 local SCRIPT="/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 [ -f "$SCRIPT" ] && source "$SCRIPT"
+
+
+
+# ###########################################################################
+#
+# python
+#
+
+# $1 - optional - work on WHAT. default: current path name
+wo() { if [ -z "$1" ] ; then workon "$(basename "$PWD")" ; else workon "$1" ; fi }
+
+
+
+# ###########################################################################
+#
+# ssh
+#
+
+# $1 = name of the identity file
+# $@ = ssh parameters
+ssi() {
+  if [ -z "$2" ] ; then
+    echo "USAGE: ssi filename ssh_param [ssh_param ...]"
+    return
+  fi
+  local IDFILE="$1"
+  [ ! -f "$IDFILE" ] && IDFILE="$HOME/.ssh/$IDFILE"
+  if [ ! -f "$IDFILE" ] ; then
+    echo "File '$IDFILE' not found. Looked in: ['.', '~/.ssh']"
+    return
+  else
+    echo "Using ID file: $IDFILE"
+  fi
+  shift
+  ssh -i "$IDFILE" -o IdentitiesOnly=yes "$@"
+}
+
+# create hash for ssh (public) keys, mainly for AWS
+# see here: https://serverfault.com/a/603983
+ssh-key-hash() {
+  if [ -z "$1" ]; then
+    echo "USAGE: ssh-key-hash PUB_KEY_FILE"
+    return
+  fi
+  if grep -q BEGIN "$1" ; then
+    # we have a private key :)
+    echo "Found private key."
+
+    echo -n "PUBkey  MD5  openssl:     "
+    openssl pkey -in "$1" -pubout -outform DER | openssl md5 -c \
+      | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
+
+    echo -n "PRIVkey SHA1 openssl:     "
+    openssl pkcs8 -in "$1" -nocrypt -topk8 -outform DER | openssl sha1 -c \
+      | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
+  else
+    # we have a public key
+    echo "Found public key."
+    echo "Use private keys for AWS."
+    echo -n "PUBkey  MD5  ssh-keygen:  "
+    ssh-keygen -E md5 -lf "$1" | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
+  fi
+}
+
+
+
+# ###########################################################################
+#
+# git
+#
+
+# gitignore service :)
+function giti() { curl -L -s https://www.gitignore.io/api/$@ ;}
+
+# convert a file to utf8
+# $1 - original encoding
+# $2... - filename(s)
+file2utf8() {
+  if [[ -z "$2" || "$1" = "-h" ]] ; then
+    echo "Convert a file from a given encoding to UTF-8."
+    echo "USAGE: file2utf8 FROM_ENCODING FILENAME"
+    return
+  fi
+  FROM_ENC="$1"
+  shift
+  for convfile in "$@" ; do
+    if [ ! -f "$convfile" ] ; then continue ; fi
+    echo "Converting: $convfile"
+    iconv -f $FROM_ENC -t utf-8 "$convfile" > "$convfile.utf8" \
+      && mv -f "$convfile.utf8" "$convfile"
+    rm -f "$convfile.utf8"
+  done
+}
+
+# trim trailing whitespaces in file
+# $1 - filename
+trim() {
+  if [[ -z "$1" || "$1" = "-h" ]] ; then
+    echo "Trim trailing whitespaces from each line in a file."
+    echo "USAGE: trim FILENAME"
+    return
+  fi
+  for trimfile in "$@" ; do
+    if [ ! -f "$trimfile" ] ; then continue ; fi
+    echo "Trimming: $trimfile"
+    sed -Ei 's/^[ \t]+$//;s/[ \t]+$//' "$trimfile"
+  done
+}
+
+
+
+# ############################################################################
+#
+# brew
+#
+
+# update dynamic paths after brew operations ...
+brew() {
+  command brew "$@"
+  if [ "$1" = "install" ] ; then
+    update_dynamic_paths
+  fi
+}
+
+# brew - m1 vs. x86
+ibrew() {
+  if [ -x /usr/local/bin/brew ] ; then
+    /usr/local/bin/brew "$@"
+  else
+    brew "$@"
+  fi
+}
+
+
+
+# ###########################################################################
+#
+# path helpers
+#
 
 # mac os & homebrew - if the coreutils are installed, use them instead of the OS X ones.
 # see "brew info coreutils". should not have an effect on linux ;)
