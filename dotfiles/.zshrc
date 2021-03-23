@@ -7,6 +7,9 @@
 #   $ZDOTDIR/.zlogout                   # login-shells (on exit)
 # see here: http://bit.ly/1sGzo6g
 
+# we need this :/
+UNAME=$(uname -s)
+
 # add $HOME/bin to the path.
 path=("$HOME/bin" $path)
 if [ "$UNAME" = "Darwin" ] ; then
@@ -42,7 +45,6 @@ source $ZSH/oh-my-zsh.sh
 
 export LANG=en_US.UTF-8
 
-UNAME=$(uname -s)
 for sourceme in $HOME/.shell/*.sh{,.$UNAME} ; do
   source "$sourceme"
 done
