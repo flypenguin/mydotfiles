@@ -1,13 +1,15 @@
 #!/usr/bin/env sh
 
+_STYLE="monokai"
+
 case "$1" in
     *.awk|*.groff|*.java|*.js|*.m4|*.php|*.pl|*.pm|*.pod|*.sh|\
     *.ad[asb]|*.asm|*.inc|*.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|\
     *.lsp|*.l|*.pas|*.p|*.xml|*.xps|*.xsl|*.axp|*.ppd|*.pov|\
     *.diff|*.patch|*.py|*.rb|*.sql|*.ebuild|*.eclass|*.pp)
-        pygmentize "$1";;
+        pygmentize -O style=$_STYLE "$1";;
     .bashrc|.bash_aliases|.bash_environment)
-        pygmentize -l sh "$1"
+        pygmentize -O style=$_STYLE -l sh "$1"
         ;;
     *)
         grep "#\!/bin/bash" "$1" > /dev/null
