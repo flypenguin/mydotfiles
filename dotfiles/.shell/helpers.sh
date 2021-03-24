@@ -31,6 +31,23 @@ wo() { if [ -z "$1" ] ; then workon "$(basename "$PWD")" ; else workon "$1" ; fi
 
 # ###########################################################################
 #
+# azure
+#
+
+# ac - az with jsonc output
+ac() {
+  az "$@" --output jsonc
+}
+
+# aj - az with json output
+aj() {
+  az "$@" --output json
+}
+
+
+
+# ###########################################################################
+#
 # ssh
 #
 
