@@ -12,9 +12,7 @@ alias -g   S=' | sort'
 
 ### DEVELOPMENT related aliases
 # PYTHON    - VIRTUALENV
-alias cvi="mkvirtualenv -p \$(which python3) \$(basename \$(pwd))"
-alias cvil="virtualenv -p \$(which python3) .ve-\$(basename \$(pwd))"
-alias wol="source .ve-\$(basename \$(pwd))/bin/activate"
+alias wol="source .venv/bin/activate"
 # PYTHON    - DJANGO
 alias pm="python manage.py"
 

@@ -27,6 +27,22 @@ local SCRIPT="/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highligh
 # $1 - optional - work on WHAT. default: current path name
 wo() { if [ -z "$1" ] ; then workon "$(basename "$PWD")" ; else workon "$1" ; fi }
 
+# $1 - (OPTIONAL) name of virtual environment
+cvi() {
+  local ENVNAME=${1:-$(basename $PWD)}
+  mkvirtualenv -p $(which python3) "$ENVNAME"
+}
+
+# $1 - (OPTIONAL) name of virtual environment
+cvv() {
+  local ENVNAME=${1:-$(basename $PWD)}
+  python3 -m venv --prompt "$ENVNAME" .venv
+  # mimic 'mkvirtualenv' behavior and activate automatically
+  source .venv/bin/activate
+}
+
+
+
 
 
 # ###########################################################################
