@@ -123,6 +123,23 @@ ssh-key-hash() {
 # gitignore service :)
 function giti() { curl -L -s https://www.gitignore.io/api/$@ ;}
 
+
+# ###########################################################################
+#
+# file operations
+#
+
+# add trailing newlines to files of a certain type
+# https://unix.stackexchange.com/a/161853
+# $@ - the files to add a newline to
+addtrailingnewline() {
+  for file in "$@" ; do
+    echo "Checking '$file' ..."
+    tail -c1 < "$file" | read -r _ || echo >> "$file"
+  done
+}
+
+
 # convert a file to utf8
 # $1 - original encoding
 # $2... - filename(s)
