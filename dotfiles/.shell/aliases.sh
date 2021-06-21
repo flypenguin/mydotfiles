@@ -23,6 +23,7 @@ alias    tma="tmux attach"
 # ssh
 alias ssr="ssh -l root"
 alias ssp="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no"
+alias sshconfig="vim \$HOME/.ssh/config"
 
 # git
 alias gco="git checkout"
