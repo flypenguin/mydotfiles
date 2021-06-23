@@ -18,6 +18,9 @@ unset VIRTUAL_ENV_DISABLE_PROMPT
 # now I DON'T want it ;)
 #export VIRTUAL_ENV_DISABLE_PROMPT=1
 
+# fucking go
+export GOPATH=$HOME/dev/go-modules
+
 # ZSH settings
 
 set -k                          # recognize inline comments on the command line
