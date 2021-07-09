@@ -55,3 +55,7 @@ CheckReload() {
 :*://ts::
   Send, %A_YYYY%%A_MM%%A_DD%_%A_Hour%%A_Min%%A_Sec%
   Return
+
+:*:..tel::
+  Send,  {+}49 171 4522178
+  Return
