@@ -41,10 +41,10 @@ alias gdc="git diff --cached"
 #   (s)hort, (c)ontinuous, (l)ong, (d)iff
 # (g)it (d)iff ...
 #   (), (s)tat
-alias gls="git --no-pager log -n 40 --pretty=format:'%C(yellow)%h %ad%Cred%d %Creset%s%Cblue [%cn]' --decorate --date=short"
-alias glc="git            log       --pretty=format:'%C(yellow)%h %ad%Cred%d %Creset%s%Cblue [%cn]' --decorate --date=short"
-alias gll="git log --pretty=format:'%C(yellow)%h %C(white)%aD %Cred%d %Creset%s%Cblue [%cn]' --decorate --numstat"
-alias gld="git log --pretty=format:'%C(yellow reverse)%h%C(reset) %C(yellow reverse)%ad%C(red reverse)%d%C(reset) %C(white reverse)%s%C(reset)%Cblue [%cn]' --decorate --date=short -p"
+alias gls="git --no-pager log -n 40 --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short"
+alias glc="git            log       --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short"
+alias gll="git log --pretty=format:'%C(yellow)%h %C(yellow reverse)%aD%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --numstat"
+alias gld="git log --pretty=format:'%C(yellow reverse)%h%Creset %C(yellow reverse)%ad%Creset %C(white reverse)%s%Creset %Cblue[%cn]%C(red reverse)% d%Creset' --decorate --date=short -p"
 alias gds="git --no-pager diff --stat"
 alias glf="git log --stat --oneline --pretty='%n%C(yellow reverse)%h%C(reset) %C(yellow)%ad%C(red)%d%C(reset) %C(white)%s%C(reset) %C(blue)[%cn]%C(reset)'"
 alias gpb="git push --set-upstream origin \$(git rev-parse --abbrev-ref HEAD)"

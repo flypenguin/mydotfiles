@@ -3,8 +3,6 @@
 	email = mr.axel.bock@gmail.com
 [push]
 	default = simple
-[alias]
-    ls = log --pretty=format:\"%C(yellow)%h %C(blue)%ad %C(reset)%s %C(green)[%cn]%C(red)%d \" --decorate --date=local
 [color]
 	ui = true
 [mergetool]
@@ -26,3 +24,20 @@
 [mergetool "sourcetree"]
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
+[user]
+	email = mr.axel.bock@gmail.com
+	name = Axel Bock
+[alias]
+	d = diff
+	p = push
+	s = status
+	dc = !git diff --cached
+	ds = !git --no-pager diff --stat
+	ra = rebase --abort
+	pf = push --force
+	ri = rebase --interactive
+    apa = "add --patch"
+	ls = !git --no-pager log -n 40 --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short
+	lc = !git            log       --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short
+	ll = !git log --pretty=format:'%C(yellow)%h %C(yellow reverse)%aD%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --numstat
+	ld = !git log --pretty=format:'%C(yellow reverse)%h%Creset %C(yellow reverse)%ad%Creset %C(white reverse)%s%Creset %C(brightblue)[%cn]%C(red)%d%Creset' --decorate --date=short -p
