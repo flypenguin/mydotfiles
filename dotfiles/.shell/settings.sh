@@ -6,7 +6,7 @@ export LESSOPEN="|$HOME/bin/_lessfilter %s"
 
 # set & create GOPATH ...
 export GOPATH="$HOME/Dev/gopath"
-mkdir -p "%GOPATH"
+mkdir -p "$GOPATH"
 echo "This directory is created by $HOME/.shells/settings.sh" > "$GOPATH/REALLY-README.md"
 
 # less awful java font rendering
