@@ -7,7 +7,9 @@ tap "homebrew/cask-versions"
 tap "homebrew/bundle"
 tap "homebrew/core"
 tap "neovim/neovim"
-
+tap "aws/tap"
+tap "willdoescode/natls"
+tap "filippo.io/age"
 
 # replace Mac OS command line utils
 brew "curl"
