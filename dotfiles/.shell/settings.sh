@@ -4,6 +4,11 @@
 export LESS='-iMRS#15'
 export LESSOPEN="|$HOME/bin/_lessfilter %s"
 
+# set & create GOPATH ...
+export GOPATH="$HOME/Dev/gopath"
+mkdir -p "%GOPATH"
+echo "This directory is created by $HOME/.shells/settings.sh" > "$GOPATH/REALLY-README.md"
+
 # less awful java font rendering
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=on'
 export EDITOR='vim'
