@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# source: microsoft
+# https://answers.microsoft.com/en-us/msteams/forum/all/how-to-completely-remove-teams-from-mac/2499239d-d491-43cb-a9c1-acbee7223b8d
+
+
+# $1 - full path to file / dir to delete
+delete_teams_file() {
+    DELETE_ME=$1
+    if [[ -d $1 ]] ; then
+        echo -n "DELETE      $DELETE_ME ... "
+        rm -rf "$DELETE_ME"
+        echo "done."
+    else
+        echo "Not found - $DELETE_ME"
+    fi
+}
+
+set -euo pipefail
+
+# prepare sudo entry
+echo "Prepare sudo ..."
+sudo echo "sudo prep successful :)"
+
+DELETE_BASE="$HOME/Library/Caches/com.microsoft."
+for DELETE_DIR in teams teams.shipit ; do
+    delete_teams_file "${DELETE_BASE}${DELETE_DIR}"
+done
+
+DELETE_BASE="$HOME/Library/Application Support/Microsoft/Teams"
+delete_teams_file "$DELETE_BASE"
+
+sudo rm -rf "/Applications/Microsoft Teams.app"
+
+echo "All done."
