@@ -119,8 +119,8 @@ ssh-key-hash() {
       | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
   else
     # we have a public key
-    echo -n "PUBkey MD5 AWS hash (AWS):       "
-    ssh-keygen -f ../resources/ssh_keys/id_rsa_hcm_aws_default.pub -e -m PKCS8 \
+    echo -n "PUBkey MD5 AWS hash (AWS):   "
+    ssh-keygen -f "$1" -e -m PKCS8 \
       | openssl pkey -pubin -outform DER \
       | openssl md5 -c
     echo -n "PUBkey MD5 ssh-keygen hash:  "
