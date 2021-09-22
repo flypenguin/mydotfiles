@@ -87,31 +87,52 @@ ssi() {
 }
 
 # create hash for ssh (public) keys, mainly for AWS
-# see here: https://serverfault.com/a/603983
+# see here: https://serverfault.com/a/603983, https://is.gd/OURGbO
 ssh-key-hash() {
   if [ -z "$1" ]; then
-    echo "USAGE: ssh-key-hash PUB_KEY_FILE"
+    echo "USAGE: ssh-key-hash (PUB_)KEY_FILE"
     return
   fi
-  if grep -q BEGIN "$1" ; then
+  if grep -q "OPENSSH PRIVATE KEY" "$1" ; then
+    echo "ERROR: OPENSSH PRIVATE KEYs are not supported (yet)."
+    echo "To convert the file IN PLACE to openSSL RSA format, use the command below."
+    echo "AGAIN: this WILL CHANGE the saved file!"
+    echo ""
+    echo "    ssh-keygen -pN \"\" -m pem -f \"$1\""
+    echo ""
+  elif grep -q "RSA PRIVATE KEY" "$1" ; then
     # we have a private key :)
-    echo "Found private key."
+    echo "Found RSA private key."
 
     echo -n "PUBkey  MD5  openssl:     "
     openssl pkey -in "$1" -pubout -outform DER | openssl md5 -c \
       | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
 
     echo -n "PRIVkey SHA1 openssl:     "
-    openssl pkcs8 -in "$1" -nocrypt -topk8 -outform DER | openssl sha1 -c \
+    openssl pkcs8 -in "$1" -inform PEM -outform DER -topk8 -nocrypt \
+      | openssl sha1 -c 2>/dev/null \
+      | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
+
+    echo -n "PRIVkey MD5 openssl:      "
+    openssl rsa -in "$1" -pubout -outform DER \
+      | openssl md5 -c \
       | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
   else
     # we have a public key
-    echo "Found public key."
-    echo "Use private keys for AWS."
-    echo -n "PUBkey  MD5  ssh-keygen:  "
+    echo -n "PUBkey MD5 AWS hash (AWS):       "
+    ssh-keygen -f ../resources/ssh_keys/id_rsa_hcm_aws_default.pub -e -m PKCS8 \
+      | openssl pkey -pubin -outform DER \
+      | openssl md5 -c
+    echo -n "PUBkey MD5 ssh-keygen hash:  "
     ssh-keygen -E md5 -lf "$1" | grep --color=never -Eo '(([a-z0-9]{2}:)+[a-z0-9]{2})'
   fi
 }
+
+# let's alias those
+alias aws-ssh-fingerprint=ssh-key-hash
+alias ssh-aws-fingerprint=ssh-key-hash
+alias aws-fp=ssh-key-hash
+
 
 
 
