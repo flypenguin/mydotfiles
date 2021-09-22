@@ -27,7 +27,7 @@ ZSH_THEME="robbyrussell"
 DISABLE_UPDATE_PROMPT="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(git docker virtualenv virtualenvwrapper git common-aliases dotenv kubectl fzf)
+plugins=(direnv git docker virtualenv virtualenvwrapper git common-aliases kubectl fzf)
 
 # CASE_SENSITIVE="true"
 # DISABLE_AUTO_UPDATE="true"
