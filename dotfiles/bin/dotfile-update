@@ -129,7 +129,9 @@ update_basefiles
 STOW_LOG="$DOTDIR/logs/stow_$TIMESTAMP"
 mkdir -p "$(dirname $STOW_LOG)"
 echo -n " * Updating dotfiles ... "
-stow -v -t "$HOME" -d "$DOTDIR/dotfiles" . > "$STOW_LOG" 2>&1 \
+stow -v \
+  -t "$HOME" -d "$DOTDIR/dotfiles" --ignore="\.DS_.*" . \
+  > "$STOW_LOG" 2>&1 \
   && echo "OK" \
   || echo "ERROR. See logs: $STOW_LOG"
 
