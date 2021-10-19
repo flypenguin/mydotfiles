@@ -13,7 +13,7 @@
 	eol = lf
 	autocrlf = input
 [merge]
-	tool = meld
+	tool = smerge
 [pull]
 	rebase = true
 [init]
