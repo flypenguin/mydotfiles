@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+
+if [ -z "$2" ] ; then
+  echo "USAGE: $(basename $0) -x/-z TARGET_DIR"
+  echo "    - '-x' compress directory with tar.xz"
+  echo "    - '-z' compress directory with zip"
+  echo "    - creates TARGET_DIR.txt/.md5 in TARGET_DIR's parent directory"
+  echo "    - creates _FILE.txt/.md5 in TARGET_DIR"
+  exit -1
+elif [ ! -d "$2" ] ; then
+  echo "ERROR: not a directory: $2"
+  exit -2
+fi
+
+COMPRESS="$1"
+
+set -euo pipefail
+
+cd "$2"
+export TGT_DIR=$(basename "$PWD")
+export TS=$(date +%Y-%m-%d__%H.%M.%S)
+export TS_HUMAN=${TS//__/ }
+
+rm -f "../$TGT_DIR.md5" "_LIST__"*.md5
+rm -f "../$TGT_DIR.md5" "_LIST__"*.txt
+
+echo -n "Creating '$TGT_DIR.txt' ... "
+echo "# Time of creation: $TS_HUMAN"   > "../$TGT_DIR.txt"
+find . | sort                         >> "../$TGT_DIR.txt"
+echo "done."
+
+echo -n "Creating '$TGT_DIR.md5' ... "
+echo "# Time of creation: $TS_HUMAN"   > "../$TGT_DIR.md5"
+find . -type f | sort | while read file ; do
+    md5sum "$file"                    >> "../$TGT_DIR.md5"
+done
+echo "done."
+
+cp "../$TGT_DIR.md5" ./_LIST__$TS.md5
+cp "../$TGT_DIR.txt" ./_LIST__$TS.txt
+
+if [ "$COMPRESS" == "-x" ] ; then
+  ARCHIVE_NAME="$TGT_DIR.tar.xz"
+  cd ..
+  echo -n "Creating '$TGT_DIR.tar.xz' ... "
+  rm -f "$TGT_DIR.tar.xz"
+  tar cJf "$ARCHIVE_NAME" "$TGT_DIR"
+  echo "done."
+elif [ "$COMPRESS" == "-z" ] ; then
+  ARCHIVE_NAME="$TGT_DIR.zip"
+  cd ..
+  echo -n "Creating '$TGT_DIR.zip' ... "
+  rm -f "$TGT_DIR.zip"
+  zip -r "$ARCHIVE_NAME" "$TGT_DIR" > zip-progress.txt
+  echo "done."
+  rm -f zip-progress.txt
+fi
+
+rm "$TGT_DIR"/_LIST__*
+md5sum "$ARCHIVE_NAME" > "$TGT_DIR.md5"
+
+mv "$TGT_DIR" "$TGT_DIR.orig"
+mkdir "$TGT_DIR"
+mv "$ARCHIVE_NAME" "$TGT_DIR/"
+mv "$TGT_DIR.md5" "$TGT_DIR.txt" "$TGT_DIR"
+
+echo "All done."
