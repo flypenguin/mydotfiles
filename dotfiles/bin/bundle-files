@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+help() {
+    echo "USAGE: $(basename $0) STRING"
+    echo "Moves STRING* files into directory 'STRING', direcory"
+    echo "will be created if it does not exist."
+}
+
+mkdir "$1"
+GLOBIGNORE=$1
+mv "$1"* "$1/"
+unset GLOBIGNORE
