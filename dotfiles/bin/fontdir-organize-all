@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+help() {
+  echo "USAGE: $(basename $0) DIR"
+  exit -1
+}
+
+[ "$1" == "-h" ] && help
+
+for a in * ; do
+  "$(dirname $0)/fontdir-organize" "$a"
+done

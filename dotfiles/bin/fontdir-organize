@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+help() {
+  echo "USAGE: $(basename $0) DIR"
+  exit -1
+}
+
+[ -z "$1" ] && help
+[ "$1" == "-h" ] && help
+
+if [ ! -d "$1" ] ; then
+  echo "ERROR: not a directory: $1"
+  exit -1
+fi
+
+DIR="$1"
+cd "$DIR"
+
+# https://www.tecmint.com/?p=23183
+OLD_DIR=$(mktemp -dp .)
+OLD_DIR=${OLD_DIR:2}
+GLOBIGNORE=$OLD_DIR
+mv * "$OLD_DIR/"
+unset GLOBIGNORE
+
+NEW_DIR=$(mktemp -dp .)
+NEW_DIR=${NEW_DIR:2}
+mkdir -p "$NEW_DIR/_font"
+
+find "$OLD_DIR/" -type f \
+  \( \
+       -iname "*.webloc" \
+    -o -iname "*.pdf" \
+    -o -iname "*.png" \
+    -o -iname "*.gif" \
+    -o -iname "*.jpg" \
+    -o -iname "*.jpeg" \
+    -o -iname "*.svg" \
+    -o -iname "*.eps" \
+    -o -iname "*.ai" \
+  \) \
+  -print0 \
+  | xargs -0i mv {} "./$NEW_DIR"
+
+find "$OLD_DIR/" -type f \
+  \( \
+       -iname "*.ttf" \
+    -o -iname "*.otf" \
+    -o -iname "*.woff" \
+    -o -iname "*.woff2" \
+    -o -iname "*.eot" \
+  \) \
+  -print0 \
+  | xargs -0i mv {} "./$NEW_DIR/_font/"
+
+mv "$NEW_DIR/"* .
+rmdir "$NEW_DIR"
+find . -type f \
+  \( \
+       -iname "*.txt" \
+    -o -iname "*.htm" \
+    -o -iname "*.zip" \
+    -o -iname "*.rar" \
+    -o -iname "*.alias" \
+    -o -iname "*.url" \
+    -o -iname "Thumbs.db" \
+    -o -iname ".DS_Store" \
+    -o -iname "*.html" \
+    -o -iname "*.diz" \
+    -o -iname "*.nfo" \
+    -o -iname "*.afm" \
+    -o -iname "*.inf" \
+    -o -iname "*.pfb" \
+    -o -iname "*.pfm" \
+  \) \
+  -delete
+find . -type d -empty -delete
+
+# count font files
+num_fonts=$(find . -type f -iname "*.otf" | wc -l)
+(( $num_fonts == 0 )) && num_fonts=$(find . -type f -iname "*.ttf" | wc -l)
+(( $num_fonts == 0 )) && num_fonts=$(find . -type f -iname "*.woff" | wc -l)
+(( $num_fonts == 0 )) && num_fonts=$(find . -type f -iname "*.woff2" | wc -l)
+
+set +ex
+dir_name="${PWD##*/}"
+new_base=${dir_name// \[*/}
+new_name="$new_base [$num_fonts]"
+if [[ "$new_name" != "$dir_name" ]] ; then
+  cd ..
+  mv "$dir_name" "$new_name"
+fi
