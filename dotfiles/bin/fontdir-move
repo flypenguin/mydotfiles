@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+help() {
+  echo "USAGE: $(basename $0) SRC_DIR FONT_COLLECTION_DIR"
+  exit -1
+}
+
+[ -z "$2" ] && help
+[ "$1" == "-h" ] && help
+
+if [ ! -d "$1" ] ; then
+  echo "ERROR: not a directory: $1"
+  exit -1
+fi
+
+if [ ! -d "$2" ] ; then
+  echo "ERROR: not a directory: $2"
+  exit -1
+fi
+
+SRC="$1"
+MOVE_TO_DIR="$2"
+DESTINATION_LETTER=$(echo "${SRC:0:1}" | tr '[:upper:]' '[:lower:]')
+
+FINAL_DIR="$MOVE_TO_DIR/$DESTINATION_LETTER"
+
+# check if "letter dir" already exists
+[ ! -d "$FINAL_DIR" ] && mkdir -p "$FINAL_DIR"
+
+# check whether there is already a dir with the same name
+FINAL_FULL_PATH="$FINAL_DIR/$(basename $SRC)"
+if [ -d "$FINAL_FULL_PATH" ] ; then
+  echo "ERROR: '$FINAL_FULL_PATH' already exists. Aborting."
+  exit -1
+if
+
+mv "$SRC" "$FINAL_DIR/"
+
+echo "$SRC  ->  $FINAL_DIR"
