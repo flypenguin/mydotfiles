@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+
+if [ -z "$1" ] ; then
+  echo "USAGE: $(basename $0) TARGETDIR"
+  echo "    - create TARGETDIR_thumbs_TIMESTAMP directory with thumbnail"
+  echo "      images and videos from TARGETDIR"
+  exit -1
+elif [ ! -d "$1" ] ; then
+  echo "ERROR: not a directory: $2"
+  exit -2
+fi
+
+set -euo pipefail
+
+CONVERT_QUALITY=${CONVERT_QUALITY:-65}
+CONVERT_RESIZE=${CONVERT_RESIZE:-1280x1280}
+CONVERT_OUTPUT_FORMAT="webp"
+FFMPEG_OUTPUT_CODEC="h264"
+FFMPEG_SCALE_SIZE=${FFMPEG_SCALE_SIZE:-360}
+
+
+cd "$1"
+export TGT_DIR=$(basename "$PWD")
+export TS=$(date +%Y-%m-%d__%H.%M.%S)
+export TS_HUMAN=${TS//__/ }
+ 
+
+# CREATE THUMBNAILS
+
+# create the directories
+THUMBS_DIR_DEFAULT="${1}_thumbs_$TS"
+THUMBS_DIR=${THUMBS_DIR:-$THUMBS_DIR_DEFAULT}
+mkdir -p "../${THUMBS_DIR}"
+find . -type d -print0 | xargs -0 -I {} mkdir -p "../$THUMBS_DIR/{}"
+
+# create thumbs
+find . \( \
+    -iname "*.jpg"   -o \
+    -iname "*.png"   -o \
+    -iname "*.nef"   -o \
+    -iname "*.jpeg"  -o \
+    -iname "*.heic"  -o \
+    -iname "*.webp"     \
+  \) \
+  | parallel -qI {} \
+    convert {} \
+      -quality "$CONVERT_QUALITY" \
+      -resize "${CONVERT_RESIZE}>" \
+      "../$THUMBS_DIR/{}.$CONVERT_OUTPUT_FORMAT"
+
+# create thumb VIDEOS
+# sources: https://stackoverflow.com/a/20848224, https://superuser.com/a/567934
+SCALE_RESOLUTION="min($FFMPEG_SCALE_SIZE,iw)':'min($FFMPEG_SCALE_SIZE,ih)"
+SCALE="scale='$SCALE_RESOLUTION':force_original_aspect_ratio=decrease"
+PAD="pad=width='ceil(min(360,iw)/4)*4':height='ceil(min(360,ih)/4)*4'"
+
+find . \( \
+    -iname "*.mp4"   -o \
+    -iname "*.avi"   -o \
+    -iname "*.mov"   -o \
+    -iname "*.mkv"      \
+  \) \
+  | parallel -qI {} \
+    ffmpeg \
+      -loglevel error \
+      -i {} \
+      -c:v $FFMPEG_OUTPUT_CODEC \
+      -filter:v "$SCALE,$PAD" \
+      "../$THUMBS_DIR/{}.mp4"
+
+# sanity check
+find . \( \
+    -iname "*.jpg"   -o \
+    -iname "*.png"   -o \
+    -iname "*.nef"   -o \
+    -iname "*.jpeg"  -o \
+    -iname "*.heic"  -o \
+    -iname "*.webp"     \
+  \) | \
+  while read a ; do 
+    if [[ ! -f "../$THUMBS_DIR/$a.$CONVERT_OUTPUT_FORMAT" ]] ; then
+      echo "\!\! $a"
+    fi
+  done
+
+find . \( \
+    -iname "*.mp4"   -o \
+    -iname "*.avi"   -o \
+    -iname "*.mov"   -o \
+    -iname "*.mkv"      \
+  \) \
+  | while read a ; do 
+    if [[ ! -f "../$THUMBS_DIR/$a.mp4" ]] ; then
+      echo "\!\! $a"
+    fi
+  done
+
+# remove empty dirs
+find "../$THUMBS_DIR/" -type d -empty -delete
+
+
+# output thumbs dir name
+echo "$THUMBS_DIR"
+
