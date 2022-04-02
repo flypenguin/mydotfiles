@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [[ "$HOME" =~ /Users/.+ ]] ; then
+  echo "On a Mac"
+  exec nohup /Applications/Firefox.app/Contents/MacOS/firefox-bin -profilemanager > /dev/null 2>&1 &
+else
+  echo "On *nix"
+  exec firefox -profilemanager
+fi
