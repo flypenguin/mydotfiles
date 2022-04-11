@@ -10,6 +10,9 @@
 # we need this :/
 UNAME=$(uname -s)
 
+# "dynamic" plugins
+ADD_PLUGINS=()
+
 # add $HOME/bin to the path.
 path=("$HOME/bin" $path)
 if [ "$UNAME" = "Darwin" ] ; then
@@ -17,6 +20,14 @@ if [ "$UNAME" = "Darwin" ] ; then
   export WORKON_HOME=$HOME/.virtualenvs
   export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
   export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+fi
+
+# add pyenv _before_ the plugins load ...
+if command -v pyenv &>/dev/null; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  ADD_PLUGINS+="pyenv"
 fi
 
 export ZSH="$HOME/.oh-my-zsh"
@@ -27,7 +38,8 @@ ZSH_THEME="robbyrussell"
 DISABLE_UPDATE_PROMPT="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(direnv git docker virtualenv virtualenvwrapper git common-aliases kubectl fzf)
+plugins=(direnv git docker virtualenv virtualenvwrapper pyenv common-aliases kubectl fzf)
+plugins+=(${ADD_PLUGINS[@]})
 
 # CASE_SENSITIVE="true"
 # DISABLE_AUTO_UPDATE="true"
