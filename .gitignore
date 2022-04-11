@@ -1,3 +1,6 @@
+# temp files
+tmp/
+
 *.swp
 .ssh/config
 .zsh/local*
