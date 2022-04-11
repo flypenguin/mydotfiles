@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [ "$(uname)" = "Darwin" ] ; then
+  exec nohup /Applications/Firefox.app/Contents/MacOS/firefox-bin --new-instance > /dev/null 2>&1 &
+else
+  exec nohup firefox --new-instance > /dev/null 2>&1 &
+fi
