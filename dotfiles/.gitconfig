@@ -12,6 +12,7 @@
 	editor = vim
 	eol = lf
 	autocrlf = input
+	commitGraph = true
 [merge]
 	tool = smerge
 [pull]
