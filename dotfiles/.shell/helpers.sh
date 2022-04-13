@@ -210,7 +210,8 @@ trim() {
 # update dynamic paths after brew operations ...
 brew() {
   command brew "$@"
-  if [ "$1" = "install" ] ; then
+  RES=$?
+  if [ "$1" = "install" -a "$RES" = "0" ] ; then
     update_dynamic_paths
   fi
 }
