@@ -17,6 +17,10 @@ whence direnv > /dev/null 2>&1 && eval "$(direnv hook zsh)"
 local SCRIPT="/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 [ -f "$SCRIPT" ] && source "$SCRIPT"
 
+# this is intended for zsh & bash, even if it's called "bash"
+if [ -f "$HOME/.config/broot/launcher/bash/br" ] ; then
+  source "$HOME/.config/broot/launcher/bash/br"
+fi
 
 
 # ###########################################################################
