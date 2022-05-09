@@ -46,9 +46,6 @@ cvv() {
 }
 
 
-
-
-
 # ###########################################################################
 #
 # azure
@@ -275,9 +272,6 @@ update_dynamic_paths() {
   # PREpended to path (java - on mac ...)
   # later = higher preference
   for PATH_SEARCH in \
-    "$HOME/linuxbrew/bin" \
-    "/usr/local/bin" \
-    "/opt/homebrew/bin" \
     "/usr/local/opt/openjdk/bin" \
   ; do
     if [ -d "$PATH_SEARCH" ]; then

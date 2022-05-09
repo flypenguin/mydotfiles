@@ -13,7 +13,17 @@ UNAME=$(uname -s)
 # "dynamic" plugins
 ADD_PLUGINS=()
 
-# add $HOME/bin to the path.
+# loads of shit does not work if this is not properly set EARLY.
+# later = higher preference, so /usr/local is "first" in the
+# list
+for PATH_SEARCH in \
+  "/usr/local/bin" \
+  "/opt/homebrew/bin" \
+; do
+  [ -d "$PATH_SEARCH" ] && path=($PATH_SEARCH $path)
+done
+
+# this is annoying, but for now it works.
 path=("$HOME/bin" $path)
 if [ "$UNAME" = "Darwin" ] ; then
   # fix VIRTUALENVWRAPPER on OS X
@@ -22,8 +32,8 @@ if [ "$UNAME" = "Darwin" ] ; then
   export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
 fi
 
-# add pyenv _before_ the plugins load ...
-if command -v pyenv &>/dev/null; then
+# add pyenv _before_ the plugins load ... ugly fucking hack.
+if command -v pyenv > /dev/null 2>&1 ; then
   export PYENV_ROOT="$HOME/.pyenv"
   export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init --path)"
