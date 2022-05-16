@@ -22,14 +22,12 @@ set -euo pipefail
 echo "Prepare sudo ..."
 sudo echo "sudo prep successful :)"
 
-DELETE_BASE="$HOME/Library/Caches/com.microsoft."
-for DELETE_DIR in teams teams.shipit ; do
-    delete_teams_file "${DELETE_BASE}${DELETE_DIR}"
+for DELETE_MASK in "com.microsoft.teams*" "teams*" ; do
+  find $HOME/Library -iname "$DELETE_MASK" -type d | while read DIR_TO_DELETE ; do
+    delete_teams_file "$DIR_TO_DELETE"
+  done
 done
 
-DELETE_BASE="$HOME/Library/Application Support/Microsoft/Teams"
-delete_teams_file "$DELETE_BASE"
-
-sudo rm -rf "/Applications/Microsoft Teams.app"
+delete_teams_file "/Applications/Microsoft Teams.app"
 
 echo "All done."
