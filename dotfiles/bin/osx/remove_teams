@@ -9,7 +9,7 @@ delete_teams_file() {
     DELETE_ME=$1
     if [[ -d $1 ]] ; then
         echo -n "DELETE      $DELETE_ME ... "
-        rm -rf "$DELETE_ME"
+        sudo rm -rf "$DELETE_ME"
         echo "done."
     else
         echo "Not found - $DELETE_ME"
