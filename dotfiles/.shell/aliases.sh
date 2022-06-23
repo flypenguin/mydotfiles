@@ -79,9 +79,9 @@ alias pss="pacman -Ss"
 alias prs="sudo pacman -Rs"
 alias psy="sudo pacman -Sy"
 alias psu="psy && sudo pacman -Su"
-alias yss="pikaur -Ss"
-alias  yi="pikaur -S"
-alias ysu="pikaur -Syu --aur"
+alias yss="yay -Ss"
+alias  yi="yay -S"
+alias ysu="yay -Syu --aur"
 
 # kubernetes (we already have aliases from ... somewhere, so just add missing)
 alias       kd="k describe"
