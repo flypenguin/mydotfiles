@@ -3,10 +3,10 @@
 # set up arch linux systems
 
 SUDO_STRING="%wheel ALL=(ALL) NOPASSWD: ALL"
-SUDO_MATCHR='^%wheel ALL=\(ALL\) NOPASSWD: ALL$'
+SUDO_MATCHR='^%wheel ALL=\(ALL(:ALL)?\) NOPASSWD: ALL$'
 WANT_SHELL="/usr/bin/zsh"
-YAOURT_PACKAGES=""
-PACMAN_PACKAGES="stow python2-pip python-pip python-virtualenvwrapper docker docker-compose jq zsh vim rsync base-devel openssh ruby"
+AUR_PACKAGES="vscodium-bin"
+PACMAN_PACKAGES="stow python-virtualenvwrapper docker docker-compose jq zsh vim rsync base-devel openssh"
 LOGFILE="/tmp/setup-arch.$(date +%Y%m%d_%H%M%S).log"
 
 
@@ -44,19 +44,19 @@ for p in $PACMAN_PACKAGES ; do
 done
 
 # ============================================================================
-echo -e "\n\n Installing pikaur ...\n"
+echo -e "\n\n Installing yay ...\n"
 
-if ! which pikaur >/dev/null 2>&1 ; then
+if ! which yay >/dev/null 2>&1 ; then
     OLD_TMP=$(pwd)
     TMP=$(mktemp -d)
     cd "$TMP"
-    git clone https://aur.archlinux.org/pikaur.git
-    cd pikaur
-    makepkg -fsri
+    git clone https://aur.archlinux.org/yay-bin.git
+    cd yay-bin
+    makepkg -si
     cd "$OLD_TMP"
     rm -rf "$TMP"
 else
-    echo " * Skipping pikaur installation, seems to be already present."
+    echo " * Skipping yay installation, seems to be already present."
 fi
 
 # ============================================================================
@@ -64,7 +64,7 @@ echo -e "\n\n Installing sudo rules ... \n"
 
 if ! sudo cat /etc/sudoers | egrep "${SUDO_MATCHR}" > /dev/null ; then
     echo " * Adding global sudo rule ..."
-    runme sudo bash -c 'echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers'
+    runme sudo bash -c 'echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers'
     runme sudo rm -rf "/etc/sudoers.d/"*
 else
     echo " * Skipping sudo rule installation, already present."
@@ -74,12 +74,12 @@ fi
 # ============================================================================
 echo -e "\n\n * Installing yaourt packages ... \n"
 
-for p in $YAOURT_PACKAGES ; do
+for p in $AUR_PACKAGES ; do
     if ! pacman -Qs $p > /dev/null ; then
-        echo "   * Yaourt: installing $p"
-        runme yaourt -S --noconfirm $p
+        echo "   * AUR: installing $p"
+        runme yay -S --noconfirm $p
     else
-        echo "   * Yaourt: package already installed: $p"
+        echo "   * AUR: package already installed: $p"
     fi
 done
 
@@ -114,7 +114,7 @@ done
 echo -e "\n\n * Installing linuxbrew ... \n"
 
 if ! which brew > /dev/null 2>&1 ; then
-  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 else
   echo "   * Linuxbrew seems to be installed already. Skipping."
 fi
