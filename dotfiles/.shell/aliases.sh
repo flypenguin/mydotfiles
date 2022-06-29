@@ -27,6 +27,7 @@ alias sshconfig="vim \$HOME/.ssh/config"
 
 # git
 alias gco="git checkout"
+alias gnp="git --no-pager"
 #alias gls="git ls" // git ls was a GIT INTERNAL alias, removed for simplicity.
 alias gri="git rebase --interactive"
 alias gra="git rebase --abort"
