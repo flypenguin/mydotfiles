@@ -10,12 +10,6 @@ alias cp >/dev/null 2>&1 && unalias cp
 alias -g WCL=' | wc -l'
 alias -g   S=' | sort'
 
-### DEVELOPMENT related aliases
-# PYTHON    - VIRTUALENV
-alias wol="source .venv/bin/activate"
-# PYTHON    - DJANGO
-alias pm="python manage.py"
-
 # console helpers
 alias    tma="tmux attach"
 
@@ -92,17 +86,6 @@ alias      kgi="k get ingress"
 alias     kgpv="k get pv"
 alias     kgds="k get daemonset"
 alias     kdel="k delete"
-
-alias     kd-a="k describe --all-namespaces"
-alias    kds-a="k describe --all-namespaces svc"
-alias    kdp-a="k describe --all-namespaces pod"
-alias    kdi-a="k describe --all-namespaces ingress"
-
-alias     kg-a="k get --all-namespaces"
-alias    kgi-a="k get --all-namespaces ingress"
-alias    kgp-a="k get --all-namespaces pods"
-alias   kgds-a="k get --all-namespaces daemonset"
-
 alias       kc="k config"
 alias    kcsnd="k config set-context --current --namespace=default"
 
@@ -113,15 +96,8 @@ alias docker_stop_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs d
 alias docker_kill_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker kill"
 alias dockify="eval \$(docker-machine env default)"
 
-# OPS
-alias   tf="terraform"
-alias  tfp="terraform plan"
-alias  tfa="terraform apply"
-alias tfps="terraform plan -out=terraform.plan"
-alias tfas="terraform apply terraform.plan; rm -f terraform.plan"
-
 # JSON conversion with pipes
-alias _yml="python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)'"
+alias -g YAML="| python3 -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)'"
 
 # OPS AWS
 alias aws-list-instances="aws ec2 describe-instances | jq '.Reservations[].Instances[] | {IP: .PrivateIpAddress, ID: .InstanceId, Name: .Tags[] | select(.Key==\"Name\").Value}'"
