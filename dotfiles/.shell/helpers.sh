@@ -146,6 +146,95 @@ alias aws-fp=ssh-key-hash
 function giti() { curl -L -s https://www.gitignore.io/api/$@ ;}
 
 
+
+# ###########################################################################
+#
+# AWS
+#
+
+# gat = Get Aws sessionToken
+gat() {
+  local TOKEN_DURATION=28800 # 8h
+
+  # save existing AWS_* env vars
+  local APRO_BACKUP
+  local AKID_BACKUP
+  local ASAK_BACKUP
+  local ASET_BACKUP
+  APRO_BACKUP=$AWS_PROFILE
+  AKID_BACKUP=$AWS_ACCESS_KEY_ID
+  ASAK_BACKUP=$AWS_SECRET_ACCESS_KEY
+  ASET_BACKUP=$AWS_SESSION_TOKEN
+
+  # check if we already have a session token active
+  if [ -n "$AWS_SESSION_TOKEN" ] ; then
+    if [ "$1" != "-f" ] ; then
+      echo "Seems we are already using a session token."
+      echo "Use -f to force a new one."
+      return
+    else
+      echo -n "Parameter -f set, unsetting existing session tokens in env ... "
+      unset AWS_SESSION_TOKEN
+      unset AWS_ACCESS_KEY_ID
+      unset AWS_SECRET_ACCESS_KEY
+      echo "done."
+    fi
+  fi
+
+  echo -n "AWS profile to use (ENTER for none): "
+  read AWS_PROFILE
+  if [ -z "$AWS_PROFILE" ] ; then
+    echo "Not using specific AWS profile."
+    unset AWS_PROFILE
+  else
+    echo "Using AWS profile '$AWS_PROFILE'"
+    export AWS_PROFILE
+  fi
+
+  # clean env variables if we already have a session token
+
+  echo -n "Getting MFA ARN ... "
+  MFA_ARN=$(aws iam list-mfa-devices | jq -r '.MFADevices[0].SerialNumber')
+  if [ "$?" != "0" ] ; then
+    echo "ERROR: something failed getting the session token."
+    export AWS_PROFILE=$APRO_BACKUP
+    export AWS_ACCESS_KEY_ID=$AKID_BACKUP
+    export AWS_SECRET_ACCESS_KEY=$ASAK_BACKUP
+    export AWS_SESSION_TOKEN=$ASET_BACKUP
+    return
+  fi
+  echo "done."
+
+  echo -en "Enter MFA token ($MFA_ARN): "
+  read MFA_TOKEN
+  echo -n "Getting session token ... "
+  SESSION_TOKEN_JSON=$(aws sts get-session-token --serial-number $MFA_ARN --token-code $MFA_TOKEN --duration-seconds $TOKEN_DURATION)
+  if [ "$?" != "0" ] ; then
+    echo "ERROR: something failed getting the session token."
+    export AWS_PROFILE=$APRO_BACKUP
+    export AWS_ACCESS_KEY_ID=$AKID_BACKUP
+    export AWS_SECRET_ACCESS_KEY=$ASAK_BACKUP
+    export AWS_SESSION_TOKEN=$ASET_BACKUP
+    return
+  else
+    echo "done."
+  fi
+
+  echo "Setting env variables:"
+  export AWS_ACCESS_KEY_ID=$(echo $SESSION_TOKEN_JSON | jq -r '.Credentials.AccessKeyId')
+  echo "  * (set) AWS_ACCESS_KEY_ID"
+  export AWS_SECRET_ACCESS_KEY=$(echo $SESSION_TOKEN_JSON | jq -r '.Credentials.SecretAccessKey')
+  echo "  * (set) AWS_SECRET_ACCESS_KEY"
+  export AWS_SESSION_TOKEN=$(echo $SESSION_TOKEN_JSON | jq -r '.Credentials.SessionToken')
+  echo "  * (set) AWS_ACCESS_KEY_ID"
+  # just to be sure
+  unset AWS_PROFILE
+  echo "  * (*un*set) AWS_PROFILE"
+  echo "... done.\n\nYou should be all set now."
+}
+
+
+
 # ###########################################################################
 #
 # file operations
