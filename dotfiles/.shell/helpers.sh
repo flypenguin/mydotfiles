@@ -169,15 +169,10 @@ gat() {
   # check if we already have a session token active
   if [ -n "$AWS_SESSION_TOKEN" ] ; then
     if [ "$1" != "-f" ] ; then
-      echo "Seems we are already using a session token."
-      echo "Use -f to force a new one."
+      echo "Seems we are already using a session token, use -f to override."
       return
     else
-      echo -n "Parameter -f set, unsetting existing session tokens in env ... "
-      unset AWS_SESSION_TOKEN
-      unset AWS_ACCESS_KEY_ID
-      unset AWS_SECRET_ACCESS_KEY
-      echo "done."
+      echo "Session token found, but '-f' set; proceeding."
     fi
   fi
 
@@ -191,7 +186,20 @@ gat() {
     export AWS_PROFILE
   fi
 
-  # clean env variables if we already have a session token
+  echo -n "Enter MFA token value (ENTER to abort): "
+  read MFA_TOKEN
+  if [ -z "$MFA_TOKEN" ] ; then
+    echo "Abort."
+    return
+  fi
+
+  # clean env variables, but only if a session token is active
+  if [ -n "$AWS_SESSION_TOKEN" ] ; then
+    echo "Cleaning existing ENV vars (already have a session token)"
+    unset AWS_SESSION_TOKEN
+    unset AWS_ACCESS_KEY_ID
+    unset AWS_SECRET_ACCESS_KEY
+  fi
 
   echo -n "Getting MFA ARN ... "
   MFA_ARN=$(aws iam list-mfa-devices | jq -r '.MFADevices[0].SerialNumber')
@@ -203,10 +211,8 @@ gat() {
     export AWS_SESSION_TOKEN=$ASET_BACKUP
     return
   fi
-  echo "done."
+  echo $MFA_ARN
 
-  echo -en "Enter MFA token ($MFA_ARN): "
-  read MFA_TOKEN
   echo -n "Getting session token ... "
   SESSION_TOKEN_JSON=$(aws sts get-session-token --serial-number $MFA_ARN --token-code $MFA_TOKEN --duration-seconds $TOKEN_DURATION)
   if [ "$?" != "0" ] ; then
