@@ -1,2 +1,1 @@
-# GfK
 # nothing yet :)
