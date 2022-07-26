@@ -166,27 +166,62 @@ gat() {
   ASAK_BACKUP=$AWS_SECRET_ACCESS_KEY
   ASET_BACKUP=$AWS_SESSION_TOKEN
 
+  local C_BOLD="\e[1m"
+  local C_BRED="\e[91m"
+  local C_BGRE="\e[92m"
+  local C_BYEL="\e[93m"
+  local C_BWHI="\e[97m"
+  local C_REST="\e[0m"
+  local H_GREN="${C_BGRE}${C_BOLD}"
+  local H_YELO="${C_BYEL}${C_BOLD}"
+  local DINFO="${C_BWHI}${C_BOLD}INFO:${C_REST}"
+  local DERRR="${C_BRED}${C_BOLD}ERROR:${C_REST}"
+  local DWARN="${C_BYEL}${C_BOLD}WARNING:${C_REST}"
+
   # check if we already have a session token active
-  if [ -n "$AWS_SESSION_TOKEN" ] ; then
-    if [ "$1" != "-f" ] ; then
-      echo "Seems we are already using a session token, use -f to override."
+  if [ "$1" = "-f" ] ; then
+    if [ -n "$AWS_SESSION_TOKEN" ] ; then
+      echo "$DWARN Force-refreshing existing token"
+    else
+      echo "$DINFO Creating new token."
+    fi
+  elif [ -n "$AWS_SESSION_TOKEN" ] ; then
+    if [ -z  "$AWS_TOKEN_VALIDITY" -a "$1" != "-f" ] ; then
+      echo "$DERRR Seems we are already using a session token, and no token"
+      echo "       validity information found. Not refreshing, use -f to override."
       return
     else
-      echo "Session token found, but '-f' set; proceeding."
+      local TIME_NOW=$(date  +%s)
+      local TIME_REMAINING=$((AWS_TOKEN_VALIDITY - TIME_NOW))
+      local VALIDITY_STR=$(date --date=@$AWS_TOKEN_VALIDITY +%H:%M:%S)
+      if (( TIME_REMAINING <= 0 )) ; then
+        echo "$DINFO ${H_GREN}Expired token${C_REST} found ($VALIDITY_STR), refreshing."
+      elif (( TIME_REMAINING <= 3600 )) ; then
+        echo "$DINFO ${H_YELO}Existing token${C_REST} validity ($VALIDITY_STR) <1h, refreshing."
+      else
+        echo "$DERRR Existing token validity ($VALIDITY_STR) >1h, not refreshing (use -f to force)."
+        return
+      fi
     fi
-  fi
-
-  echo -n "AWS profile to use (ENTER for none): "
-  read AWS_PROFILE
-  if [ -z "$AWS_PROFILE" ] ; then
-    echo "Not using specific AWS profile."
-    unset AWS_PROFILE
   else
-    echo "Using AWS profile '$AWS_PROFILE'"
-    export AWS_PROFILE
+    echo "$DINFO Creating new token."
   fi
 
-  echo -n "Enter MFA token value (ENTER to abort): "
+  if [ -z "$GAT_AWS_PROFILE" ] ; then
+    echo -n ">> AWS profile to use (ENTER for none): "
+    read AWS_PROFILE
+    if [ -z "$AWS_PROFILE" ] ; then
+      export AWS_PROFILE="default"
+    else
+      export AWS_PROFILE
+    fi
+  else
+    echo -e "$DINFO AWS profile set using \$GAT_AWS_PROFILE"
+    export AWS_PROFILE=$GAT_AWS_PROFILE
+  fi
+  echo "$DINFO Using AWS ${H_GREN}profile '$AWS_PROFILE'${C_REST}"
+
+  echo -n ">> Enter MFA token value (ENTER to abort): "
   read MFA_TOKEN
   if [ -z "$MFA_TOKEN" ] ; then
     echo "Abort."
@@ -195,13 +230,13 @@ gat() {
 
   # clean env variables, but only if a session token is active
   if [ -n "$AWS_SESSION_TOKEN" ] ; then
-    echo "Cleaning existing ENV vars (already have a session token)"
+    echo "* Cleaning existing ENV vars (already have a session token)"
     unset AWS_SESSION_TOKEN
     unset AWS_ACCESS_KEY_ID
     unset AWS_SECRET_ACCESS_KEY
   fi
 
-  echo -n "Getting MFA ARN ... "
+  echo -n "* Getting MFA ARN ... "
   MFA_ARN=$(aws iam list-mfa-devices | jq -r '.MFADevices[0].SerialNumber')
   if [ "$?" != "0" ] ; then
     echo "ERROR: something failed getting the session token."
@@ -213,7 +248,7 @@ gat() {
   fi
   echo $MFA_ARN
 
-  echo -n "Getting session token ... "
+  echo -n "* Getting session token ... "
   SESSION_TOKEN_JSON=$(aws sts get-session-token --serial-number $MFA_ARN --token-code $MFA_TOKEN --duration-seconds $TOKEN_DURATION)
   if [ "$?" != "0" ] ; then
     echo "ERROR: something failed getting the session token."
@@ -223,23 +258,84 @@ gat() {
     export AWS_SESSION_TOKEN=$ASET_BACKUP
     return
   else
+    export AWS_TOKEN_VALIDITY=$(( $(date +%s) + TOKEN_DURATION ))
+    export GAT_AWS_PROFILE=$AWS_PROFILE
     echo "done."
   fi
 
-  echo "Setting env variables:"
+
+  echo "* Setting env variables:"
   export AWS_ACCESS_KEY_ID=$(echo $SESSION_TOKEN_JSON | jq -r '.Credentials.AccessKeyId')
-  echo "  * (set) AWS_ACCESS_KEY_ID"
+  echo "   * (set) AWS_ACCESS_KEY_ID"
   export AWS_SECRET_ACCESS_KEY=$(echo $SESSION_TOKEN_JSON | jq -r '.Credentials.SecretAccessKey')
-  echo "  * (set) AWS_SECRET_ACCESS_KEY"
+  echo "   * (set) AWS_SECRET_ACCESS_KEY"
   export AWS_SESSION_TOKEN=$(echo $SESSION_TOKEN_JSON | jq -r '.Credentials.SessionToken')
-  echo "  * (set) AWS_ACCESS_KEY_ID"
+  echo "   * (set) AWS_ACCESS_KEY_ID"
+  TOKEN_FILE="$HOME/.aws/token.$AWS_PROFILE.sh"
+  echo -n "   * Writing $TOKEN_FILE ... "
+  cat > $HOME/.aws/token.$AWS_PROFILE.sh <<EOF
+# SOURCE this file, do not execute it.
+export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
+# helper variables
+export AWS_TOKEN_VALIDITY=$AWS_TOKEN_VALIDITY
+export GAT_AWS_PROFILE=$AWS_PROFILE
+EOF
+  chmod 600 "$TOKEN_FILE"
+  echo "done."
   # just to be sure
   unset AWS_PROFILE
-  echo "  * (*un*set) AWS_PROFILE"
-  echo "... done.\n\nYou should be all set now."
+  echo "   * (*un*set) AWS_PROFILE"
+
+  echo "* done."
+  local VALIDITY_STR=$(date --date=@$AWS_TOKEN_VALIDITY +%H:%M:%S)
+  echo "${DINFO} ${H_GREN}token valid until ${VALIDITY_STR}${C_REST}"
+
+  echo -e "\nYou should be all set now."
 }
 
+# gat = Re-use Aws sessionToken
+rat() {
+  local C_BOLD="\e[1m"
+  local C_BRED="\e[91m"
+  local C_BGRE="\e[92m"
+  local C_BYEL="\e[93m"
+  local C_BWHI="\e[97m"
+  local C_REST="\e[0m"
+  local H_GREN="${C_BGRE}${C_BOLD}"
+  local H_YELO="${C_BYEL}${C_BOLD}"
+  local DINFO="${C_BWHI}${C_BOLD}INFO:${C_REST}"
+  local DERRR="${C_BRED}${C_BOLD}ERROR:${C_REST}"
+  local DWARN="${C_BYEL}${C_BOLD}WARNING:${C_REST}"
 
+  # use first parameter or $GAT_AWS_PROFILE for profile selection,
+  # in that order. if none is found, use "default".
+  GAT_AWS_PROFILE=${1:-$GAT_AWS_PROFILE}
+  GAT_AWS_PROFILE=${GAT_AWS_PROFILE:-default}
+  echo "$DINFO using profile '$GAT_AWS_PROFILE'"
+
+  local TOKEN_FILE="$HOME/.aws/token.$GAT_AWS_PROFILE.sh"
+  if [ ! -f "$TOKEN_FILE" ] ; then
+    echo -e "$DERRR $TOKEN_FILE not found, aborting."
+  else
+    unset AWS_ACCESS_KEY_ID
+    unset AWS_SECRET_ACCESS_KEY
+    unset AWS_SESSION_TOKEN
+    unset AWS_TOKEN_VALIDITY
+
+    # source file and check for token validity
+    . "$TOKEN_FILE"
+    local TIME_NOW=$(date  +%s)
+    local TIME_REMAINING=$((AWS_TOKEN_VALIDITY - TIME_NOW))
+    if (( TIME_REMAINING <= 3600 )) ; then
+      echo -e "$DINFO ${H_YELO}Auto-refreshing${C_REST} token based on validity"
+      gat
+    else
+      echo -e "$DINFO ${H_GREN}Token information loaded${C_REST}."
+    fi
+  fi
+}
 
 # ###########################################################################
 #
