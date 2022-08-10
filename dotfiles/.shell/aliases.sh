@@ -49,6 +49,8 @@ alias gpb="git push --set-upstream origin \$(git rev-parse --abbrev-ref HEAD)"
 # from here: https://stackoverflow.com/a/38404202/902327
 alias git-branch-clean="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -d"
 alias git-branch-clean-f="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -D"
+# overwrite some predefined aliases
+alias gb="git --no-pager branch -vv"
 
 # ls
 if which exa >/dev/null 2>&1 ; then
