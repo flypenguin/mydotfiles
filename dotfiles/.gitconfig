@@ -25,7 +25,7 @@
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
 [user]
-	email = mr.axel.bock@gmail.com
+	email = ab@a3b3.de
 	name = Axel Bock
 [alias]
 	d = diff
