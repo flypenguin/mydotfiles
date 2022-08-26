@@ -8,7 +8,6 @@
 [mergetool]
 	keepBackup = true
 [core]
-	excludesfile = /Users/tm/.gitignore_global
 	editor = vim
 	eol = lf
 	autocrlf = input
