@@ -80,7 +80,11 @@ alias yss="yay -Ss"
 alias  yi="yay -S"
 alias ysu="yay -Syu --aur"
 
+# tmux
+alias tms="tmux list-sessions"
+
 # kubernetes (we already have aliases from ... somewhere, so just add missing)
+alias kubeshell="kubectl run my-shell --rm -i --tty --image ubuntu -- bash"
 alias     krew="k krew"
 alias       kd="k describe"
 alias     kdds="k describe daemonset"
