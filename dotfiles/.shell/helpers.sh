@@ -152,190 +152,172 @@ function giti() { curl -L -s https://www.gitignore.io/api/$@ ;}
 # AWS
 #
 
-# gat = Get Aws sessionToken
-gat() {
-  local TOKEN_DURATION=28800 # 8h
+C_BOLD="\e[1m"
+C_BRED="\e[91m"
+C_BGRE="\e[92m"
+C_BYEL="\e[93m"
+C_BWHI="\e[97m"
+C_REST="\e[0m"
+H_GREN="${C_BGRE}${C_BOLD}"
+H_YELO="${C_BYEL}${C_BOLD}"
+H_REDD="${C_BRED}${C_BOLD}"
+DINFO="${C_BWHI}${C_BOLD}INFO:${C_REST}"
+DERRR="${C_BRED}${C_BOLD}ERROR:${C_REST}"
+DWARN="${C_BYEL}${C_BOLD}WARNING:${C_REST}"
 
-  # save existing AWS_* env vars
-  local APRO_BACKUP
-  local AKID_BACKUP
-  local ASAK_BACKUP
-  local ASET_BACKUP
-  APRO_BACKUP=$AWS_PROFILE
-  AKID_BACKUP=$AWS_ACCESS_KEY_ID
-  ASAK_BACKUP=$AWS_SECRET_ACCESS_KEY
-  ASET_BACKUP=$AWS_SESSION_TOKEN
+# this function assumes the following env variables are present:
+#   - AWS_TOKEN_VALIDITY
+# parameters
+#   $1 - the AWS profile for which to check
+# it returns:
+#   0 - still valid (loaded _OR_ active tokens)
+#   1 - token almost expired
+#   2 - token expired
+#   3 - no token found
+_aws_load_token() {
+  local TOKEN_FILE="$HOME/.aws/token.$1.sh"
 
-  local C_BOLD="\e[1m"
-  local C_BRED="\e[91m"
-  local C_BGRE="\e[92m"
-  local C_BYEL="\e[93m"
-  local C_BWHI="\e[97m"
-  local C_REST="\e[0m"
-  local H_GREN="${C_BGRE}${C_BOLD}"
-  local H_YELO="${C_BYEL}${C_BOLD}"
-  local DINFO="${C_BWHI}${C_BOLD}INFO:${C_REST}"
-  local DERRR="${C_BRED}${C_BOLD}ERROR:${C_REST}"
-  local DWARN="${C_BYEL}${C_BOLD}WARNING:${C_REST}"
-
-  # check if we already have a session token active
-  if [ "$1" = "-f" ] ; then
-    if [ -n "$AWS_SESSION_TOKEN" ] ; then
-      echo "$DWARN Force-refreshing existing token"
+  if [ "$AWS_MFA_BASE" != "$1" ] ; then
+    if [ ! -f "$TOKEN_FILE" ] ; then
+      # "no existing token found"
+      echo "$DINFO ${H_YELO}No existing token${C_REST} found."
+      return 3
     else
-      echo "$DINFO Creating new token."
+      . "$TOKEN_FILE"
     fi
-  elif [ -n "$AWS_SESSION_TOKEN" ] ; then
-    if [ -z  "$AWS_TOKEN_VALIDITY" -a "$1" != "-f" ] ; then
-      echo "$DERRR Seems we are already using a session token, and no token"
-      echo "       validity information found. Not refreshing, use -f to override."
-      return
-    else
-      local TIME_NOW=$(date  +%s)
-      local TIME_REMAINING=$((AWS_TOKEN_VALIDITY - TIME_NOW))
-      local VALIDITY_STR=$(date --date=@$AWS_TOKEN_VALIDITY +%H:%M:%S)
-      if (( TIME_REMAINING <= 0 )) ; then
-        echo "$DINFO ${H_GREN}Expired token${C_REST} found ($VALIDITY_STR), refreshing."
-      elif (( TIME_REMAINING <= 3600 )) ; then
-        echo "$DINFO ${H_YELO}Existing token${C_REST} validity ($VALIDITY_STR) <1h, refreshing."
-      else
-        echo "$DERRR Existing token validity ($VALIDITY_STR) >1h, not refreshing (use -f to force)."
-        return
-      fi
-    fi
-  else
-    echo "$DINFO Creating new token."
   fi
-
-  if [ -z "$GAT_AWS_PROFILE" ] ; then
-    echo -n ">> AWS profile to use (ENTER for none): "
-    read AWS_PROFILE
-    if [ -z "$AWS_PROFILE" ] ; then
-      export AWS_PROFILE="default"
-    else
-      export AWS_PROFILE
-    fi
+  # now we are set and can verify the token lifetime
+  local TIME_NOW=$(date  +%s)
+  local TIME_REMAINING=$((AWS_TOKEN_VALIDITY - TIME_NOW))
+  if (( TIME_REMAINING > 3600 )) ; then
+    echo "$DINFO existing ${H_GREN}token still valid${C_REST} (and loaded)"
+    return 0
+  elif (( TIME_REMAINING > 0 )) ; then
+    # "token almost expired"
+    echo "$DINFO existing ${H_YELO}token almost expired${C_REST}, creating new one"
+    return 2
   else
-    echo -e "$DINFO AWS profile set using \$GAT_AWS_PROFILE"
-    export AWS_PROFILE=$GAT_AWS_PROFILE
+    echo "$DINFO existing ${H_YELO}token expired${C_REST}, creating new one"
+    # "token expired"
+    return 1
   fi
-  echo "$DINFO Using AWS ${H_GREN}profile '$AWS_PROFILE'${C_REST}"
+}
+
+# parameters:
+#   $1 - the profile to get a token for
+_aws_get_new_token() {
+  local TOKEN_FILE="$HOME/.aws/token.$1.sh"
+  local SED_MARKER
+  local TMP
 
   echo -n ">> Enter MFA token value (ENTER to abort): "
   read MFA_TOKEN
   if [ -z "$MFA_TOKEN" ] ; then
     echo "Abort."
-    return
+    return 1
   fi
 
   # clean env variables, but only if a session token is active
-  if [ -n "$AWS_SESSION_TOKEN" ] ; then
+  if [ -n "$AWS_MFA_BASE" ] ; then
     echo "* Cleaning existing ENV vars (already have a session token)"
     unset AWS_SESSION_TOKEN
     unset AWS_ACCESS_KEY_ID
     unset AWS_SECRET_ACCESS_KEY
   fi
 
+  export AWS_PROFILE="$1"
+
   echo -n "* Getting MFA ARN ... "
-  MFA_ARN=$(aws iam list-mfa-devices | jq -r '.MFADevices[0].SerialNumber')
+  MFA_ARN=$(aws --profile $AWS_PROFILE iam list-mfa-devices | jq -r '.MFADevices[0].SerialNumber')
   if [ "$?" != "0" ] ; then
-    echo "ERROR: something failed getting the session token."
-    export AWS_PROFILE=$APRO_BACKUP
-    export AWS_ACCESS_KEY_ID=$AKID_BACKUP
-    export AWS_SECRET_ACCESS_KEY=$ASAK_BACKUP
-    export AWS_SESSION_TOKEN=$ASET_BACKUP
-    return
+    echo "$DERRR something failed getting the session token. You should close this shell."
+    return 2
   fi
   echo $MFA_ARN
 
   echo -n "* Getting session token ... "
-  SESSION_TOKEN_JSON=$(aws sts get-session-token --serial-number $MFA_ARN --token-code $MFA_TOKEN --duration-seconds $TOKEN_DURATION)
+  SESSION_TOKEN_JSON=$(aws --profile $AWS_PROFILE sts get-session-token --serial-number $MFA_ARN --token-code $MFA_TOKEN --duration-seconds $TOKEN_DURATION)
   if [ "$?" != "0" ] ; then
-    echo "ERROR: something failed getting the session token."
-    export AWS_PROFILE=$APRO_BACKUP
-    export AWS_ACCESS_KEY_ID=$AKID_BACKUP
-    export AWS_SECRET_ACCESS_KEY=$ASAK_BACKUP
-    export AWS_SESSION_TOKEN=$ASET_BACKUP
-    return
+    echo "$DERRR something failed getting the session token. You should close this shell."
+    return 3
   else
     export AWS_TOKEN_VALIDITY=$(( $(date +%s) + TOKEN_DURATION ))
-    export GAT_AWS_PROFILE=$AWS_PROFILE
-    echo "done."
+    export AWS_MFA_BASE=$AWS_PROFILE
+    echo "${C_BGRE}${C_BOLD}done${C_REST}."
   fi
 
-
-  echo "* Setting env variables:"
+  echo -n "* Setting env variables ... "
   export AWS_ACCESS_KEY_ID=$(echo $SESSION_TOKEN_JSON | jq -r '.Credentials.AccessKeyId')
-  echo "   * (set) AWS_ACCESS_KEY_ID"
   export AWS_SECRET_ACCESS_KEY=$(echo $SESSION_TOKEN_JSON | jq -r '.Credentials.SecretAccessKey')
-  echo "   * (set) AWS_SECRET_ACCESS_KEY"
   export AWS_SESSION_TOKEN=$(echo $SESSION_TOKEN_JSON | jq -r '.Credentials.SessionToken')
-  echo "   * (set) AWS_ACCESS_KEY_ID"
-  TOKEN_FILE="$HOME/.aws/token.$AWS_PROFILE.sh"
-  echo -n "   * Writing $TOKEN_FILE ... "
-  cat > $HOME/.aws/token.$AWS_PROFILE.sh <<EOF
+  echo "done."
+
+  echo -n "* Writing ${C_BWHI}${C_BOLD}$TOKEN_FILE${C_REST} ... "
+  cat > "$TOKEN_FILE" <<EOF
 # SOURCE this file, do not execute it.
 export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
 # helper variables
 export AWS_TOKEN_VALIDITY=$AWS_TOKEN_VALIDITY
-export GAT_AWS_PROFILE=$AWS_PROFILE
+export AWS_MFA_BASE=$AWS_PROFILE
 EOF
   chmod 600 "$TOKEN_FILE"
   echo "done."
-  # just to be sure
-  unset AWS_PROFILE
-  echo "   * (*un*set) AWS_PROFILE"
+
+  export AWS_PROFILE="$1_mfasession"
+  echo -n "* Creating AWS MFA ${C_BWHI}${C_BOLD}profile '${AWS_PROFILE}'${C_REST} ... "
+  # delete old version of profile from credentials file
+  SED_MARKER="##- MFA $AWS_PROFILE"
+  sed -Ei "/$SED_MARKER/,/$SED_MARKER/d" "$HOME/.aws/credentials"
+  # append new credentials
+  TMP="$HOME/.aws/credentials"
+  echo "$SED_MARKER start"                                  >> "$TMP"
+  echo "[$AWS_PROFILE]"                                     >> "$TMP"
+  echo "aws_access_key_id = $AWS_ACCESS_KEY_ID"             >> "$TMP"
+  echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY"     >> "$TMP"
+  echo "aws_session_token = $AWS_SESSION_TOKEN"             >> "$TMP"
+  echo "$SED_MARKER end"                                    >> "$TMP"
+  echo "done."
 
   echo "* done."
   local VALIDITY_STR=$(date --date=@$AWS_TOKEN_VALIDITY +%H:%M:%S)
   echo "${DINFO} ${H_GREN}token valid until ${VALIDITY_STR}${C_REST}"
-
-  echo -e "\nYou should be all set now."
 }
 
-# gat = Re-use Aws sessionToken
-rat() {
-  local C_BOLD="\e[1m"
-  local C_BRED="\e[91m"
-  local C_BGRE="\e[92m"
-  local C_BYEL="\e[93m"
-  local C_BWHI="\e[97m"
-  local C_REST="\e[0m"
-  local H_GREN="${C_BGRE}${C_BOLD}"
-  local H_YELO="${C_BYEL}${C_BOLD}"
-  local DINFO="${C_BWHI}${C_BOLD}INFO:${C_REST}"
-  local DERRR="${C_BRED}${C_BOLD}ERROR:${C_REST}"
-  local DWARN="${C_BYEL}${C_BOLD}WARNING:${C_REST}"
 
-  # use first parameter or $GAT_AWS_PROFILE for profile selection,
-  # in that order. if none is found, use "default".
-  GAT_AWS_PROFILE=${1:-$GAT_AWS_PROFILE}
-  GAT_AWS_PROFILE=${GAT_AWS_PROFILE:-default}
-  echo "$DINFO using profile '$GAT_AWS_PROFILE'"
+# gat = Get Aws sessionToken
+gat() {
+  local TOKEN_DURATION=28800 # 8h
+  local FORCE_TOKEN="no"
+  local USE_PROFILE
 
-  local TOKEN_FILE="$HOME/.aws/token.$GAT_AWS_PROFILE.sh"
-  if [ ! -f "$TOKEN_FILE" ] ; then
-    echo -e "$DERRR $TOKEN_FILE not found, aborting."
+  if [ "$2" = "-f" ] ; then
+    FORCE_TOKEN="yes"
+    USE_PROFILE="$1"
+  elif [ "$1" = "-f" ] ; then
+    FORCE_TOKEN="yes"
+    USE_PROFILE="${2:-${AWS_MFA_BASE:-default}}"
   else
-    unset AWS_ACCESS_KEY_ID
-    unset AWS_SECRET_ACCESS_KEY
-    unset AWS_SESSION_TOKEN
-    unset AWS_TOKEN_VALIDITY
-
-    # source file and check for token validity
-    . "$TOKEN_FILE"
-    local TIME_NOW=$(date  +%s)
-    local TIME_REMAINING=$((AWS_TOKEN_VALIDITY - TIME_NOW))
-    if (( TIME_REMAINING <= 3600 )) ; then
-      echo -e "$DINFO ${H_YELO}Auto-refreshing${C_REST} token based on validity"
-      gat
-    else
-      echo -e "$DINFO ${H_GREN}Token information loaded${C_REST}."
-    fi
+    USE_PROFILE="${1:-${AWS_MFA_BASE:-default}}"
+  fi
+  echo "$DINFO using ${H_GREN}profile '${USE_PROFILE}'${C_REST}"
+  TOKEN_FILE="$HOME/.aws/token.$USE_PROFILE.sh"
+  # check if we already have a session token active
+  if [ "$FORCE_TOKEN" = "yes" ] ; then
+    echo "$DINFO ${H_REDD}Force-creating${C_REST} new token ..."
+    _aws_get_new_token $USE_PROFILE
+  else
+    _aws_load_token $USE_PROFILE || _aws_get_new_token $USE_PROFILE
   fi
 }
+
+# rat = Re-use Aws sessionToken
+# same as "gat" now
+rat() {
+  gat "$@"
+}
+
 
 # ###########################################################################
 #
