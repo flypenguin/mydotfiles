@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
 
+# sets the global $LEVEL from the global $COMPRESSION
+# $1 = COMPRESS parameter
+# $2 = default level
+# sets $LEVEL to a value.
+setlevel() {
+  LEVEL=${1:2:2}
+  [ -z "$LEVEL" ] && LEVEL=$2
+  echo "Using compression level: $LEVEL"
+}
 
 if [ -z "$2" ] ; then
   echo "USAGE: $(basename $0) -x/-z TARGET_DIR"
   echo "    - '-x' compress directory with tar.xz"
-  echo "    - '-z' compress directory with zip"
+  echo "    - '-t' just store directory with tar"
+  echo "    - '-zLEVEL' compress directory with zip"
+  echo "    - '-7LEVEL' STORE directory with 7z"
   echo "    - creates TARGET_DIR.txt/.md5 in TARGET_DIR's parent directory"
   echo "    - creates _FILE.txt/.md5 in TARGET_DIR"
   exit -1
@@ -40,22 +51,44 @@ echo "done."
 cp "../$TGT_DIR.md5" ./_LIST__$TS.md5
 cp "../$TGT_DIR.txt" ./_LIST__$TS.txt
 
+
+cd ..
+
+# TAR XZ
 if [ "$COMPRESS" == "-x" ] ; then
   ARCHIVE_NAME="$TGT_DIR.tar.xz"
-  cd ..
-  echo -n "Creating '$TGT_DIR.tar.xz' ... "
-  rm -f "$TGT_DIR.tar.xz"
-  tar cJf "$ARCHIVE_NAME" "$TGT_DIR"
-  echo "done."
-elif [ "$COMPRESS" == "-z" ] ; then
+  echo -n "Creating '$ARCHIVE_NAME' ... "
+  rm -f "$ARCHIVE_NAME"
+  tar cJf "$ARCHIVE_NAME" "$TGT_DIR" > "$ARCHIVE_NAME.progress.txt"
+
+# JUST TAR
+elif [ "$COMPRESS" == "-t" ] ; then
+  ARCHIVE_NAME="$TGT_DIR.tar"
+  echo -n "Creating '$ARCHIVE_NAME' ... "
+  rm -f "$ARCHIVE_NAME"
+  tar cvf "$ARCHIVE_NAME" "$TGT_DIR" > "$ARCHIVE_NAME.progress.txt"
+  rm -f "$ARCHIVE_NAME.progress.txt"
+
+# ZIP
+elif [ "${COMPRESS:0:2}" == "-z" ] ; then
+  setlevel $COMPRESS 6
   ARCHIVE_NAME="$TGT_DIR.zip"
-  cd ..
-  echo -n "Creating '$TGT_DIR.zip' ... "
-  rm -f "$TGT_DIR.zip"
-  zip -r "$ARCHIVE_NAME" "$TGT_DIR" > zip-progress.txt
-  echo "done."
-  rm -f zip-progress.txt
+  echo -n "Creating '$ARCHIVE_NAME' ... "
+  rm -f "$ARCHIVE_NAME"
+  zip -r -$LEVEL "$ARCHIVE_NAME" "$TGT_DIR" > "$ARCHIVE_NAME.progress.txt"
+  rm -f "$ARCHIVE_NAME.progress.txt"
+
+# 7ZIP
+elif [ "${COMPRESS:0:2}" == "-7" ] ; then
+  setlevel $COMPRESS 6
+  ARCHIVE_NAME="$TGT_DIR.7z"
+  echo -n "Creating '$ARCHIVE_NAME' ... "
+  rm -f "$ARCHIVE_NAME"
+  7z a -mmt4 -mx$LEVEL -r -snl -w. "$TGT_DIR.7z" "$TGT_DIR" > "$ARCHIVE_NAME.progress.txt"
+  rm -f "$ARCHIVE_NAME.progress.txt"
 fi
+
+echo "done."
 
 rm "$TGT_DIR"/_LIST__*
 md5sum "$ARCHIVE_NAME" > "$TGT_DIR.md5"
