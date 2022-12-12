@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+if [ -z "$2" ] ; then
+    echo "USAGE: $(basename $0)  PDF_FILE  PAGE_START  [PAGE_END]"
+    exit 255
+fi
+
+PDF_FILE="$1"
+SVG_FILE="${PDF_FILE%.pdf}.svg"
+
+PAGE_START="$2"
+if [ -z "$3" ] ; then
+    PAGE_END="$2"
+    SUFFIX="page$PAGE_START"
+else
+    PAGE_END="$3"
+    SUFFIX="pages$PAGE_START-$PAGE_END"
+fi
+
+FINAL_NAME="${PDF_FILE%.pdf}.$SUFFIX.svg"
+echo "  > $FINAL_NAME"
+pdftocairo -svg -f "$PAGE_START" -l "$PAGE_END" "$PDF_FILE" "$FINAL_NAME"
