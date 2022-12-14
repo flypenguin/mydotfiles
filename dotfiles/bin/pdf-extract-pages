@@ -5,6 +5,18 @@ if [ -z "$2" ] ; then
     exit 255
 fi
 
+if [ ! -f "$1" ] ; then
+    echo "ERROR: file '$1' not found."
+    echo "ABORTING."
+    exit 255
+fi
+
+if ! hash pdftocairo &> /dev/null ; then
+    echo "ERROR: pdftocairo needs to be installed."
+    echo "ABORTING."
+    exit 255
+fi
+
 PDF_FILE="$1"
 SVG_FILE="${PDF_FILE%.pdf}.svg"
 
