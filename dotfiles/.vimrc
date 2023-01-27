@@ -47,6 +47,9 @@ set ruler
 set wildmode=longest,list
 set wildmenu
 
+" remove trailing whitespace
+autocmd BufWritePre *.* :%s/\s\+$//e
+
 
 "
 " PLUGIN CONFIGURATIONS
