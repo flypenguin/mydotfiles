@@ -67,6 +67,7 @@ brew "bfg"
 brew "node"
 brew "python3"
 brew "tig"
+brew "delta"
 
 # misc applications
 brew "hugo"

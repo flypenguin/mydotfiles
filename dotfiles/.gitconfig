@@ -12,15 +12,13 @@
 	eol = lf
 	autocrlf = input
 	commitGraph = true
+	pager = delta
 [merge]
 	tool = smerge
 [pull]
 	rebase = true
 [init]
 	defaultBranch = main
-[user]
-	email = ab@a3b3.de
-	name = Axel Bock
 [alias]
 	d = diff
 	p = push
@@ -30,8 +28,25 @@
 	ra = rebase --abort
 	pf = push --force
 	ri = rebase --interactive
-    apa = "add --patch"
+	apa = "add --patch"
 	ls = !git --no-pager log -n 40 --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short
 	lc = !git            log       --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short
 	ll = !git log --pretty=format:'%C(yellow)%h %C(yellow reverse)%aD%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --numstat
-	ld = !git log --pretty=format:'%C(yellow reverse)%h%Creset %C(yellow reverse)%ad%Creset %C(white reverse)%s%Creset %C(brightblue)[%cn]%C(red)%d%Creset' --decorate --date=short -p
+	ld = !git log --pretty=format:'%C(white reverse)%n%h%C(yellow reverse)%ad%Creset %C(white reverse)%s%Creset %C(brightblue)[%cn]%C(red)%d%Creset' --decorate --date=short -p
+[interactive]
+	diffFilter = delta --color-only
+[color "diff"]
+	meta = 11
+	frag = magenta bold
+	func = 146 bold
+	commit = yellow bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
+[delta]
+	line-numbers = true
+	zero-style = dim syntax
+	minus-style = red bold
+        plus-style = green bold
+	hunk-header-decoration-style =
+	file-decoration-style = blue ol
