@@ -9,6 +9,7 @@ alias cp >/dev/null 2>&1 && unalias cp
 # those nifgy G, L etc aliases :)
 alias -g WCL=' | wc -l'
 alias -g   S=' | sort'
+alias -g   U=' | uniq'
 
 # console helpers
 alias    tma="tmux attach"
