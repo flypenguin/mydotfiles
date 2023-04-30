@@ -1,5 +1,23 @@
 # ###########################################################################
 #
+# always useful: some colors ...
+#
+
+C_BOLD="\e[1m"
+C_BRED="\e[91m"
+C_BGRE="\e[92m"
+C_BYEL="\e[93m"
+C_BWHI="\e[97m"
+C_REST="\e[0m"
+H_GREN="${C_BGRE}${C_BOLD}"
+H_YELO="${C_BYEL}${C_BOLD}"
+H_REDD="${C_BRED}${C_BOLD}"
+DINFO="${C_BWHI}${C_BOLD}INFO:${C_REST}"
+DERRR="${C_BRED}${C_BOLD}ERROR:${C_REST}"
+DWARN="${C_BYEL}${C_BOLD}WARNING:${C_REST}"
+
+# ###########################################################################
+#
 # configure generic helpers
 #
 
@@ -31,18 +49,72 @@ fi
 # $1 - optional - work on WHAT. default: current path name
 wo() { if [ -z "$1" ] ; then workon "$(basename "$PWD")" ; else workon "$1" ; fi }
 
-# $1 - (OPTIONAL) name of virtual environment
+# Create Virtual Environment
 cvi() {
-  local ENVNAME=${1:-$(basename $PWD)}
-  mkvirtualenv -p $(which python3) "$ENVNAME"
+  PYTHON="$(which python3)"
+  ENVNAME="$(basename $PWD)"
+  # https://stackoverflow.com/a/34531699
+  while getopts "hn:p:" OPT; do
+    case $OPT in
+    h)
+      echo "USAGE: cvi [-p python] [-n ENVNAME] [-- mkvirtualenv_param,...]"
+      return
+      ;;
+    p)
+      PYTHON="$OPTARG"
+      ;;
+    n)
+      ENVNAME="$OPTARG"
+      ;;
+    esac
+  done
+  shift "$((OPTIND - 1))"
+
+  echo "Using python interpreter:             $PYTHON"
+  echo "Using virtualenv name:                $ENVNAME"
+  echo "Additional mkvirtualenv parameters:   ${@:--}"
+  TMP=$(mktemp)
+  if mkvirtualenv "$ENVNAME" -p "$PYTHON" "$@" >"$TMP" 2>&1; then
+    echo "${H_YELO}Virtual${C_REST} environment '${H_GREN}$ENVNAME${C_REST}' active: ${H_GREN}$(python --version)${C_REST}"
+  else
+    cat "$TMP"
+    echo "${H_REDD}ERROR:${C_REST} something went wrong."
+  fi
+  rm "$TMP"
 }
 
-# $1 - (OPTIONAL) name of virtual environment
+# Create VenV environment (python3 -m venv ...)
 cvv() {
-  local ENVNAME=${1:-$(basename $PWD)}
-  python3 -m venv --prompt "$ENVNAME" .venv
-  # mimic 'mkvirtualenv' behavior and activate automatically
+  PYTHON="$(which python3)"
+  ENVNAME="$(basename $PWD)"
+  DIRNAME=".venv"
+  # https://stackoverflow.com/a/34531699
+  while getopts "d:hn:p:" OPT; do
+    case $OPT in
+    h)
+      echo "USAGE: cvv [-p python] [-n ENVNAME] [-- venv_module_param,...]"
+      return
+      ;;
+    d)
+      DIRNAME="$OPTARG"
+      ;;
+    p)
+      PYTHON="$OPTARG"
+      ;;
+    n)
+      ENVNAME="$OPTARG"
+      ;;
+    esac
+  done
+  shift "$((OPTIND - 1))"
+
+  echo "Using python interpreter:     $PYTHON"
+  echo "Using directory:              $DIRNAME"
+  echo "Using venv name:              $ENVNAME"
+  echo "Additional venv pavemeters:   ${@:--}"
+  "$PYTHON" -m venv "$DIRNAME" --prompt "$ENVNAME" "$@"
   source .venv/bin/activate
+  echo "${H_YELO}Venv${C_REST} environment '${H_GREN}$ENVNAME${C_REST}' activated: ${H_GREN}$(python --version)${C_REST}"
 }
 
 
