@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# FOR USE FROM APPLE AUTOMATOR, WORKS ALSO FROM COMMAND LINE
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:/Library/TeX/texbin:$PATH"
+
+for infile in "$@" ; do
+
+    pandoc -f markdown -t pdf   "${infile}"  -o ${infile%.*}.pdf
+
+done
