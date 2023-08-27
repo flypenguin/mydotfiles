@@ -7,11 +7,13 @@ if [ -z "$1" ] ; then
   echo "      images and videos from TARGETDIR"
   exit -1
 elif [ ! -d "$1" ] ; then
-  echo "ERROR: not a directory: $2"
+  echo "ERROR: not a directory: $1"
   exit -2
 fi
 
-set -euo pipefail
+eerr() {
+  echo -en "$@" >&2;
+}
 
 CONVERT_QUALITY=${CONVERT_QUALITY:-65}
 CONVERT_RESIZE=${CONVERT_RESIZE:-1920x1080}
@@ -19,22 +21,20 @@ CONVERT_OUTPUT_FORMAT="webp"
 FFMPEG_OUTPUT_CODEC="h264"
 FFMPEG_SCALE_SIZE=${FFMPEG_SCALE_SIZE:-360}
 
+export SRC_DIR="$1"
+export TGT_DIR="$PWD/$(basename "$SRC_DIR").thumbs"
+export TS=$(date +%Y%m%d.%H%M%S)
 
-cd "$1"
-export TGT_DIR=$(basename "$PWD")
-export TS=$(date +%Y-%m-%d__%H.%M.%S)
-export TS_HUMAN=${TS//__/ }
- 
+rm -rf "$TGT_DIR"
+cd "$SRC_DIR"
 
 # CREATE THUMBNAILS
 
-# create the directories
-THUMBS_DIR_DEFAULT="${1}_thumbs_$TS"
-THUMBS_DIR=${THUMBS_DIR:-$THUMBS_DIR_DEFAULT}
-mkdir -p "../${THUMBS_DIR}"
-find . -type d -print0 | xargs -0 -I {} mkdir -p "../$THUMBS_DIR/{}"
+mkdir -p "${TGT_DIR}"
+find . -type d -print0 | xargs -0 -I {} mkdir -p "$TGT_DIR/{}"
 
 # create thumbs
+eerr "$SRC_DIR: Creating image thumbnails ... "
 find . \( \
     -iname "*.jpg"   -o \
     -iname "*.png"   -o \
@@ -49,7 +49,8 @@ find . \( \
     convert {} \
       -quality "$CONVERT_QUALITY" \
       -resize "${CONVERT_RESIZE}>" \
-      "../$THUMBS_DIR/{}.$CONVERT_OUTPUT_FORMAT"
+      "$TGT_DIR/{}.$CONVERT_OUTPUT_FORMAT"
+eerr "done.\n"
 
 # create thumb VIDEOS
 # sources: https://stackoverflow.com/a/20848224, https://superuser.com/a/567934
@@ -57,6 +58,7 @@ SCALE_RESOLUTION="min($FFMPEG_SCALE_SIZE,iw)':'min($FFMPEG_SCALE_SIZE,ih)"
 SCALE="scale='$SCALE_RESOLUTION':force_original_aspect_ratio=decrease"
 PAD="pad=width='ceil(min(360,iw)/4)*4':height='ceil(min(360,ih)/4)*4'"
 
+eerr "$SRC_DIR: Creating video thumbnails ... "
 find . \( \
     -iname "*.mp4"   -o \
     -iname "*.avi"   -o \
@@ -69,19 +71,19 @@ find . \( \
       -i {} \
       -c:v $FFMPEG_OUTPUT_CODEC \
       -filter:v "$SCALE,$PAD" \
-      "../$THUMBS_DIR/{}.mp4"
+      "$TGT_DIR/{}.mp4"
+eerr "done.\n"
 
 # sanity check
 find . \( \
     -iname "*.jpg"   -o \
-    -iname "*.png"   -o \
     -iname "*.nef"   -o \
     -iname "*.jpeg"  -o \
     -iname "*.heic"  -o \
     -iname "*.webp"     \
   \) | \
-  while read a ; do 
-    if [[ ! -f "../$THUMBS_DIR/$a.$CONVERT_OUTPUT_FORMAT" ]] ; then
+  while read a ; do
+    if [[ ! -f "$TGT_DIR/$a.$CONVERT_OUTPUT_FORMAT" ]] ; then
       echo "\!\! $a"
     fi
   done
@@ -92,16 +94,15 @@ find . \( \
     -iname "*.mov"   -o \
     -iname "*.mkv"      \
   \) \
-  | while read a ; do 
-    if [[ ! -f "../$THUMBS_DIR/$a.mp4" ]] ; then
+  | while read a ; do
+    if [[ ! -f "$TGT_DIR/$a.mp4" ]] ; then
       echo "\!\! $a"
     fi
   done
 
-# remove empty dirs
-find "../$THUMBS_DIR/" -type d -empty -delete
 
+# remove empty dirs
+find "$TGT_DIR/" -type d -empty -delete
 
 # output thumbs dir name
-echo "$THUMBS_DIR"
-
+echo "$TGT_DIR"

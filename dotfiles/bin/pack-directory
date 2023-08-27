@@ -6,12 +6,11 @@
 # sets $LEVEL to a value.
 setlevel() {
   LEVEL=${1:2:2}
-  [ -z "$LEVEL" ] && LEVEL=$2
-  echo "Using compression level: $LEVEL"
+  [ -z "$LEVEL" ] && LEVEL=$2 || true
 }
 
 if [ -z "$2" ] ; then
-  echo "USAGE: $(basename $0) -x/-z TARGET_DIR"
+  echo "USAGE: $(basename "$0") -x/-z TARGET_DIR"
   echo "    - '-x' compress directory with tar.xz"
   echo "    - '-t' just store directory with tar"
   echo "    - '-zLEVEL' compress directory with zip"
@@ -28,74 +27,84 @@ COMPRESS="$1"
 
 set -euo pipefail
 
-cd "$2"
-export TGT_DIR=$(basename "$PWD")
+export SRC_DIR="$2"
+export SRC_DIR_NAME=$(basename "$SRC_DIR")
+export TGT_DIR="$PWD/$SRC_DIR_NAME.pack"
 export TS=$(date +%Y-%m-%d__%H.%M.%S)
 export TS_HUMAN=${TS//__/ }
 
-rm -f "../$TGT_DIR.md5" "_LIST__"*.md5
-rm -f "../$TGT_DIR.md5" "_LIST__"*.txt
+mkdir "$TGT_DIR"
 
-echo -n "Creating '$TGT_DIR.txt' ... "
-echo "# Time of creation: $TS_HUMAN"   > "../$TGT_DIR.txt"
-find . | sort                         >> "../$TGT_DIR.txt"
-echo "done."
+cd "$SRC_DIR"
 
-echo -n "Creating '$TGT_DIR.md5' ... "
-echo "# Time of creation: $TS_HUMAN"   > "../$TGT_DIR.md5"
+# do _not_ create in $SRC_DIR, otherwise 'find' will also find the .md5
+# file, and we will calculate a (wrong) checksum over it.
+# create it somewhere else and move it into the SRC_DIR
+WORK="$TGT_DIR/_FILES.md5"
+echo -n "$SRC_DIR: Creating _FILES.md5 ... "
+echo "# Time of creation: $TS_HUMAN"   > "$WORK"
 find . -type f | sort | while read file ; do
-    md5sum "$file"                    >> "../$TGT_DIR.md5"
+    md5sum "$file"                    >> "$WORK"
 done
+mv "$WORK" .
 echo "done."
 
-cp "../$TGT_DIR.md5" ./_LIST__$TS.md5
-cp "../$TGT_DIR.txt" ./_LIST__$TS.txt
-
+# the files list should be within the archive, as well as within the .pack
+# directory. (under different names). so some copying needed.
+WORK="_FILES.txt"
+echo -n "$SRC_DIR: Creating $WORK ... "
+echo "# Time of creation: $TS_HUMAN"   > "$WORK"
+find . | sort                         >> "$WORK"
+cp "$WORK" "$TGT_DIR/$SRC_DIR_NAME.txt"
+echo "done."
 
 cd ..
 
 # TAR XZ
 if [ "$COMPRESS" == "-x" ] ; then
-  ARCHIVE_NAME="$TGT_DIR.tar.xz"
-  echo -n "Creating '$ARCHIVE_NAME' ... "
-  rm -f "$ARCHIVE_NAME"
-  tar cJf "$ARCHIVE_NAME" "$TGT_DIR" > "$ARCHIVE_NAME.progress.txt"
+  ARCHIVE_NAME="$SRC_DIR_NAME.tar.xz"
+  ARCHIVE_FILE="$TGT_DIR/$ARCHIVE_NAME"
+  echo -n "$SRC_DIR: Creating '$ARCHIVE_NAME' (default compression level) ... "
+  rm -f "$ARCHIVE_FILE"
+  tar cJf "$ARCHIVE_FILE" "$SRC_DIR_NAME" > "$ARCHIVE_NAME.progress.txt"
+  rm -f "$ARCHIVE_NAME.progress.txt"
 
 # JUST TAR
 elif [ "$COMPRESS" == "-t" ] ; then
-  ARCHIVE_NAME="$TGT_DIR.tar"
-  echo -n "Creating '$ARCHIVE_NAME' ... "
-  rm -f "$ARCHIVE_NAME"
-  tar cvf "$ARCHIVE_NAME" "$TGT_DIR" > "$ARCHIVE_NAME.progress.txt"
+  ARCHIVE_NAME="$SRC_DIR_NAME.tar"
+  ARCHIVE_FILE="$TGT_DIR/$ARCHIVE_NAME"
+  echo -n "$SRC_DIR: Creating '$ARCHIVE_NAME' (no compression) ... "
+  rm -f "$ARCHIVE_FILE"
+  tar cvf "$ARCHIVE_FILE" "$SRC_DIR_NAME" > "$ARCHIVE_NAME.progress.txt"
   rm -f "$ARCHIVE_NAME.progress.txt"
 
 # ZIP
 elif [ "${COMPRESS:0:2}" == "-z" ] ; then
   setlevel $COMPRESS 6
-  ARCHIVE_NAME="$TGT_DIR.zip"
-  echo -n "Creating '$ARCHIVE_NAME' ... "
-  rm -f "$ARCHIVE_NAME"
-  zip -r -$LEVEL "$ARCHIVE_NAME" "$TGT_DIR" > "$ARCHIVE_NAME.progress.txt"
+  ARCHIVE_NAME="$SRC_DIR_NAME.zip"
+  ARCHIVE_FILE="$TGT_DIR/$ARCHIVE_NAME"
+  echo -n "$SRC_DIR: Creating '$ARCHIVE_NAME' (compression level: $LEVEL) ... "
+  rm -f "$ARCHIVE_FILE"
+  zip -r -$LEVEL "$ARCHIVE_FILE" "$SRC_DIR_NAME" > "$ARCHIVE_NAME.progress.txt"
   rm -f "$ARCHIVE_NAME.progress.txt"
 
 # 7ZIP
 elif [ "${COMPRESS:0:2}" == "-7" ] ; then
   setlevel $COMPRESS 6
-  ARCHIVE_NAME="$TGT_DIR.7z"
-  echo -n "Creating '$ARCHIVE_NAME' ... "
-  rm -f "$ARCHIVE_NAME"
-  7z a -mmt4 -mx$LEVEL -r -snl -w. "$TGT_DIR.7z" "$TGT_DIR" > "$ARCHIVE_NAME.progress.txt"
+  ARCHIVE_NAME="$SRC_DIR_NAME.7z"
+  ARCHIVE_FILE="$TGT_DIR/$ARCHIVE_NAME"
+  echo -n "$SRC_DIR: Creating '$ARCHIVE_NAME' (compression level: $LEVEL) ... "
+  rm -f "$ARCHIVE_FILE"
+  7z a -mmt4 -mx$LEVEL -r -snl -w. "$ARCHIVE_FILE" "$SRC_DIR_NAME" > "$ARCHIVE_NAME.progress.txt"
   rm -f "$ARCHIVE_NAME.progress.txt"
 fi
 
 echo "done."
 
-rm "$TGT_DIR"/_LIST__*
-md5sum "$ARCHIVE_NAME" > "$TGT_DIR.md5"
+# remove the _FILES.md5/.txt file from the SRC_DIR ...
+rm -f "$SRC_DIR_NAME/_FILES.md5" "$SRC_DIR_NAME/_FILES.txt"
 
-mv "$TGT_DIR" "$TGT_DIR.orig"
-mkdir "$TGT_DIR"
-mv "$ARCHIVE_NAME" "$TGT_DIR/"
-mv "$TGT_DIR.md5" "$TGT_DIR.txt" "$TGT_DIR"
+cd "$TGT_DIR"
+md5sum "$ARCHIVE_NAME" > "$ARCHIVE_NAME.md5"
 
-echo "All done."
+echo "$SRC_DIR: All done."

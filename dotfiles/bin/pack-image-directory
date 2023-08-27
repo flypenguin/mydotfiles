@@ -10,11 +10,12 @@ if [ ! -d "$1" ] ; then
   exit -1
 fi
 
+set -x
+BASENAME=$(basename "$1")
 THUMBS_DIR=$(create-thumbnail-dir "$1")
 pack-directory -z0 "$1"
 
-zip -r "$THUMBS_DIR.zip" "$THUMBS_DIR" > "$THUMBS_DIR.progress.txt"
-mv "$THUMBS_DIR.zip" "$1/"
+zip -r -0 "$BASENAME.pack/$BASENAME.thumbs.zip" "$THUMBS_DIR" > "$THUMBS_DIR.progress.txt"
 rm -rf "$THUMBS_DIR" "$THUMBS_DIR.progress.txt"
 
 echo "All done."
