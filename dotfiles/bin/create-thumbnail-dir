@@ -14,7 +14,7 @@ fi
 set -euo pipefail
 
 CONVERT_QUALITY=${CONVERT_QUALITY:-65}
-CONVERT_RESIZE=${CONVERT_RESIZE:-1280x1280}
+CONVERT_RESIZE=${CONVERT_RESIZE:-1920x1280}
 CONVERT_OUTPUT_FORMAT="webp"
 FFMPEG_OUTPUT_CODEC="h264"
 FFMPEG_SCALE_SIZE=${FFMPEG_SCALE_SIZE:-360}
@@ -39,8 +39,10 @@ find . \( \
     -iname "*.jpg"   -o \
     -iname "*.png"   -o \
     -iname "*.nef"   -o \
+    -iname "*.cr2"   -o \
     -iname "*.jpeg"  -o \
     -iname "*.heic"  -o \
+    -iname "*.gif"  -o \
     -iname "*.webp"     \
   \) \
   | parallel -qI {} \
