@@ -10,7 +10,6 @@ if [ ! -d "$1" ] ; then
   exit -1
 fi
 
-set -x
 BASENAME=$(basename "$1")
 THUMBS_DIR=$(create-thumbnail-dir "$1")
 pack-directory -z0 "$1"
