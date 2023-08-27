@@ -11,9 +11,10 @@ if [ ! -d "$1" ] ; then
 fi
 
 THUMBS_DIR=$(create-thumbnail-dir "$1")
-pack-directory -z "$1"
-zip -r "$THUMBS_DIR.zip" "$THUMBS_DIR"
+pack-directory -z0 "$1"
+
+zip -r "$THUMBS_DIR.zip" "$THUMBS_DIR" > "$THUMBS_DIR.progress.txt"
 mv "$THUMBS_DIR.zip" "$1/"
-rm -rf "$THUMBS_DIR"
+rm -rf "$THUMBS_DIR" "$THUMBS_DIR.progress.txt"
 
 echo "All done."
