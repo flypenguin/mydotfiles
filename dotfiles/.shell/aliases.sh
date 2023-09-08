@@ -22,32 +22,31 @@ alias sshconfig="vim \$HOME/.ssh/config"
 alias ssh-clean="rm -f '$HOME/.ssh/sockets/'*"
 
 # git
-alias gco="git checkout"
-alias gnp="git --no-pager"
-#alias gls="git ls" // git ls was a GIT INTERNAL alias, removed for simplicity.
-alias gri="git rebase --interactive"
-alias gra="git rebase --abort"
-alias grc="git rebase --continue"
-alias gpf="git push --force"
-alias  gp="git push"
-alias  gs="git status"
-alias  gd="git diff"
-alias gdc="git diff --cached"
+alias  gco="git checkout"
+alias  gnp="git --no-pager"
+alias  gri="git rebase --interactive"
+alias  gra="git rebase --abort"
+alias  grc="git rebase --continue"
+alias  gpf="git push --force"
+alias   gp="git push"
+alias   gs="git status"
+alias   gd="git diff"
+alias  gdc="git diff --cached"
 # see http://is.gd/h9AB6z
 # it's ...
 # (g)it (l)og ...
 #   (s)hort, (c)ontinuous, (l)ong, (d)iff
 # (g)it (d)iff ...
 #   (), (s)tat
-alias gls="git ls"
-alias glv="git --no-pager log -n 30 --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%an]%Cred%d%Creset%+b' --decorate --date=short"
-alias glc="git lc"
+alias  gls="git --no-pager log -n 40 --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short"
+alias  glv="git --no-pager log -n 30 --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%an]%Cred%d%Creset%+b' --decorate --date=short"
+alias  glc="git            log       --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short"
 alias glvc="git            log       --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%an]%Cred%d%Creset%+b' --decorate --date=short"
-alias gll="git ll"
-alias gld="git ld"
-alias gds="git --no-pager diff --stat"
-alias glf="git log --stat --oneline --pretty='%n%C(yellow reverse)%h%C(reset) %C(yellow)%ad%C(red)%d%C(reset) %C(white)%s%C(reset) %C(blue)[%an]%C(reset)'"
-alias gpb="git push --set-upstream origin \$(git rev-parse --abbrev-ref HEAD)"
+alias  gll="git log --pretty=format:'%C(yellow)%h %C(yellow reverse)%aD%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --numstat"
+alias  gld="git log --pretty=format:'%C(white reverse)%n%h%C(yellow reverse)%ad%Creset %C(white reverse)%s%Creset %C(brightblue)[%cn]%C(red)%d%Creset' --decorate --date=short -p"
+alias  gds="git --no-pager diff --stat"
+alias  glf="git log --stat --oneline --pretty='%n%C(yellow reverse)%h%C(reset) %C(yellow)%ad%C(red)%d%C(reset) %C(white)%s%C(reset) %C(blue)[%an]%C(reset)'"
+alias  gpb="git push --set-upstream origin \$(git rev-parse --abbrev-ref HEAD)"
 # from here: https://stackoverflow.com/a/38404202/902327
 alias git-branch-clean="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -d"
 alias git-branch-clean-f="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -D"
