@@ -203,7 +203,7 @@ alias    klf1m="kubectl logs --since 1m -f"
 alias    klf1s="kubectl logs --since 1s -f"
 
 # other ...
-alias      kca="_kca(){ kubectl \$@\" --all-namespaces;  unset -f _kca; }; _kca"
+alias      kca="_kca(){ kubectl \"$@\" --all-namespaces;  unset -f _kca; }; _kca"
 alias      kaf="kubectl apply -f"
 alias      kcp="kubectl cp"
 alias     keti="kubectl exec -ti"
