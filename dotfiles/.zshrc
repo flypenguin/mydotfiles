@@ -48,7 +48,7 @@ ZSH_THEME="robbyrussell"
 DISABLE_UPDATE_PROMPT="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(direnv git docker virtualenv virtualenvwrapper pyenv common-aliases kubectl fzf)
+plugins=(direnv git docker virtualenv virtualenvwrapper pyenv common-aliases kubectl fzf aws)
 plugins+=(${ADD_PLUGINS[@]})
 
 # CASE_SENSITIVE="true"
