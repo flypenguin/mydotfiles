@@ -54,16 +54,16 @@ alias git-branch-clean-f="git fetch -p && git branch -vv | awk '/: gone]/{print 
 alias gb="git --no-pager branch -vv"
 
 # ls
-if which exa >/dev/null 2>&1 ; then
+if which eza >/dev/null 2>&1; then
   unalias ls
-  alias  ls="exa"
+  alias  ls="eza"
   alias  ll="ls -lFh"
   alias  la="ll -a"
   alias  lg="ll -G"
   alias dir="lg"
 else
   unalias ls
-  alias ls="ls --color=auto"
+  alias  ls="ls --color=auto"
   alias  ll="ls -lh"
   alias  la="ls -lha"
   alias dir="ls -lh"
