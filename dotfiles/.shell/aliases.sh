@@ -86,16 +86,16 @@ alias tms="tmux list-sessions"
 
 # kubernetes (we already have aliases from ... somewhere, so just add missing)
 alias kubeshell="kubectl run my-shell --rm -i --tty --image ubuntu -- bash"
-alias      krew="k krew"
-alias        kd="k describe"
-alias      kdds="k describe daemonset"
-alias        kg="k get"
-alias       kgi="k get ingress"
-alias      kgpv="k get pv"
-alias      kgds="k get daemonset"
-alias      kdel="k delete"
-alias        kc="k config"
-alias     kcsnd="k config set-context --current --namespace=default"
+alias      krew="kubectl krew"
+alias        kd="kubectl describe"
+alias      kdds="kubectl describe daemonset"
+alias        kg="kubectl get"
+alias       kgi="kubectl get ingress"
+alias      kgpv="kubectl get pv"
+alias      kgds="kubectl get daemonset"
+alias      kdel="kubectl delete"
+alias        kc="kubectl config"
+alias     kcsnd="kubectl config set-context --current --namespace=default"
 
 # docker
 alias docker_clean_images="docker images | grep '<none>' | awk '{print \$3}' | xargs docker rmi"
@@ -119,6 +119,10 @@ alias azgroups="az group list --query '[].name'"
 
 # kubectl ...
 alias       k=kubectl
+alias      ka="kubectl apply"
+alias     kaf="kubectl apply -f"
+alias      kr="kubectl remove"
+
 # kubectl config ...
 alias     kcuc="kubectl config use-context"
 alias     kcsc="kubectl config set-context"
