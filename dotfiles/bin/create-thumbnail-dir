@@ -49,6 +49,7 @@ find . \( \
     convert {} \
       -quality "$CONVERT_QUALITY" \
       -resize "${CONVERT_RESIZE}>" \
+      -auto-orient \
       "$TGT_DIR/{}.$CONVERT_OUTPUT_FORMAT"
 eerr "done.\n"
 
@@ -71,6 +72,7 @@ find . \( \
       -i {} \
       -c:v $FFMPEG_OUTPUT_CODEC \
       -filter:v "$SCALE,$PAD" \
+      -auto-orient \
       "$TGT_DIR/{}.mp4"
 eerr "done.\n"
 
