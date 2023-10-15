@@ -98,11 +98,15 @@ alias        kc="kubectl config"
 alias     kcsnd="kubectl config set-context --current --namespace=default"
 
 # docker
-alias docker_clean_images="docker images | grep '<none>' | awk '{print \$3}' | xargs docker rmi"
-alias docker_rm_all="docker ps -a | grep Exited | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker rm -f"
-alias docker_stop_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker stop"
-alias docker_kill_all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker kill"
+alias docker-clean-images="docker images | grep '<none>' | awk '{print \$3}' | xargs docker rmi"
+alias docker-rm-all="docker ps -a | grep Exited | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker rm -f"
+alias docker-stop-all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker stop"
+alias docker-kill-all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker kill"
 alias dockify="eval \$(docker-machine env default)"
+alias dra="docker-rm-all"
+alias dci="docker-clean-images"
+alias dsa="docker-stop-all"
+alias dka="docker-kill-all"
 
 # JSON conversion with pipes
 alias -g YAML="| python3 -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)'"
