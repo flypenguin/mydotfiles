@@ -21,13 +21,8 @@ for input_dir in "$@" ; do
 
   cd "$input_dir"
 
-  # https://stackoverflow.com/a/315113
-  touch _odt_create_log.txt
-  exec > _odt_create_log.txt
-  exec 2>&1
-
   set -x
-  ODT_FILE="../$(basename "$input_dir").odt"
+  ODT_FILE="../$(basename "$(realpath .)").odt"
   rm -f "$ODT_FILE"
 
   # create ODT documents with ZIP: https://is.gd/TZmNOQ
