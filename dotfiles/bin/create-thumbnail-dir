@@ -18,7 +18,9 @@ eerr() {
 CONVERT_QUALITY=${CONVERT_QUALITY:-65}
 CONVERT_RESIZE=${CONVERT_RESIZE:-1920x1080}
 CONVERT_OUTPUT_FORMAT="webp"
-FFMPEG_OUTPUT_CODEC="h264"
+# apple preview: see here: https://is.gd/oeaCF6
+# h265 logging output: https://stackoverflow.com/a/71746426/902327
+FFMPEG_OUTPUT_CODEC="libx265 -x265-params log-level=none -tag:v hvc1"
 FFMPEG_SCALE_SIZE=${FFMPEG_SCALE_SIZE:-360}
 
 export SRC_DIR="$1"
@@ -50,7 +52,7 @@ find . \( \
       -quality "$CONVERT_QUALITY" \
       -resize "${CONVERT_RESIZE}>" \
       -auto-orient \
-      "$TGT_DIR/{}.$CONVERT_OUTPUT_FORMAT"
+      "$TGT_DIR/{.}.$CONVERT_OUTPUT_FORMAT"
 eerr "done.\n"
 
 # create thumb VIDEOS
@@ -72,8 +74,7 @@ find . \( \
       -i {} \
       -c:v $FFMPEG_OUTPUT_CODEC \
       -filter:v "$SCALE,$PAD" \
-      -auto-orient \
-      "$TGT_DIR/{}.mp4"
+      "$TGT_DIR/{.}.mp4"
 eerr "done.\n"
 
 # sanity check
@@ -85,8 +86,9 @@ find . \( \
     -iname "*.webp"     \
   \) | \
   while read a ; do
-    if [[ ! -f "$TGT_DIR/$a.$CONVERT_OUTPUT_FORMAT" ]] ; then
-      echo "\!\! $a"
+    file_base=${a%.*}
+    if [[ ! -f "$TGT_DIR/${file_base}.$CONVERT_OUTPUT_FORMAT" ]] ; then
+      echo "[WARNING] no thumb found for: $a"
     fi
   done
 
@@ -97,8 +99,9 @@ find . \( \
     -iname "*.mkv"      \
   \) \
   | while read a ; do
-    if [[ ! -f "$TGT_DIR/$a.mp4" ]] ; then
-      echo "\!\! $a"
+    file_base=${a%.*}
+    if [[ ! -f "$TGT_DIR/${file_base}.mp4" ]] ; then
+      echo "[WARNING] no thumb found for: $a"
     fi
   done
 
