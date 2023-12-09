@@ -48,12 +48,15 @@ brew "git"
 brew "jump"
 
 # fonts
+cask "font-fantasque-sans-mono"
 cask "font-fira-code"
 cask "font-hack"
-cask "font-monoid"
 cask "font-inconsolata"
-cask "font-source-code-pro"
 cask "font-jetbrains-mono"
+cask "font-monoid"
+cask "font-source-code-pro"
+cask "font-sudo"
+cask "font-victor-mono"
 
 # docker & friends
 brew "docker"
