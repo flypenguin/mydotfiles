@@ -45,6 +45,8 @@ def cmdline_video(src_file, dst_dir, add_params=None) -> Tuple[Path, list]:
             "faststart",
             "-c:v",
             "libx265",
+            "-crf",
+            f"{config.video_crf}",
             "-tag:v",
             "hvc1",
             "-filter:v",
@@ -70,7 +72,7 @@ def cmdline_gif(src_file, dst_dir) -> Tuple[Path, list]:
     # https://stackoverflow.com/a/1413234
     cmd = ["identify", str(src_file)]
     res = subprocess.run(cmd, capture_output=True)
-    if "gif[1]" in str(res.stdout):
+    if "gif[1]" in str(res.stdout) and config.gif_format == "vid":
         # https://unix.stackexchange.com/a/294892
         return cmdline_video(src_file, dst_dir, add_params=["-pix_fmt", "yuv420p"])
     else:
@@ -113,7 +115,7 @@ class EncodeFile:
         return (Path(str(self.base) + ".thumbs") / rel).parent
 
     def create_thumb(self) -> Tuple[int, str]:
-        self.dst_dir.mkdir(exist_ok=True)
+        self.dst_dir.mkdir(parents=True, exist_ok=True)
         res = subprocess.run(
             self.cmdline,
             stdout=subprocess.PIPE,
@@ -133,6 +135,11 @@ def encode(encode_me: EncodeFile):
 
 def create_thumbs():
     tmp0 = {}
+
+    for base_dir in config.img_dirs:
+        if not Path(base_dir).is_dir():
+            print(f"Not a directory: {base_dir}")
+            sys.exit()
 
     for base_dir in config.img_dirs:
         for dirpath, _, files in walk(base_dir):
@@ -167,11 +174,14 @@ def create_thumbs():
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("img_dirs", nargs="+")
-    parser.add_argument("--video-res", default="720")
-    parser.add_argument("--thumb-quality", default="65")
-    parser.add_argument("--thumb-size", default="1920x1080")
-    parser.add_argument("--thumb-format", default="webp")
-    parser.add_argument("-n", "--num-workers", default=0, type=int)
+    parser.add_argument("--video-res", default="540", help=f"default: 540")
+    parser.add_argument("--video-crf", default="30", help=f"default: 33")
+    parser.add_argument("--thumb-quality", default="65", help=f"default: 65")
+    parser.add_argument("--thumb-size", default="1920x1080", help=f"default: 1920x1080")
+    parser.add_argument("--thumb-format", default="webp", help=f"default: webp")
+    parser.add_argument(
+        "--gif-format", choices=["img", "vid"], default="vid", help=f"default: vid"
+    )
+    parser.add_argument("-n", "--num-workers", type=int, default=0, help=f"default: 0")
     config = parser.parse_args()
-    print(config)
     create_thumbs()
