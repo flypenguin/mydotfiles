@@ -1,110 +1,251 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 
-# sets the global $LEVEL from the global $COMPRESSION
-# $1 = COMPRESS parameter
-# $2 = default level
-# sets $LEVEL to a value.
-setlevel() {
-  LEVEL=${1:2:2}
-  [ -z "$LEVEL" ] && LEVEL=$2 || true
-}
+import hashlib
+import io
+import subprocess
+import re
+import stat
+import sys
+import tarfile
+import time
+import zipfile
+from argparse import ArgumentParser
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime as dt
+from os import walk
+from os.path import join, relpath
+from pathlib import Path
+from typing import Tuple, Union
 
-if [ -z "$2" ] ; then
-  echo "USAGE: $(basename "$0") -x/-z TARGET_DIR"
-  echo "    - '-x' compress directory with tar.xz"
-  echo "    - '-t' just store directory with tar"
-  echo "    - '-zLEVEL' compress directory with zip"
-  echo "    - '-7LEVEL' STORE directory with 7z"
-  echo "    - creates TARGET_DIR.txt/.md5 in TARGET_DIR's parent directory"
-  echo "    - creates _FILE.txt/.md5 in TARGET_DIR"
-  exit -1
-elif [ ! -d "$2" ] ; then
-  echo "ERROR: not a directory: $2"
-  exit -2
-fi
 
-COMPRESS="$1"
+DEFAULT_EXCLUDE = ["\.DS_Store"]
+STAT644 = stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
+config = None
+exclude_patterns = []
 
-set -euo pipefail
 
-export SRC_DIR="$2"
-export SRC_DIR_NAME=$(basename "$SRC_DIR")
-export TGT_DIR="$PWD/$SRC_DIR_NAME.pack"
-export TS=$(date +%Y-%m-%d__%H.%M.%S)
-export TS_HUMAN=${TS//__/ }
+class ArchiveFile:
+    def __init__(
+        self,
+        src_dir: Union[Path, str],
+        *,
+        compression: int = 6,
+        create_file_list=True,
+        create_archive_checksum=True,
+        include_checksum_file=True,
+        checksum_type="md5",
+    ):
+        self.checksum_file_text = ""
+        self.file_list_text = f"created @ {dt.now()}\n\n"
+        self.compression = compression
+        self.include_checksum_file = include_checksum_file
+        self.checksum_type = checksum_type
+        self.create_file_list = create_file_list
+        self.create_archive_checksum = create_archive_checksum
+        self.src_dir = Path(src_dir)
+        self.tgt_dir = Path(str(self.src_dir) + ".pack")
+        self.archive_file = self.tgt_dir / (self.src_dir.name + self.SUFFIX)
 
-mkdir "$TGT_DIR"
+    def _add_file(self, file_to_add: Union[Path, str], archive_filename=None):
+        raise NotImplementedError("ArchiveFile._add_file()")
 
-cd "$SRC_DIR"
+    def _add_content(
+        self,
+        archive_filename: Union[Path, str],
+        content: Union[bytes, str],
+    ):
+        raise NotImplementedError("ArchiveFile._add_content()")
 
-# do _not_ create in $SRC_DIR, otherwise 'find' will also find the .md5
-# file, and we will calculate a (wrong) checksum over it.
-# create it somewhere else and move it into the SRC_DIR
-WORK="$TGT_DIR/_FILES.md5"
-echo -n "$SRC_DIR: Creating _FILES.md5 ... "
-echo "# Time of creation: $TS_HUMAN"   > "$WORK"
-find . -type f | sort | while read file ; do
-    md5sum "$file"                    >> "$WORK"
-done
-mv "$WORK" .
-echo "done."
+    def _prepare(self):
+        raise NotImplementedError("ArchiveFile._prepare()")
 
-# the files list should be within the archive, as well as within the .pack
-# directory. (under different names). so some copying needed.
-WORK="_FILES.txt"
-echo -n "$SRC_DIR: Creating $WORK ... "
-echo "# Time of creation: $TS_HUMAN"   > "$WORK"
-find . | sort                         >> "$WORK"
-cp "$WORK" "$TGT_DIR/$SRC_DIR_NAME.txt"
-echo "done."
+    def _finalize(self):
+        raise NotImplementedError("ArchiveFile._finalize()")
 
-cd ..
+    def add_file(self, file_to_add: Union[Path, str]):
+        file_to_add = Path(file_to_add)
+        rp = relpath(file_to_add, start=self.src_dir)
+        if self.create_file_list:
+            self.file_list_text += f"{rp}\n"
+        if self.include_checksum_file:
+            with open(file_to_add, "rb") as infile:
+                self.checksum_file_text += f"{hashlib.file_digest(infile, self.checksum_type).hexdigest()}  {rp}\n"
+        self._add_file(file_to_add, archive_filename=rp)
 
-# TAR XZ
-if [ "$COMPRESS" == "-x" ] ; then
-  ARCHIVE_NAME="$SRC_DIR_NAME.tar.xz"
-  ARCHIVE_FILE="$TGT_DIR/$ARCHIVE_NAME"
-  echo -n "$SRC_DIR: Creating '$ARCHIVE_NAME' (default compression level) ... "
-  rm -f "$ARCHIVE_FILE"
-  tar cJf "$ARCHIVE_FILE" "$SRC_DIR_NAME" > "$ARCHIVE_NAME.progress.txt"
-  rm -f "$ARCHIVE_NAME.progress.txt"
+    def __enter__(self):
+        archive_file = self.archive_file
+        archive_file.parent.mkdir(parents=True, exist_ok=True)
+        archive_file.unlink(missing_ok=True)
+        self._prepare()
+        return self
 
-# JUST TAR
-elif [ "$COMPRESS" == "-t" ] ; then
-  ARCHIVE_NAME="$SRC_DIR_NAME.tar"
-  ARCHIVE_FILE="$TGT_DIR/$ARCHIVE_NAME"
-  echo -n "$SRC_DIR: Creating '$ARCHIVE_NAME' (no compression) ... "
-  rm -f "$ARCHIVE_FILE"
-  tar cvf "$ARCHIVE_FILE" "$SRC_DIR_NAME" > "$ARCHIVE_NAME.progress.txt"
-  rm -f "$ARCHIVE_NAME.progress.txt"
+    def __exit__(self, *args):
+        if self.include_checksum_file:
+            self._add_content(
+                f"{self.checksum_type.upper()}SUMS.txt", self.checksum_file_text
+            )
+        self._finalize()
 
-# ZIP
-elif [ "${COMPRESS:0:2}" == "-z" ] ; then
-  setlevel $COMPRESS 6
-  ARCHIVE_NAME="$SRC_DIR_NAME.zip"
-  ARCHIVE_FILE="$TGT_DIR/$ARCHIVE_NAME"
-  echo -n "$SRC_DIR: Creating '$ARCHIVE_NAME' (compression level: $LEVEL) ... "
-  rm -f "$ARCHIVE_FILE"
-  zip -r -$LEVEL "$ARCHIVE_FILE" "$SRC_DIR_NAME" > "$ARCHIVE_NAME.progress.txt"
-  rm -f "$ARCHIVE_NAME.progress.txt"
+        if self.create_file_list:
+            file_list = self.tgt_dir / (self.archive_file.name + ".txt")
+            with open(file_list, "w") as outfile:
+                outfile.write(self.file_list_text)
 
-# 7ZIP
-elif [ "${COMPRESS:0:2}" == "-7" ] ; then
-  setlevel $COMPRESS 6
-  ARCHIVE_NAME="$SRC_DIR_NAME.7z"
-  ARCHIVE_FILE="$TGT_DIR/$ARCHIVE_NAME"
-  echo -n "$SRC_DIR: Creating '$ARCHIVE_NAME' (compression level: $LEVEL) ... "
-  rm -f "$ARCHIVE_FILE"
-  7z a -mmt4 -mx$LEVEL -r -snl -w. "$ARCHIVE_FILE" "$SRC_DIR_NAME" > "$ARCHIVE_NAME.progress.txt"
-  rm -f "$ARCHIVE_NAME.progress.txt"
-fi
+        if self.create_archive_checksum:
+            with (
+                open(f"{self.archive_file}.{self.checksum_type}", "w") as outfile,
+                open(self.archive_file, "rb") as infile,
+            ):
+                outfile.write(
+                    f"{hashlib.file_digest(infile, self.checksum_type).hexdigest()}  {self.archive_file.name}\n"
+                )
 
-echo "done."
 
-# remove the _FILES.md5/.txt file from the SRC_DIR ...
-rm -f "$SRC_DIR_NAME/_FILES.md5" "$SRC_DIR_NAME/_FILES.txt"
+class ZipArchive(ArchiveFile):
+    SUFFIX = ".zip"
 
-cd "$TGT_DIR"
-md5sum "$ARCHIVE_NAME" > "$ARCHIVE_NAME.md5"
+    def _prepare(self):
+        self.archive = zipfile.ZipFile(
+            self.archive_file,
+            mode="w",
+            compression=(
+                zipfile.ZIP_DEFLATED if self.compression else zipfile.ZIP_STORED
+            ),
+            compresslevel=self.compression,
+        )
 
-echo "$SRC_DIR: All done."
+    def _finalize(self):
+        self.archive.close()
+
+    def _add_content(
+        self,
+        archive_filename: Union[Path, str],
+        content: Union[bytes, str],
+    ):
+        self.archive.writestr(str(archive_filename), data=content)
+
+    def _add_file(self, file_to_add: Union[Path, str], archive_filename=None):
+        self.archive.write(file_to_add, arcname=archive_filename)
+
+
+class TarArchive(ArchiveFile):
+    SUFFIX = ".tgz"
+
+    def _prepare(self):
+        if self.compression:
+            tar_mode = "w:gz"
+            tar_params = {"compresslevel": self.compression}
+        else:
+            tar_mode = "w"
+            tar_params = {}
+        self.archive = tarfile.open(str(self.archive_file), mode=tar_mode, **tar_params)
+
+    def _finalize(self):
+        self.archive.close()
+
+    def _add_content(
+        self,
+        archive_filename: Union[Path, str],
+        content: Union[bytes, str],
+    ):
+        if isinstance(content, str):
+            content = content.encode("utf-8")
+        ti = tarfile.TarInfo(name=str(archive_filename))
+        ti.size = len(content)
+        ti.mtime = int(time.time())
+        ti.mode = STAT644
+        self.archive.addfile(ti, fileobj=io.BytesIO(content))
+
+    def _add_file(self, file_to_add: Union[Path, str], archive_filename=None):
+        self.archive.add(file_to_add, arcname=archive_filename)
+
+
+# https://stackoverflow.com/a/34482761
+def progressbar(it, prefix="", size=60, out=sys.stdout, num_items=0):  # Python3.3+
+    count = num_items or len(it)
+
+    def show(j):
+        x = int(size * j / count)
+        print(
+            "{}[{}{}] {}/{}".format(prefix, "#" * x, "." * (size - x), j, count),
+            end="\r",
+            file=out,
+            flush=True,
+        )
+
+    show(0)
+    for i, item in enumerate(it):
+        yield item
+        show(i + 1)
+    print("", flush=True, file=out)
+
+
+def compress_directory(dir_to_compress: Path):
+    dst_dir = Path(str(dir_to_compress) + ".pack")
+    files_to_add = []
+    for dirpath, dirs, files in walk(dir_to_compress):
+        files = [Path(join(dirpath, f)) for f in sorted(files)]
+        if config.no_hidden:
+            # https://stackoverflow.com/a/19859907/902327
+            dirs[:] = [d for d in dirs if not d.startswith(".")]
+            files = [f for f in files if not f.name.startswith(".")]
+        files_to_add += files
+
+    tmp = []
+    for file_to_add in files_to_add:
+        for pattern in exclude_patterns:
+            if not pattern.search(str(file_to_add)):
+                tmp.append(file_to_add)
+    files_to_add = tmp
+
+    ArchiveClass = ZipArchive if config.type == "zip" else TarArchive
+    with ArchiveClass(dir_to_compress) as archive:
+        for file_to_add in progressbar(files_to_add, f"{archive.archive_file.name} "):
+            archive.add_file(file_to_add)
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("dirs", nargs="+", type=Path)
+    parser.add_argument(
+        "-l", "--level", default="6", help=f"set compression level (default: 6)"
+    )
+    parser.add_argument(
+        "--no-hidden",
+        action="store_true",
+        default=False,
+        help=f"do not store hidden files (default: False)",
+    )
+    parser.add_argument(
+        "-t",
+        "--type",
+        choices=("zip", "tar"),
+        default="zip",
+        help=f"specify archive format (default: zip)",
+    )
+    parser.add_argument(
+        "-x",
+        "--exclude",
+        nargs="*",
+        default=[],
+        help=f"specify regex exclude patterns",
+    )
+    parser.add_argument(
+        "-c",
+        "--checksum-type",
+        default="md5",
+        help=f"specify checksum type",
+    )
+    config = parser.parse_args()
+
+    exclude_patterns = [
+        re.compile(pattern) for pattern in DEFAULT_EXCLUDE + config.exclude
+    ]
+
+    for dir_to_compress in config.dirs:
+        if not dir_to_compress.is_dir():
+            print(f"Not a directory: {dir_to_compress}")
+            sys.exit()
+
+    for dir_to_compress in config.dirs:
+        compress_directory(dir_to_compress)
