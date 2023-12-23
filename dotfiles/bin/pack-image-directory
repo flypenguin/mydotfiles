@@ -11,7 +11,9 @@ if [ ! -d "$1" ] ; then
 fi
 
 BASENAME=$(basename "$1")
-THUMBS_DIR=$(create-thumbnail-dir "$1")
+THUMBS_DIR="$1.thumbs"
+
+create-thumbnail-dir "$1"
 pack-directory -z0 "$1"
 
 zip -r -0 "$BASENAME.pack/$BASENAME.thumbs.zip" "$THUMBS_DIR" > "$THUMBS_DIR.progress.txt"

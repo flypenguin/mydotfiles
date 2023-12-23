@@ -1,113 +1,177 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python
+
+import subprocess
+import sys
+from argparse import ArgumentParser
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime as dt
+from os import walk
+from os.path import join, relpath
+from pathlib import Path
+from typing import Tuple
+
+config = None
 
 
-if [ -z "$1" ] ; then
-  echo "USAGE: $(basename $0) TARGETDIR"
-  echo "    - create TARGETDIR_thumbs_TIMESTAMP directory with thumbnail"
-  echo "      images and videos from TARGETDIR"
-  exit -1
-elif [ ! -d "$1" ] ; then
-  echo "ERROR: not a directory: $1"
-  exit -2
-fi
+def cmdline_img(src_file, dst_dir) -> Tuple[Path, list]:
+    dst_file = str(dst_dir / src_file.stem) + "." + config.thumb_format
+    cmd = [
+        "convert",
+        str(src_file),
+        "-quality",
+        config.thumb_quality,
+        "-resize",
+        f"{config.thumb_size}>",
+        "-auto-orient",
+        dst_file,
+    ]
+    return Path(dst_file), cmd
 
-eerr() {
-  echo -en "$@" >&2;
+
+def cmdline_video(src_file, dst_dir, add_params=None) -> Tuple[Path, list]:
+    # create thumb VIDEOS
+    # sources: https://stackoverflow.com/a/20848224, https://superuser.com/a/567934
+    dst_file = str(dst_dir / src_file.stem) + ".mp4"
+    Path(dst_file).unlink(missing_ok=True)
+    add_params = add_params or []
+    cmd = (
+        [
+            "ffmpeg",
+            "-loglevel",
+            "error",
+            "-i",
+            str(src_file),
+            "-movflags",
+            "faststart",
+            "-c:v",
+            "libx265",
+            "-tag:v",
+            "hvc1",
+            "-filter:v",
+            (
+                "scale="
+                f"'min({config.video_res},iw)':'min({config.video_res},ih)'"
+                ":force_original_aspect_ratio=decrease"
+                ","
+                "pad="
+                f"width='ceil(min({config.video_res},iw)/4)*4':height='ceil(min({config.video_res},ih)/4)*4'"
+            ),
+        ]
+        + add_params
+        + [
+            dst_file,
+        ]
+    )
+    return Path(dst_file), cmd
+
+
+def cmdline_gif(src_file, dst_dir) -> Tuple[Path, list]:
+    # animated gif?
+    # https://stackoverflow.com/a/1413234
+    cmd = ["identify", str(src_file)]
+    res = subprocess.run(cmd, capture_output=True)
+    if "gif[1]" in str(res.stdout):
+        # https://unix.stackexchange.com/a/294892
+        return cmdline_video(src_file, dst_dir, add_params=["-pix_fmt", "yuv420p"])
+    else:
+        return cmdline_img(src_file, dst_dir)
+
+
+EXT_MAP = {
+    "avi": cmdline_video,
+    "cr2": cmdline_img,
+    "gif": cmdline_gif,
+    "heic": cmdline_img,
+    "jpeg": cmdline_img,
+    "jpg": cmdline_img,
+    "mkv": cmdline_video,
+    "mov": cmdline_video,
+    "mp4": cmdline_video,
+    "nef": cmdline_img,
+    "png": cmdline_img,
+    "webp": cmdline_img,
 }
 
-CONVERT_QUALITY=${CONVERT_QUALITY:-65}
-CONVERT_RESIZE=${CONVERT_RESIZE:-1920x1080}
-CONVERT_OUTPUT_FORMAT="webp"
-# apple preview: see here: https://is.gd/oeaCF6
-# h265 logging output: https://stackoverflow.com/a/71746426/902327
-FFMPEG_OUTPUT_CODEC="libx265 -x265-params log-level=none -tag:v hvc1"
-FFMPEG_SCALE_SIZE=${FFMPEG_SCALE_SIZE:-360}
-
-export SRC_DIR="$1"
-export TGT_DIR="$PWD/$(basename "$SRC_DIR").thumbs"
-export TS=$(date +%Y%m%d.%H%M%S)
-
-rm -rf "$TGT_DIR"
-cd "$SRC_DIR"
-
-# CREATE THUMBNAILS
-
-mkdir -p "${TGT_DIR}"
-find . -type d -print0 | xargs -0 -I {} mkdir -p "$TGT_DIR/{}"
-
-# create thumbs
-eerr "$SRC_DIR: Creating image thumbnails ... "
-find . \( \
-    -iname "*.jpg"   -o \
-    -iname "*.png"   -o \
-    -iname "*.nef"   -o \
-    -iname "*.cr2"   -o \
-    -iname "*.jpeg"  -o \
-    -iname "*.heic"  -o \
-    -iname "*.gif"  -o \
-    -iname "*.webp"     \
-  \) \
-  | parallel -qI {} \
-    convert {} \
-      -quality "$CONVERT_QUALITY" \
-      -resize "${CONVERT_RESIZE}>" \
-      -auto-orient \
-      "$TGT_DIR/{.}.$CONVERT_OUTPUT_FORMAT"
-eerr "done.\n"
-
-# create thumb VIDEOS
-# sources: https://stackoverflow.com/a/20848224, https://superuser.com/a/567934
-SCALE_RESOLUTION="min($FFMPEG_SCALE_SIZE,iw)':'min($FFMPEG_SCALE_SIZE,ih)"
-SCALE="scale='$SCALE_RESOLUTION':force_original_aspect_ratio=decrease"
-PAD="pad=width='ceil(min(360,iw)/4)*4':height='ceil(min(360,ih)/4)*4'"
-
-eerr "$SRC_DIR: Creating video thumbnails ... "
-find . \( \
-    -iname "*.mp4"   -o \
-    -iname "*.avi"   -o \
-    -iname "*.mov"   -o \
-    -iname "*.mkv"      \
-  \) \
-  | parallel -qI {} \
-    ffmpeg \
-      -loglevel error \
-      -i {} \
-      -c:v $FFMPEG_OUTPUT_CODEC \
-      -filter:v "$SCALE,$PAD" \
-      "$TGT_DIR/{.}.mp4"
-eerr "done.\n"
-
-# sanity check
-find . \( \
-    -iname "*.jpg"   -o \
-    -iname "*.nef"   -o \
-    -iname "*.jpeg"  -o \
-    -iname "*.heic"  -o \
-    -iname "*.webp"     \
-  \) | \
-  while read a ; do
-    file_base=${a%.*}
-    if [[ ! -f "$TGT_DIR/${file_base}.$CONVERT_OUTPUT_FORMAT" ]] ; then
-      echo "[WARNING] no thumb found for: $a"
-    fi
-  done
-
-find . \( \
-    -iname "*.mp4"   -o \
-    -iname "*.avi"   -o \
-    -iname "*.mov"   -o \
-    -iname "*.mkv"      \
-  \) \
-  | while read a ; do
-    file_base=${a%.*}
-    if [[ ! -f "$TGT_DIR/${file_base}.mp4" ]] ; then
-      echo "[WARNING] no thumb found for: $a"
-    fi
-  done
+VALID_EXTS = list(EXT_MAP.keys())
 
 
-# remove empty dirs
-find "$TGT_DIR/" -type d -empty -delete
+class EncodeFile:
+    base: Path
+    src_file: Path
+    dst_file: Path
+    cmdline: list
 
-# output thumbs dir name
-echo "$TGT_DIR"
+    def __init__(self, base: Path, src_file: Path) -> None:
+        self.base = base
+        self.src_file = src_file
+        func = EXT_MAP[self.src_file.suffix[1:].lower()]
+        self.dst_file, self.cmdline = func(self.src_file, self.dst_dir)
+
+    @property
+    def dst_dir(self) -> Path:
+        rel = relpath(self.src_file, self.base)
+        return (Path(str(self.base) + ".thumbs") / rel).parent
+
+    def create_thumb(self) -> Tuple[int, str]:
+        self.dst_dir.mkdir(exist_ok=True)
+        res = subprocess.run(
+            self.cmdline,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=True,
+        )
+        return res.returncode, str(res.stdout)
+
+    def __str__(self):
+        return f"{self.src_file}  ->  {self.dst_dir}"
+
+
+def encode(encode_me: EncodeFile):
+    rv = encode_me.create_thumb()
+    return rv
+
+
+def create_thumbs():
+    tmp0 = {}
+
+    for base_dir in config.img_dirs:
+        for dirpath, _, files in walk(base_dir):
+            for f in files:
+                f = join(dirpath, f)
+                lower_f = f.lower()
+                ext = lower_f.split(".")[-1].lower()
+                if ext not in VALID_EXTS:
+                    continue
+                encode_me = EncodeFile(Path(base_dir), Path(f))
+                tmp0[lower_f] = encode_me
+
+    # check for apple HEIC image + mov - if a HEIC image with the same name exists we
+    # skip this MOV file to save time, because it's an apple "live photo"
+    files_to_encode = []
+    for f, encode_me in tmp0.items():
+        tmp1 = Path(f)
+        if tmp1.suffix != ".mov":
+            files_to_encode.append(encode_me)
+        else:
+            heic_chk = str(tmp1.parent / tmp1.stem) + ".heic"
+            if heic_chk not in tmp0:
+                files_to_encode.append(encode_me)
+
+    num_workers = config.num_workers or None
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        futures = [executor.submit(encode, ifile) for ifile in files_to_encode]
+        for future in as_completed(futures):
+            pass
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("img_dirs", nargs="+")
+    parser.add_argument("--video-res", default="720")
+    parser.add_argument("--thumb-quality", default="65")
+    parser.add_argument("--thumb-size", default="1920x1080")
+    parser.add_argument("--thumb-format", default="webp")
+    parser.add_argument("-n", "--num-workers", default=0, type=int)
+    config = parser.parse_args()
+    print(config)
+    create_thumbs()
