@@ -22,12 +22,28 @@ set -euo pipefail
 echo "Prepare sudo ..."
 sudo echo "sudo prep successful :)"
 
-for DELETE_MASK in "com.microsoft.teams*" "teams*" "*microsoft*" "*oneauth*" ; do
-  find $HOME/Library -iname "$DELETE_MASK" -type d | while read DIR_TO_DELETE ; do
-    delete_teams_file "$DIR_TO_DELETE"
-  done
+TMP_FILE=$(mktemp)
+DELETE_MASK='(^com.microsoft.teams|teams|.*microsoft|.*oneauth).*'
+find $HOME/Library | grep -E "$DELETE_MASK" > $TMP_FILE
+
+echo -e "\nFound these files to delete:\n"
+cat "$TMP_FILE"
+
+echo -n "Delete? (y to delete, ENTER to abort)"
+read DELETE
+
+if [[ -z "$DELETE" ]]; then
+  echo -e "Aborting.\n"
+  rm "$TMP_FILE"
+  exit 255
+fi
+
+cat "$TMP_FILE" | while read to_delete ; do
+  delete_teams_file "$to_delete"
 done
 
+echo -ne "\nDeleting Teams app ... "
 delete_teams_file "/Applications/Microsoft Teams.app"
+echo -e "Done.\n"
 
-echo "All done."
+echo -e "All done.\n"
