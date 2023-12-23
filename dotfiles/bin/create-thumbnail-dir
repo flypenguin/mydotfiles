@@ -133,6 +133,26 @@ def encode(encode_me: EncodeFile):
     return rv
 
 
+# https://stackoverflow.com/a/34482761
+def progressbar(it, prefix="", size=60, out=sys.stdout, num_items=0):  # Python3.3+
+    count = num_items or len(it)
+
+    def show(j):
+        x = int(size * j / count)
+        print(
+            "{}[{}{}] {}/{}".format(prefix, "#" * x, "." * (size - x), j, count),
+            end="\r",
+            file=out,
+            flush=True,
+        )
+
+    show(0)
+    for i, item in enumerate(it):
+        yield item
+        show(i + 1)
+    print("\n", flush=True, file=out)
+
+
 def create_thumbs():
     tmp0 = {}
 
@@ -167,7 +187,11 @@ def create_thumbs():
     num_workers = config.num_workers or None
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = [executor.submit(encode, ifile) for ifile in files_to_encode]
-        for future in as_completed(futures):
+        for future in progressbar(
+            as_completed(futures),
+            "Processing thumbnails ",
+            num_items=len(files_to_encode),
+        ):
             pass
 
 
