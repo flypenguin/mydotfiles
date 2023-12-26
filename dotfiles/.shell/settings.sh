@@ -21,6 +21,10 @@ unset VIRTUAL_ENV_DISABLE_PROMPT
 # fucking go
 export GOPATH=$HOME/dev/go-modules
 
+# fucking terraform, this is insane
+export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+mkdir -p "$TF_PLUGIN_CACHE_DIR"
+
 # ZSH settings
 
 set -k                          # recognize inline comments on the command line
