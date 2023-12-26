@@ -210,6 +210,17 @@ alias aws-fp=ssh-key-hash
 # gitignore service :)
 function giti() { curl -L -s https://www.gitignore.io/api/$@; }
 
+# giba = git backup [branch]
+function giba() {
+  CURRENT_COMMIT="$(git rev-parse --short HEAD)"
+  CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+  BACKUP_BRANCH="backup/$CURRENT_BRANCH/$(date +%Y%m%d-%H%M%S)"
+  git checkout -b "$BACKUP_BRANCH" > /dev/null
+  git checkout "$CURRENT_BRANCH" > /dev/null
+  echo "Created backup branch: $CURRENT_COMMIT -> '$BACKUP_BRANCH'"
+}
+
+
 # ###########################################################################
 #
 # AWS
