@@ -10,25 +10,28 @@ from os.path import join, relpath
 from pathlib import Path
 from typing import Tuple
 
-config = None
 
-
-def cmdline_img(src_file, dst_dir) -> Tuple[Path, list]:
-    dst_file = str(dst_dir / src_file.stem) + "." + config.thumb_format
+def cmdline_thumb_img(src_file, dst_dir, config) -> Tuple[Path, list]:
+    dst_file = str(dst_dir / src_file.stem) + "." + config.img_format
     cmd = [
         "convert",
         str(src_file),
         "-quality",
-        config.thumb_quality,
+        config.img_quality,
         "-resize",
-        f"{config.thumb_size}>",
+        f"{config.img_size}>",
         "-auto-orient",
         dst_file,
     ]
     return Path(dst_file), cmd
 
 
-def cmdline_video(src_file, dst_dir, add_params=None) -> Tuple[Path, list]:
+def cmdline_thumb_video(
+    src_file,
+    dst_dir,
+    config,
+    add_params=None,
+) -> Tuple[Path, list]:
     # create thumb VIDEOS
     # sources: https://stackoverflow.com/a/20848224, https://superuser.com/a/567934
     dst_file = str(dst_dir / src_file.stem) + ".mp4"
@@ -46,17 +49,17 @@ def cmdline_video(src_file, dst_dir, add_params=None) -> Tuple[Path, list]:
             "-c:v",
             "libx265",
             "-crf",
-            f"{config.video_crf}",
+            f"{config.vid_crf}",
             "-tag:v",
             "hvc1",
             "-filter:v",
             (
                 "scale="
-                f"'min({config.video_res},iw)':'min({config.video_res},ih)'"
+                f"'min({config.vid_res},iw)':'min({config.vid_res},ih)'"
                 ":force_original_aspect_ratio=decrease"
                 ","
                 "pad="
-                f"width='ceil(min({config.video_res},iw)/4)*4':height='ceil(min({config.video_res},ih)/4)*4'"
+                f"width='ceil(min({config.vid_res},iw)/4)*4':height='ceil(min({config.vid_res},ih)/4)*4'"
             ),
         ]
         + add_params
@@ -67,7 +70,7 @@ def cmdline_video(src_file, dst_dir, add_params=None) -> Tuple[Path, list]:
     return Path(dst_file), cmd
 
 
-def cmdline_gif(src_file, dst_dir) -> Tuple[Path, list]:
+def cmdline_thumb_gif(src_file, dst_dir, config) -> Tuple[Path, list]:
     # animated gif?
     # https://stackoverflow.com/a/1413234
     cmd = ["identify", str(src_file)]
@@ -80,44 +83,45 @@ def cmdline_gif(src_file, dst_dir) -> Tuple[Path, list]:
 
 
 EXT_MAP = {
-    "avi": cmdline_video,
-    "cr2": cmdline_img,
-    "gif": cmdline_gif,
-    "heic": cmdline_img,
-    "jpeg": cmdline_img,
-    "jpg": cmdline_img,
-    "mkv": cmdline_video,
-    "mov": cmdline_video,
-    "mp4": cmdline_video,
-    "nef": cmdline_img,
-    "png": cmdline_img,
-    "webp": cmdline_img,
+    "avi": cmdline_thumb_video,
+    "cr2": cmdline_thumb_img,
+    "gif": cmdline_thumb_gif,
+    "heic": cmdline_thumb_img,
+    "jpeg": cmdline_thumb_img,
+    "jpg": cmdline_thumb_img,
+    "mkv": cmdline_thumb_video,
+    "mov": cmdline_thumb_video,
+    "mp4": cmdline_thumb_video,
+    "nef": cmdline_thumb_img,
+    "orf": cmdline_thumb_img,
+    "png": cmdline_thumb_img,
+    "webp": cmdline_thumb_img,
 }
 
 VALID_EXTS = list(EXT_MAP.keys())
 
 
+def dst_dir(base_dir, src_file, suffix=".thumbs"):
+    rel = relpath(src_file, base_dir)
+    return (Path(str(base_dir) + suffix) / rel).parent
+
+
 class EncodeFile:
-    base: Path
     src_file: Path
-    dst_file: Path
-    cmdline: list
+    dst_dir: Path
+    config: object
 
-    def __init__(self, base: Path, src_file: Path) -> None:
-        self.base = base
+    def __init__(self, src_file, dst_dir: Path, config: object) -> None:
         self.src_file = src_file
-        func = EXT_MAP[self.src_file.suffix[1:].lower()]
-        self.dst_file, self.cmdline = func(self.src_file, self.dst_dir)
-
-    @property
-    def dst_dir(self) -> Path:
-        rel = relpath(self.src_file, self.base)
-        return (Path(str(self.base) + ".thumbs") / rel).parent
+        self.dst_dir = dst_dir
+        self.config = config
 
     def create_thumb(self) -> Tuple[int, str]:
         self.dst_dir.mkdir(parents=True, exist_ok=True)
+        func = EXT_MAP[self.src_file.suffix[1:].lower()]
+        dst_file, cmdline = func(self.src_file, self.dst_dir, self.config)
         res = subprocess.run(
-            self.cmdline,
+            cmdline,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             check=True,
@@ -153,24 +157,18 @@ def progressbar(it, prefix="", size=60, out=sys.stdout, num_items=0):  # Python3
     print("", flush=True, file=out)
 
 
-def create_thumbs():
+def create_thumbnails_for_dir(base_dir: Path, config: object):
     tmp0 = {}
 
-    for base_dir in config.img_dirs:
-        if not Path(base_dir).is_dir():
-            print(f"Not a directory: {base_dir}")
-            sys.exit()
-
-    for base_dir in config.img_dirs:
-        for dirpath, _, files in walk(base_dir):
-            for f in files:
-                f = join(dirpath, f)
-                lower_f = f.lower()
-                ext = lower_f.split(".")[-1].lower()
-                if ext not in VALID_EXTS:
-                    continue
-                encode_me = EncodeFile(Path(base_dir), Path(f))
-                tmp0[lower_f] = encode_me
+    for dirpath, _, files in walk(base_dir):
+        for f in files:
+            f = join(dirpath, f)
+            lower_f = f.lower()
+            ext = lower_f.split(".")[-1].lower()
+            if ext not in VALID_EXTS:
+                continue
+            encode_me = EncodeFile(Path(f), dst_dir(base_dir, f), config)
+            tmp0[lower_f] = encode_me
 
     # check for apple HEIC image + mov - if a HEIC image with the same name exists we
     # skip this MOV file to save time, because it's an apple "live photo"
@@ -189,23 +187,53 @@ def create_thumbs():
         futures = [executor.submit(encode, ifile) for ifile in files_to_encode]
         for future in progressbar(
             as_completed(futures),
-            "Creating thumbnails ",
+            f"{base_dir.name} ",
             num_items=len(files_to_encode),
         ):
             pass
 
 
-if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("img_dirs", nargs="+")
-    parser.add_argument("--video-res", default="540", help=f"default: 540")
-    parser.add_argument("--video-crf", default="30", help=f"default: 33")
-    parser.add_argument("--thumb-quality", default="65", help=f"default: 65")
-    parser.add_argument("--thumb-size", default="1920x1080", help=f"default: 1920x1080")
-    parser.add_argument("--thumb-format", default="webp", help=f"default: webp")
+def cmd_create_thumbs(config):
+    for base_dir in config.img_dirs:
+        if not Path(base_dir).is_dir():
+            print(f"Not a directory: {base_dir}")
+            continue
+        create_thumbnails_for_dir(base_dir, config)
+
+
+def main():
+    root_parser = ArgumentParser()
+    subparsers = root_parser.add_subparsers(
+        title="subcommands",
+        help="sub commands help",
+        required=True,
+    )
+
+    # create thumbnails
+    parser = subparsers.add_parser(
+        "create-thumbnails",
+        help=(
+            "creates a directory next to the given ones with thumbnail versions of all "
+            "images"
+        ),
+    )
+    parser.add_argument("img_dirs", type=Path, nargs="+")
+    parser.add_argument("--vid-res", default="540", help=f"default: 540")
+    parser.add_argument("--vid-crf", default="30", help=f"default: 33")
+    parser.add_argument("--img-quality", default="65", help=f"default: 65")
+    parser.add_argument("--img-size", default="1920x1080", help=f"default: 1920x1080")
+    parser.add_argument("--img-format", default="webp", help=f"default: webp")
     parser.add_argument(
         "--gif-format", choices=["img", "vid"], default="vid", help=f"default: vid"
     )
     parser.add_argument("-n", "--num-workers", type=int, default=0, help=f"default: 0")
-    config = parser.parse_args()
-    create_thumbs()
+    parser.set_defaults(func=cmd_create_thumbs)
+
+    # parse args
+    config = root_parser.parse_args()
+    config.func(config)
+
+
+if __name__ == "__main__":
+    # prevent cluttering of global namespace ...
+    main()

@@ -15,7 +15,7 @@ THUMBS_DIR="$1.thumbs"
 
 echo "Archiving directory:   [$1]"
 
-create-thumbnail-dir "$1"
+picture-dir-tool create-thumbnails "$1"
 pack-directory -c 0 "$1"
 
 zip -r -0 "$BASENAME.pack/$BASENAME.thumbs.zip" "$THUMBS_DIR" >"$THUMBS_DIR.progress.txt"
