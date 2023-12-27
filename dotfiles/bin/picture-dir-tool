@@ -82,6 +82,17 @@ def cmdline_thumb_gif(src_file, dst_dir, config) -> Tuple[Path, list]:
         return cmdline_img(src_file, dst_dir)
 
 
+RAW_EXTS = [
+    "arw",
+    "cr2",
+    "crw",
+    "dcr",
+    "dng",
+    "nef",
+    "raf",
+    "srf",
+]
+
 EXT_MAP = {
     "avi": cmdline_thumb_video,
     "cr2": cmdline_thumb_img,
@@ -101,7 +112,7 @@ EXT_MAP = {
 VALID_EXTS = list(EXT_MAP.keys())
 
 
-def dst_dir(base_dir, src_file, suffix=".thumbs"):
+def dst_dir_for(base_dir, src_file, suffix=".thumbs"):
     rel = relpath(src_file, base_dir)
     return (Path(str(base_dir) + suffix) / rel).parent
 
@@ -157,6 +168,18 @@ def progressbar(it, prefix="", size=60, out=sys.stdout, num_items=0):  # Python3
     print("", flush=True, file=out)
 
 
+def parallel_convert(base_dir, files_to_encode, config):
+    num_workers = config.num_workers or None
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        futures = [executor.submit(encode, ifile) for ifile in files_to_encode]
+        for future in progressbar(
+            as_completed(futures),
+            f"{base_dir.name} ",
+            num_items=len(files_to_encode),
+        ):
+            pass
+
+
 def create_thumbnails_for_dir(base_dir: Path, config: object):
     tmp0 = {}
 
@@ -167,7 +190,7 @@ def create_thumbnails_for_dir(base_dir: Path, config: object):
             ext = lower_f.split(".")[-1].lower()
             if ext not in VALID_EXTS:
                 continue
-            encode_me = EncodeFile(Path(f), dst_dir(base_dir, f), config)
+            encode_me = EncodeFile(Path(f), dst_dir_for(base_dir, f), config)
             tmp0[lower_f] = encode_me
 
     # check for apple HEIC image + mov - if a HEIC image with the same name exists we
@@ -182,15 +205,43 @@ def create_thumbnails_for_dir(base_dir: Path, config: object):
             if heic_chk not in tmp0:
                 files_to_encode.append(encode_me)
 
-    num_workers = config.num_workers or None
-    with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        futures = [executor.submit(encode, ifile) for ifile in files_to_encode]
-        for future in progressbar(
-            as_completed(futures),
-            f"{base_dir.name} ",
-            num_items=len(files_to_encode),
-        ):
-            pass
+    if len(files_to_encode) == 0:
+        print(f"No images found in: {base_dir}")
+        return
+
+    parallel_convert(base_dir, files_to_encode, config)
+
+
+def move_raw_files_out(base_dir, config):
+    files_to_move = []  # (src_file, dst_dir) tuples
+    files_to_convert = []  # EncodeFile objects
+
+    for dirpath, _, files in walk(base_dir):
+        for f in files:
+            f = join(dirpath, f)
+            lower_f = f.lower()
+            ext = lower_f.split(".")[-1].lower()
+            if ext not in RAW_EXTS:
+                continue
+            files_to_move.append(
+                (Path(f), dst_dir_for(base_dir, f, suffix=".raw-files"))
+            )
+
+    if len(files_to_move) == 0:
+        print(f"Now RAW files found in: {base_dir}")
+        return
+
+    # create directories
+    dirs_to_create = set([item[1] for item in files_to_move])
+    for dir_to_create in dirs_to_create:
+        dir_to_create.mkdir(exist_ok=True, parents=True)
+
+    for src_file, dst_dir in progressbar(files_to_move, f"{base_dir.name} (move)"):
+        dst_file = dst_dir / src_file.name
+        src_file.rename(dst_file)
+        files_to_convert.append(EncodeFile(dst_file, src_file.parent, config))
+
+    parallel_convert(base_dir, files_to_convert, config)
 
 
 def cmd_create_thumbs(config):
@@ -199,6 +250,14 @@ def cmd_create_thumbs(config):
             print(f"Not a directory: {base_dir}")
             continue
         create_thumbnails_for_dir(base_dir, config)
+
+
+def cmd_extract_raws(config):
+    for base_dir in config.img_dirs:
+        if not Path(base_dir).is_dir():
+            print(f"Not a directory: {base_dir}")
+            continue
+        move_raw_files_out(base_dir, config)
 
 
 def main():
@@ -228,6 +287,25 @@ def main():
     )
     parser.add_argument("-n", "--num-workers", type=int, default=0, help=f"default: 0")
     parser.set_defaults(func=cmd_create_thumbs)
+
+    # convert all
+    parser = subparsers.add_parser(
+        "extract-raw",
+        help=(
+            "moves all RAW files out of the given directories into a new one next to it"
+            "and replaces them with JPEGs"
+        ),
+    )
+    parser.add_argument("img_dirs", nargs="+", type=Path)
+    parser.add_argument("--vid-res", default="10000", help=f"default: 540")
+    parser.add_argument("--vid-crf", default="24", help=f"default: 24")
+    parser.add_argument("--img-quality", default="85", help=f"default: 85")
+    parser.add_argument(
+        "--img-size", default="30000x30000", help=f"default: 30000x30000"
+    )
+    parser.add_argument("--img-format", default="jpg", help=f"default: jpg")
+    parser.add_argument("-n", "--num-workers", type=int, default=0, help=f"default: 0")
+    parser.set_defaults(func=cmd_extract_raws)
 
     # parse args
     config = root_parser.parse_args()
