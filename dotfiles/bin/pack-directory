@@ -131,6 +131,11 @@ class ZipArchive(ArchiveFile):
 class TarArchive(ArchiveFile):
     SUFFIX = ".tgz"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.compression == 0:
+            self.archive_file = self.tgt_dir / (self.src_dir.name + ".tar")
+
     def _prepare(self):
         if self.compression:
             tar_mode = "w:gz"
@@ -199,7 +204,7 @@ def compress_directory(dir_to_compress: Path):
     files_to_add = tmp
 
     ArchiveClass = ZipArchive if config.type == "zip" else TarArchive
-    with ArchiveClass(dir_to_compress) as archive:
+    with ArchiveClass(dir_to_compress, compression=config.level) as archive:
         for file_to_add in progressbar(files_to_add, f"{archive.archive_file.name} "):
             archive.add_file(file_to_add)
 
@@ -208,7 +213,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("dirs", nargs="+", type=Path)
     parser.add_argument(
-        "-l", "--level", default="6", help=f"set compression level (default: 6)"
+        "-l", "--level", default=6, type=int, help=f"set compression level (default: 6)"
     )
     parser.add_argument(
         "--no-hidden",
