@@ -77,9 +77,11 @@ def cmdline_thumb_gif(src_file, dst_dir, config) -> Tuple[Path, list]:
     res = subprocess.run(cmd, capture_output=True)
     if "gif[1]" in str(res.stdout) and config.gif_format == "vid":
         # https://unix.stackexchange.com/a/294892
-        return cmdline_video(src_file, dst_dir, add_params=["-pix_fmt", "yuv420p"])
+        return cmdline_thumb_video(
+            src_file, dst_dir, add_params=["-pix_fmt", "yuv420p"]
+        )
     else:
-        return cmdline_img(src_file, dst_dir)
+        return cmdline_thumb_img(src_file, dst_dir)
 
 
 RAW_EXTS = [
@@ -112,9 +114,9 @@ EXT_MAP = {
 VALID_EXTS = list(EXT_MAP.keys())
 
 
-def dst_dir_for(base_dir, src_file, suffix=".thumbs"):
+def dst_dir_for(base_dir, src_file, config):
     rel = relpath(src_file, base_dir)
-    return (Path(str(base_dir) + suffix) / rel).parent
+    return (Path(str(base_dir) + config.suffix) / rel).parent
 
 
 class EncodeFile:
@@ -190,7 +192,7 @@ def create_thumbnails_for_dir(base_dir: Path, config: object):
             ext = lower_f.split(".")[-1].lower()
             if ext not in VALID_EXTS:
                 continue
-            encode_me = EncodeFile(Path(f), dst_dir_for(base_dir, f), config)
+            encode_me = EncodeFile(Path(f), dst_dir_for(base_dir, f, config), config)
             tmp0[lower_f] = encode_me
 
     # check for apple HEIC image + mov - if a HEIC image with the same name exists we
@@ -223,9 +225,7 @@ def move_raw_files_out(base_dir, config):
             ext = lower_f.split(".")[-1].lower()
             if ext not in RAW_EXTS:
                 continue
-            files_to_move.append(
-                (Path(f), dst_dir_for(base_dir, f, suffix=".raw-files"))
-            )
+            files_to_move.append((Path(f), dst_dir_for(base_dir, f, config)))
 
     if len(files_to_move) == 0:
         print(f"Now RAW files found in: {base_dir}")
@@ -279,12 +279,13 @@ def main():
     parser.add_argument("img_dirs", type=Path, nargs="+")
     parser.add_argument("--vid-res", default="540", help=f"default: 540")
     parser.add_argument("--vid-crf", default="30", help=f"default: 33")
-    parser.add_argument("--img-quality", default="65", help=f"default: 65")
+    parser.add_argument("-q", "--img-quality", default="65", help=f"default: 65")
     parser.add_argument("--img-size", default="1920x1080", help=f"default: 1920x1080")
     parser.add_argument("--img-format", default="webp", help=f"default: webp")
     parser.add_argument(
         "--gif-format", choices=["img", "vid"], default="vid", help=f"default: vid"
     )
+    parser.add_argument("-s", "--suffix", default=".thumbs", help=f"default: .thumbs")
     parser.add_argument("-n", "--num-workers", type=int, default=0, help=f"default: 0")
     parser.set_defaults(func=cmd_create_thumbs)
 
@@ -299,11 +300,14 @@ def main():
     parser.add_argument("img_dirs", nargs="+", type=Path)
     parser.add_argument("--vid-res", default="10000", help=f"default: 540")
     parser.add_argument("--vid-crf", default="24", help=f"default: 24")
-    parser.add_argument("--img-quality", default="85", help=f"default: 85")
+    parser.add_argument("-q", "--img-quality", default="85", help=f"default: 85")
     parser.add_argument(
         "--img-size", default="30000x30000", help=f"default: 30000x30000"
     )
     parser.add_argument("--img-format", default="jpg", help=f"default: jpg")
+    parser.add_argument(
+        "-s", "--suffix", default=".raw-files", help=f"default: .raw-files"
+    )
     parser.add_argument("-n", "--num-workers", type=int, default=0, help=f"default: 0")
     parser.set_defaults(func=cmd_extract_raws)
 
