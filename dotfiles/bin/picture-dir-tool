@@ -280,12 +280,14 @@ def main():
     parser.add_argument("--vid-res", default="540", help=f"default: 540")
     parser.add_argument("--vid-crf", default="30", help=f"default: 33")
     parser.add_argument("-q", "--img-quality", default="65", help=f"default: 65")
-    parser.add_argument("--img-size", default="1920x1080", help=f"default: 1920x1080")
-    parser.add_argument("--img-format", default="webp", help=f"default: webp")
+    parser.add_argument(
+        "-s", "--img-size", default="1920x1080", help=f"default: 1920x1080"
+    )
+    parser.add_argument("-f", "--img-format", default="webp", help=f"default: webp")
     parser.add_argument(
         "--gif-format", choices=["img", "vid"], default="vid", help=f"default: vid"
     )
-    parser.add_argument("-s", "--suffix", default=".thumbs", help=f"default: .thumbs")
+    parser.add_argument("--suffix", default=".thumbs", help=f"default: .thumbs")
     parser.add_argument("-n", "--num-workers", type=int, default=0, help=f"default: 0")
     parser.set_defaults(func=cmd_create_thumbs)
 
@@ -302,12 +304,10 @@ def main():
     parser.add_argument("--vid-crf", default="24", help=f"default: 24")
     parser.add_argument("-q", "--img-quality", default="85", help=f"default: 85")
     parser.add_argument(
-        "--img-size", default="30000x30000", help=f"default: 30000x30000"
+        "-s", "--img-size", default="30000x30000", help=f"default: 30000x30000"
     )
-    parser.add_argument("--img-format", default="jpg", help=f"default: jpg")
-    parser.add_argument(
-        "-s", "--suffix", default=".raw-files", help=f"default: .raw-files"
-    )
+    parser.add_argument("-f", "--img-format", default="jpg", help=f"default: jpg")
+    parser.add_argument("--suffix", default=".raw-files", help=f"default: .raw-files")
     parser.add_argument("-n", "--num-workers", type=int, default=0, help=f"default: 0")
     parser.set_defaults(func=cmd_extract_raws)
 
