@@ -46,21 +46,37 @@ fi
 #
 
 # $1 - optional - work on WHAT. default: current path name
-wo() { if [ -z "$1" ]; then workon "$(basename "$PWD")"; else workon "$1"; fi; }
+# WHY DO WE NEED THIS EPIC SHIT?!
+# BECAUSE FUCKING PYENV ACTIVATE DOES NOT MODIFY THE GODFORSAKEN
+# PROMPT, BECAUSE "FUCK IT". THIS IS THE ULTIMATE FUCKED UP MOTHERFUCKING
+# BLOODY FUCKED UP SHIT SHOW.
+# also, the auto-activate feature is probably fucked up and broken as well.
+# python envs are just the MOTHER of all FUCKs.
+wo() {
+  pyenv="${1:-$(basename "$PWD")}"
+  echo "pyenv=$pyenv"
+  pyenv_name="${pyenv##*/}"
+  activate_script="$HOME/.pyenv/versions/$pyenv/bin/activate"
+  if [ ! -f "$activate_script" ]; then
+    echo "ERROR: virtual env '$pyenv_name' not found."
+    return
+  fi
+  source "$activate_script"
+}
 
 # Create Virtual Environment
 cvi() {
-  PYTHON="$(which python3)"
   ENVNAME="$(basename $PWD)"
-  # https://stackoverflow.com/a/34531699
-  while getopts "hn:p:" OPT; do
+  PYVER=$(pyenv version | awk '{print $1}')
+  while getopts "hn:v:" OPT
+  do
     case $OPT in
     h)
-      echo "USAGE: cvi [-p python] [-n ENVNAME] [-- mkvirtualenv_param,...]"
+      echo "USAGE: cvi [-v python_version] [-n ENVNAME] [-- mkvirtualenv_param,...]"
       return
       ;;
-    p)
-      PYTHON="$OPTARG"
+    v)
+      PYVER="$OPTARG"
       ;;
     n)
       ENVNAME="$OPTARG"
@@ -68,18 +84,42 @@ cvi() {
     esac
   done
   shift "$((OPTIND - 1))"
-
-  echo "Using python interpreter:             $PYTHON"
-  echo "Using virtualenv name:                $ENVNAME"
-  echo "Additional mkvirtualenv parameters:   ${@:--}"
+  echo "Using python version:                       $PYVER"
+  echo "Using virtualenv name:                      $ENVNAME"
+  echo "Additional 'pyenv virtualenv' parameters:   ${@:--}"
   TMP=$(mktemp)
-  if mkvirtualenv "$ENVNAME" -p "$PYTHON" "$@" >"$TMP" 2>&1; then
+  if pyenv virtualenv -v $PYVER "$ENVNAME"
+  then
+    # activate the newly created environment
+    wo "$ENVNAME"
     echo "${H_YELO}Virtual${C_REST} environment '${H_GREN}$ENVNAME${C_REST}' active: ${H_GREN}$(python --version)${C_REST}"
   else
     cat "$TMP"
     echo "${H_REDD}ERROR:${C_REST} something went wrong."
   fi
+  # _always_ remove SUPER IRRITATING .python-version file, THAT JUST SUCKS
+  rm -f .python-version
+  pushd . > /dev/null
+  cd $HOME/.virtualenvs
+  ln -sf "../.pyenv/versions/$ENVNAME" .
+  popd > /dev/null
   rm "$TMP"
+}
+
+# Remove a virtualenv
+rvi() {
+  if [ -z "$1" -o "$1" = "-h" ]; then
+    echo "USAGE: rvi ENV_NAME"
+    return
+  fi
+  ENVNAME="$1"
+  if pyenv virtualenv-delete "$ENVNAME"
+  then
+    echo "done."
+  else
+    echo "ERROR:"
+  fi
+  rm -rf "$HOME/.virtualenvs/$ENVNAME"
 }
 
 # Create VenV environment (python3 -m venv ...)

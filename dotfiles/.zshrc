@@ -27,7 +27,9 @@ done
 path=("$HOME/bin" $path)
 if [ "$UNAME" = "Darwin" ] ; then
   # fix VIRTUALENVWRAPPER on OS X
-  export WORKON_HOME=$HOME/.virtualenvs
+  export PYENV_VIRTUALENV_DISABLE_PROMPT=0
+  # see $HOME/.pyenv/versions/<envname>/bin/activate ...
+  unset VIRTUAL_ENV_DISABLE_PROMPT
   export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
   export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
 fi
@@ -37,6 +39,7 @@ if command -v pyenv > /dev/null 2>&1 ; then
   export PYENV_ROOT="$HOME/.pyenv"
   export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init --path)"
+  eval "$(pyenv virtualenv-init -)"
   ADD_PLUGINS+="pyenv"
 fi
 
