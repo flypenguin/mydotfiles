@@ -39,8 +39,13 @@ if command -v pyenv > /dev/null 2>&1 ; then
   export PYENV_ROOT="$HOME/.pyenv"
   export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init --path)"
-  eval "$(pyenv virtualenv-init -)"
-  ADD_PLUGINS+="pyenv"
+
+  # SLOW PROMPT FIX - https://github.com/pyenv/pyenv-virtualenv/issues/259#issuecomment-1731123922
+  #eval "$(pyenv virtualenv-init -)"
+  eval "$(pyenv virtualenv-init - zsh | sed s/precmd/chpwd/g)"
+
+  # also, DO NOT use the "pyenv" oh-my-zsh plugin, it will re-load the standard
+  # loader
 fi
 
 export ZSH="$HOME/.oh-my-zsh"
@@ -51,7 +56,7 @@ ZSH_THEME="robbyrussell"
 DISABLE_UPDATE_PROMPT="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(direnv git docker virtualenv virtualenvwrapper pyenv common-aliases kubectl fzf aws brew)
+plugins=(direnv git docker virtualenv virtualenvwrapper common-aliases kubectl fzf aws brew)
 plugins+=(${ADD_PLUGINS[@]})
 
 # CASE_SENSITIVE="true"
