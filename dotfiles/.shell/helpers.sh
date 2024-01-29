@@ -426,6 +426,12 @@ EOF
 
 # gat = Get Aws sessionToken
 gat() {
+  for check_cmd in aws jq; do
+    if ! type $check_cmd > /dev/null; then
+      echo "ERROR: command '$check_cmd' is not installed. Aborting."
+      return
+    fi
+  done
   local FORCE_TOKEN="no"
   local USE_PROFILE
 
