@@ -17,10 +17,14 @@ ADD_PLUGINS=()
 # later = higher preference, so /usr/local is "first" in the
 # list
 for PATH_SEARCH in \
-  "/usr/local/bin" \
   "/opt/homebrew/bin" \
+  "/usr/local/bin" \
+  "/home/linuxbrew/.linuxbrew/bin" \
 ; do
-  [ -d "$PATH_SEARCH" ] && path=($PATH_SEARCH $path)
+  if [ -d "$PATH_SEARCH" ]; then
+    path=($PATH_SEARCH $path)
+    ADD_PLUGINS+="brew"
+  fi
 done
 
 # this is annoying, but for now it works.
