@@ -55,7 +55,11 @@ fi
 export ZSH="$HOME/.oh-my-zsh"
 export UPDATE_ZSH_DAYS=13
 
-ZSH_THEME="robbyrussell"
+if [ -d "$HOME/.oh-my-zsh.theme" ]; then
+  ZSH_THEME="$(cat "$HOME/.oh-my-zsh.theme")"
+else
+  ZSH_THEME="robbyrussell"
+fi
 
 DISABLE_UPDATE_PROMPT="true"
 HIST_STAMPS="yyyy-mm-dd"
