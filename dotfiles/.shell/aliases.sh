@@ -133,7 +133,7 @@ alias     kcsc="kubectl config set-context"
 alias     kcdc="kubectl config delete-context"
 alias     kccc="kubectl config current-context"
 alias     kcgc="kubectl config get-contexts"
-alias      kcn="kubectl config set-context $(kubectl config current-context) --namespace"
+alias      kcn="kubectl config set-context \$(kubectl config current-context) --namespace"
 
 alias     kdel="kubectl delete"
 alias    kdelf="kubectl delete -f"
