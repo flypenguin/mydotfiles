@@ -99,10 +99,7 @@ cvi() {
   fi
   # _always_ remove SUPER IRRITATING .python-version file, THAT JUST SUCKS
   rm -f .python-version
-  pushd . > /dev/null
-  cd $HOME/.virtualenvs
-  ln -sf "../.pyenv/versions/$ENVNAME" .
-  popd > /dev/null
+  (mkdir "$HOME/.virtualenvs" ; cd $HOME/.virtualenvs && ln -sf "../.pyenv/versions/$ENVNAME" .)
   rm "$TMP"
 }
 
