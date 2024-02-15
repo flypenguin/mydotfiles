@@ -2,9 +2,10 @@
 
 import hashlib
 import io
-import subprocess
+import os
 import re
 import stat
+import subprocess
 import sys
 import tarfile
 import time
@@ -45,6 +46,10 @@ class ArchiveFile:
         self.src_dir = Path(src_dir)
         self.tgt_dir = Path(str(self.src_dir) + ".pack")
         self.archive_file = self.tgt_dir / (self.src_dir.name + self.SUFFIX)
+        self.is_unix = sys.platform in ("darwin", "linux")
+
+    def _add_symlink_file(self, file_to_add: Union[Path, str], archive_filename=None):
+        raise NotImplementedError("ArchiveFile._add_file()")
 
     def _add_file(self, file_to_add: Union[Path, str], archive_filename=None):
         raise NotImplementedError("ArchiveFile._add_file()")
@@ -65,12 +70,16 @@ class ArchiveFile:
     def add_file(self, file_to_add: Union[Path, str]):
         file_to_add = Path(file_to_add)
         rp = relpath(file_to_add, start=self.src_dir)
+        is_link = os.path.islink(file_to_add)
         if self.create_file_list:
-            self.file_list_text += f"{rp}\n"
-        if self.include_checksum_file:
+            self.file_list_text += f"{rp}{' [SYMLINK]' if is_link else ''}\n"
+        if self.include_checksum_file and not is_link:
             with open(file_to_add, "rb") as infile:
                 self.checksum_file_text += f"{hashlib.file_digest(infile, self.checksum_type).hexdigest()}  {rp}\n"
-        self._add_file(file_to_add, archive_filename=rp)
+        if is_link:
+            self._add_symlink_file(file_to_add, archive_filename=rp)
+        else:
+            self._add_file(file_to_add, archive_filename=rp)
 
     def __enter__(self):
         archive_file = self.archive_file
@@ -123,6 +132,31 @@ class ZipArchive(ArchiveFile):
         content: Union[bytes, str],
     ):
         self.archive.writestr(str(archive_filename), data=content)
+
+    def _add_symlink_file(self, file_to_add: Union[Path, str], archive_filename=None):
+        # see https://stackoverflow.com/a/65817451
+        link_target = os.readlink(file_to_add)
+        zipInfo  = zipfile.ZipInfo(str(archive_filename or symlink_file))
+        # System which created ZIP archive, 3 = Unix; 0 = Windows
+        zipInfo.create_system = 3
+        unix_st_mode = (
+            stat.S_IFLNK |
+            stat.S_IRUSR |
+            stat.S_IWUSR |
+            stat.S_IXUSR |
+            stat.S_IRGRP |
+            stat.S_IWGRP |
+            stat.S_IXGRP |
+            stat.S_IROTH |
+            stat.S_IWOTH |
+            stat.S_IXOTH
+        )
+        # The Python zipfile module accepts the 16-bit "Mode" field (that stores
+        # st_mode field from struct stat, containing user/group/other permissions,
+        # setuid/setgid and symlink info, etc) of the ASi extra block for Unix as
+        # bits 16-31 of the external_attr
+        zipInfo.external_attr = unix_st_mode << 16
+        self.archive.writestr(zipInfo, link_target)
 
     def _add_file(self, file_to_add: Union[Path, str], archive_filename=None):
         self.archive.write(file_to_add, arcname=archive_filename)
@@ -203,6 +237,11 @@ def compress_directory(dir_to_compress: Path):
                 tmp.append(file_to_add)
     files_to_add = tmp
 
+    if not files_to_add:
+        print(f"Nothing to be done for '{dir_to_compress.name}'.")
+        return
+
+    platform = sys.platform
     ArchiveClass = ZipArchive if config.type == "zip" else TarArchive
     with ArchiveClass(dir_to_compress, compression=config.level) as archive:
         for file_to_add in progressbar(files_to_add, f"{archive.archive_file.name} "):
