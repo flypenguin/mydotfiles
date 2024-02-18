@@ -17,26 +17,16 @@ ADD_PLUGINS=()
 # later = higher preference, so /usr/local is "first" in the
 # list
 for PATH_SEARCH in \
-  "/opt/homebrew/bin" \
-  "/usr/local/bin" \
   "/home/linuxbrew/.linuxbrew/bin" \
+  "/usr/local/bin" \
+  "/opt/homebrew/bin" \
+  "$HOME/bin" \
 ; do
   if [ -d "$PATH_SEARCH" ]; then
     path=($PATH_SEARCH $path)
     ADD_PLUGINS+="brew"
   fi
 done
-
-# this is annoying, but for now it works.
-path=("$HOME/bin" $path)
-if [ "$UNAME" = "Darwin" ] ; then
-  # fix VIRTUALENVWRAPPER on OS X
-  export PYENV_VIRTUALENV_DISABLE_PROMPT=0
-  # see $HOME/.pyenv/versions/<envname>/bin/activate ...
-  unset VIRTUAL_ENV_DISABLE_PROMPT
-  export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
-  export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-fi
 
 # add pyenv _before_ the plugins load ... ugly fucking hack.
 if command -v pyenv > /dev/null 2>&1 ; then

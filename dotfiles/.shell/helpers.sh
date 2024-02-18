@@ -546,8 +546,9 @@ update_dynamic_paths() {
 
   if [[ "$UNAME" = "Darwin" ]]; then
     for a in \
+      /usr/local \
       /opt/homebrew \
-      /usr/local; do
+    ; do
       if [[ -d "$a" ]]; then
         find "$a" -type d -name gnubin | while read gnu_dir; do
           echo "Adding bin dir: $gnu_dir"
