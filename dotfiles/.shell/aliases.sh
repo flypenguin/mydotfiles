@@ -58,7 +58,7 @@ alias gb="git --no-pager branch -vv"
 if which eza >/dev/null 2>&1; then
   unalias ls
   alias  ls="eza"
-  alias  ll="ls -lFh"
+  alias  ll="ls -lh"
   alias  la="ll -a"
   alias  lg="ll -G"
   alias dir="lg"
