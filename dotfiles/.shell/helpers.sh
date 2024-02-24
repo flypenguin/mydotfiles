@@ -66,31 +66,31 @@ wo() {
 
 # Create Virtual Environment
 cvi() {
-  ENVNAME="$(basename $PWD)"
-  PYVER=$(pyenv version | awk '{print $1}')
   while getopts "hn:v:" OPT
   do
     case $OPT in
     h)
-      echo "USAGE: cvi [-v python_version] [-n ENVNAME] [-- mkvirtualenv_param,...]"
+      echo "USAGE: cvi [-v python_version] ENVNAME [-- mkvirtualenv_param,...]"
       return
       ;;
     v)
       PYVER="$OPTARG"
       ;;
-    n)
-      ENVNAME="$OPTARG"
-      ;;
     esac
   done
   shift "$((OPTIND - 1))"
+
+  PYVER=$(pyenv version | awk '{print $1}')
+  ENVNAME="${1:-}"
+  [ -n "$ENVNAME" ] && shift
+
   echo "Using python version:                       $PYVER"
   echo "Using virtualenv name:                      $ENVNAME"
   echo "Additional 'pyenv virtualenv' parameters:   ${@:--}"
+
   TMP=$(mktemp)
-  if pyenv virtualenv -v $PYVER "$ENVNAME"
-  then
-    # activate the newly created environment
+
+  if pyenv virtualenv $PYVER $ENVNAME ; then
     wo "$ENVNAME"
     echo "${H_YELO}Virtual${C_REST} environment '${H_GREN}$ENVNAME${C_REST}' active: ${H_GREN}$(python --version)${C_REST}"
   else
@@ -99,7 +99,6 @@ cvi() {
   fi
   # _always_ remove SUPER IRRITATING .python-version file, THAT JUST SUCKS
   rm -f .python-version
-  (mkdir "$HOME/.virtualenvs" ; cd $HOME/.virtualenvs && ln -sf "../.pyenv/versions/$ENVNAME" .)
   rm "$TMP"
 }
 
