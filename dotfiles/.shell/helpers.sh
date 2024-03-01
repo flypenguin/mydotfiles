@@ -82,7 +82,7 @@ cvi() {
 
   PYVER=$(pyenv version | awk '{print $1}')
   ENVNAME="${1:-}"
-  [ -n "$ENVNAME" ] && shift
+  [ -n "$ENVNAME" ] && shift || ENVNAME="$(basename $PWD)"
 
   echo "Using python version:                       $PYVER"
   echo "Using virtualenv name:                      $ENVNAME"
