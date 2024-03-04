@@ -13,6 +13,8 @@ if [ ! -d "$HOME/.dotfiles" ] ; then
   cd "$HOME"
   # now we *definitively* have git ...
   git clone https://github.com/flypenguin/mydotfiles.git .dotfiles
+else
+  (cd "$HOME/.dotfiles" ; git pull)
 fi
 
 # NOW we have the brewfile :) . use it.
