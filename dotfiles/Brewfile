@@ -5,11 +5,33 @@ tap "homebrew/cask-drivers"
 tap "homebrew/cask-fonts"
 tap "homebrew/cask-versions"
 tap "homebrew/bundle"
-tap "homebrew/core"
-tap "neovim/neovim"
 tap "aws/tap"
-tap "willdoescode/natls"
-tap "filippo.io/age"
+
+# super essential
+cask "contexts"
+cask "a-better-finder-rename"
+cask "dropbox"
+cask "dropzone"
+# "exactscan" ist NOT "exactscan PRO"
+cask "firefox"
+cask "gpg-suite"
+cask "hazel"
+cask "iterm2"
+cask "nextcloud"
+cask "onedrive"
+cask "telegram"           # the correct one
+cask "typinator"
+cask "whatsapp"
+# pastebot -> see below "mac app store"
+cask "logitech-unifying"
+cask "lunar"
+brew "mas"
+
+# editors
+cask "jetbrains-toolbox"
+cask "sublime-text-dev"
+cask "vscodium"
+cask "zed"
 
 # replace Mac OS command line utils
 brew "curl"
@@ -26,13 +48,13 @@ brew "openssl"
 brew "bash"
 
 # previously uninstalled command line utils
-brew "exa"
+brew "eza"
 brew "dos2unix"
 brew "fzf"
 brew "fzy"
+brew "git"
 brew "gnupg"
 brew "htop-osx"
-brew "xz"
 brew "imagemagick"
 brew "jq"
 brew "nmap"
@@ -40,85 +62,95 @@ brew "pv"
 brew "ripgrep"
 brew "the_silver_searcher"      # "ag" :)
 brew "tmux"
-brew "unrar"
 brew "watch"
 brew "wget"
-brew "fish"
-brew "git"
-brew "jump"
+brew "xz"
+brew "yq"
 
-# fonts
-cask "font-fantasque-sans-mono"
-cask "font-fira-code"
-cask "font-hack"
-cask "font-inconsolata"
-cask "font-jetbrains-mono"
-cask "font-monoid"
-cask "font-source-code-pro"
-cask "font-sudo"
-cask "font-victor-mono"
-
-# docker & friends
-brew "docker"
-brew "docker-machine"
-brew "docker-compose"
-
-# coding
-cask "visual-studio-code"
+# coding and work related
 brew "autoenv"
-brew "bfg"
-brew "node"
-brew "python3"
-brew "tig"
-brew "delta"
-
-# misc applications
-brew "hugo"
-
-# cloud shit
 brew "awscli"
+brew "ansible"
+brew "awscli"
+brew "doctl"
+brew "helm"
+brew "helmsman"
+brew "k9s"
+brew "kubernetes-cli"
+brew "pgcli"
+brew "pyenv"
+brew "pyenv-virtualenv"
+brew "telnet"
 brew "terraform"
-
-# mac stuff
-cask "fluor"
-cask "gpg-suite"
-cask "iterm2"
-cask "logitech-unifying"
-cask "virtualbox"
-cask "hazel"
-brew "mas"
+cask "boop"
+cask "docker"
+cask "fork"
+cask "postgres-unofficial"
+cask "slack"
 
 # (mac) ui appliccations
-cask "firefox"
-cask "authy"
+cask "cyberduck"
+cask "libreoffice"
+cask "logitech-options"
 cask "pdf-expert"
 cask "rocket"
-cask "dozer"
-cask "contexts"
-cask "logitech-options"
-cask "typinator"
-cask "nextcloud"
-cask "fontexplorer-x-pro"
-cask "jdownloader"
-cask "libreoffice"
-cask "sublime-text-dev"
-cask "pycharm"
-cask "wireshark"
-cask "cyberduck"
-cask "telegram"           # the correct one
 cask "typora"             # markdown editor
-# cask "pastebot" -> bought in app store ...
+cask "wireshark"
+
+# misc
+brew "croc"
+brew "yt-dlp"
+
+# fonts
+font-commit-mono
+font-dm-mono
+font-fira-code
+font-fira-mono
+font-hack
+font-ibm-plex-mono
+font-ibm-plex-sans
+font-ibm-plex-sans-condensed
+font-ibm-plex-serif
+font-inconsolata
+font-intel-one-mono
+font-iosevka
+font-iosevka-slab
+font-jetbrains-mono
+font-juliamono
+font-monoid
+font-noto-mono
+font-noto-sans-mono
+font-nova-mono
+font-pt-mono
+font-roboto-mono
+font-sf-mono
+font-share-tech-mono
+font-source-code-pro
+font-ubuntu-mono
+# nerd
+font-bitstream-vera-sans-mono-nerd-font
+font-dejavu-sans-mono-nerd-font
+font-droid-sans-mono-nerd-font
+font-fira-mono-nerd-font
+font-go-mono-nerd-font
+font-iosevka-nerd-font
+font-roboto-mono-nerd-font
+font-shure-tech-mono-nerd-font
+font-ubuntu-mono-nerd-font
+# powerline
+font-dejavu-sans-mono-for-powerline
+font-droid-sans-mono-for-powerline
+font-fira-mono-for-powerline
+font-noto-mono-for-powerline
+font-roboto-mono-for-powerline
+font-sf-mono-for-powerline
+font-ubuntu-mono-derivative-powerline
 
 # mac app store applications
 mas "Amphetamine", id: 937984704
-mas "Affinity Photo", id: 824183456
-mas "Affinity Publisher", id: 881418622
-mas "Banking 4X", id: 926711151
 mas "BetterSnapTool", id: 417375580
-mas "ForkLift", id: 412448059
 mas "Keka", id: 470158793
 mas "MoneyMoney", id: 872698314
 mas "Pastebot", id: 1179623856
 mas "PhotoSync", id: 418818452
 mas "The Unarchiver", id: 425424353
-mas "Monosnap", id: 540348655
