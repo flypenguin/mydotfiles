@@ -3,6 +3,8 @@
 # install homebrew if needed
 if ! which brew ; then
   echo "Installing homebrew ..."
+  echo "We need sudo. Activating."
+  sudo ls
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 else
   echo "Skipping homebrew installation. Seems to be installed."
