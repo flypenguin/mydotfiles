@@ -25,6 +25,8 @@ cask "whatsapp"
 # pastebot -> see below "mac app store"
 cask "logitech-unifying"
 cask "lunar"
+
+# app store command line interface
 brew "mas"
 
 # editors
@@ -102,49 +104,49 @@ brew "croc"
 brew "yt-dlp"
 
 # fonts
-font-commit-mono
-font-dm-mono
-font-fira-code
-font-fira-mono
-font-hack
-font-ibm-plex-mono
-font-ibm-plex-sans
-font-ibm-plex-sans-condensed
-font-ibm-plex-serif
-font-inconsolata
-font-intel-one-mono
-font-iosevka
-font-iosevka-slab
-font-jetbrains-mono
-font-juliamono
-font-monoid
-font-noto-mono
-font-noto-sans-mono
-font-nova-mono
-font-pt-mono
-font-roboto-mono
-font-sf-mono
-font-share-tech-mono
-font-source-code-pro
-font-ubuntu-mono
+cask "font-commit-mono"
+cask "font-dm-mono"
+cask "font-fira-code"
+cask "font-fira-mono"
+cask "font-hack"
+cask "font-ibm-plex-mono"
+cask "font-ibm-plex-sans"
+cask "font-ibm-plex-sans-condensed"
+cask "font-ibm-plex-serif"
+cask "font-inconsolata"
+cask "font-intel-one-mono"
+cask "font-iosevka"
+cask "font-iosevka-slab"
+cask "font-jetbrains-mono"
+cask "font-juliamono"
+cask "font-monoid"
+cask "font-noto-mono"
+cask "font-noto-sans-mono"
+cask "font-nova-mono"
+cask "font-pt-mono"
+cask "font-roboto-mono"
+cask "font-sf-mono"
+cask "font-share-tech-mono"
+cask "font-source-code-pro"
+cask "font-ubuntu-mono"
 # nerd
-font-bitstream-vera-sans-mono-nerd-font
-font-dejavu-sans-mono-nerd-font
-font-droid-sans-mono-nerd-font
-font-fira-mono-nerd-font
-font-go-mono-nerd-font
-font-iosevka-nerd-font
-font-roboto-mono-nerd-font
-font-shure-tech-mono-nerd-font
-font-ubuntu-mono-nerd-font
+cask "font-bitstream-vera-sans-mono-nerd-font"
+cask "font-dejavu-sans-mono-nerd-font"
+cask "font-droid-sans-mono-nerd-font"
+cask "font-fira-mono-nerd-font"
+cask "font-go-mono-nerd-font"
+cask "font-iosevka-nerd-font"
+cask "font-roboto-mono-nerd-font"
+cask "font-shure-tech-mono-nerd-font"
+cask "font-ubuntu-mono-nerd-font"
 # powerline
-font-dejavu-sans-mono-for-powerline
-font-droid-sans-mono-for-powerline
-font-fira-mono-for-powerline
-font-noto-mono-for-powerline
-font-roboto-mono-for-powerline
-font-sf-mono-for-powerline
-font-ubuntu-mono-derivative-powerline
+cask "font-dejavu-sans-mono-for-powerline"
+cask "font-droid-sans-mono-for-powerline"
+cask "font-fira-mono-for-powerline"
+cask "font-noto-mono-for-powerline"
+cask "font-roboto-mono-for-powerline"
+cask "font-sf-mono-for-powerline"
+cask "font-ubuntu-mono-derivative-powerline"
 
 # mac app store applications
 mas "Amphetamine", id: 937984704
