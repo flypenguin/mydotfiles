@@ -21,7 +21,6 @@ cask "telegram"           # the correct one
 cask "typinator"
 cask "whatsapp"
 # pastebot -> see below "mac app store"
-cask "logitech-unifying"
 cask "lunar"
 
 # app store command line interface
@@ -83,6 +82,7 @@ brew "pyenv-virtualenv"
 brew "telnet"
 brew "terraform"
 cask "boop"
+cask "devutils"
 cask "docker"
 cask "fork"
 cask "postgres-unofficial"
