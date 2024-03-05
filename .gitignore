@@ -2,7 +2,9 @@
 tmp/
 
 *.swp
-.ssh/config
+dotfiles/.ssh/config
+dotfiles/.ssh/id_*
+dotfiles/.ssh/known_hosts
 .zsh/local*
 
 /logs/
