@@ -66,6 +66,7 @@ wo() {
 
 # Create Virtual Environment
 cvi() {
+  PYVER=""
   while getopts "hn:v:" OPT
   do
     case $OPT in
@@ -80,7 +81,7 @@ cvi() {
   done
   shift "$((OPTIND - 1))"
 
-  PYVER=$(pyenv version | awk '{print $1}')
+  [[ -z "$PYVER" ]] && PYVER=$(pyenv version | awk '{print $1}')
   ENVNAME="${1:-}"
   [ -n "$ENVNAME" ] && shift || ENVNAME="$(basename $PWD)"
 
