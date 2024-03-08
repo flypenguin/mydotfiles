@@ -52,7 +52,7 @@ fi
 DISABLE_UPDATE_PROMPT="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(direnv git docker common-aliases kubectl fzf aws brew)
+plugins=(direnv git docker common-aliases kubectl fzf aws brew autojump)
 plugins+=(${ADD_PLUGINS[@]})
 
 # CASE_SENSITIVE="true"
