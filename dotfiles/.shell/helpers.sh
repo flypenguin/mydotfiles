@@ -601,3 +601,18 @@ update_dynamic_paths() {
     done
   done
 }
+
+# ###########################################################################
+#
+# AWS helpers
+#
+
+ecr-login() {
+  local AWS_REGION=${AWS_REGION:-$AWS_DEFAULT_REGION}
+  if [[ -z "$AWS_REGION" ]]; then
+    echo "ERROR: Please set AWS[_DEFAULT]_REGION."
+    return
+  fi
+  local ACC_ID="$(aws sts get-caller-identity --query Account --output text)"
+  aws ecr get-login-password | docker login --username AWS --password-stdin $ACC_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+}
