@@ -28,18 +28,6 @@ for PATH_SEARCH in \
   fi
 done
 
-# add pyenv _before_ the plugins load ... ugly fucking hack.
-if command -v pyenv > /dev/null 2>&1 ; then
-  # I yield. virtualenvwrapper is utterly, shitty broken
-  # with pyenv.
-  export PYENV_ROOT="$HOME/.pyenv"
-  export PATH="$PYENV_ROOT/bin:$PATH"
-  export WORKON_HOME=$HOME/.virtualenvs
-  eval "$(pyenv init -)"
-  # _really_ slow prompt fix
-  eval "$(pyenv virtualenv-init - zsh | sed s/precmd/chpwd/g)"
-fi
-
 export ZSH="$HOME/.oh-my-zsh"
 export UPDATE_ZSH_DAYS=13
 

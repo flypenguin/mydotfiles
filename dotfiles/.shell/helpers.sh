@@ -53,12 +53,16 @@ fi
 # also, the auto-activate feature is probably fucked up and broken as well.
 # python envs are just the MOTHER of all FUCKs.
 wo() {
-  pyenv="${1:-$(basename "$PWD")}"
-  echo "pyenv=$pyenv"
-  pyenv_name="${pyenv##*/}"
-  activate_script="$HOME/.pyenv/versions/$pyenv/bin/activate"
-  if [ ! -f "$activate_script" ]; then
-    echo "ERROR: virtual env '$pyenv_name' not found."
+  local activate_script
+  local base_dir
+  activate_script=""
+  base_dir="${1:-.}"
+  for venv_dir in venv .venv . ; do
+    [[ -d "$base_dir/$venv_dir"  ]] && activate_script="$base_dir/$venv_dir/bin/activate" && break
+  done
+  if [[ ! -f "$activate_script" ]]; then
+    echo "ERROR: Activation script not found."
+    echo "Aborting."
     return
   fi
   source "$activate_script"
@@ -81,25 +85,24 @@ cvi() {
   done
   shift "$((OPTIND - 1))"
 
-  [[ -z "$PYVER" ]] && PYVER=$(pyenv version | awk '{print $1}')
+  [[ -z "$PYVER" ]] && PYVER=$(python3 --version | awk '{print $2}' | sed -E 's/\.[0-9]+$//')
+  echo "PYVER=$PYVER"
   ENVNAME="${1:-}"
   [ -n "$ENVNAME" ] && shift || ENVNAME="$(basename $PWD)"
 
   echo "Using python version:                       $PYVER"
   echo "Using virtualenv name:                      $ENVNAME"
-  echo "Additional 'pyenv virtualenv' parameters:   ${@:--}"
+  echo "Additional 'python -m venv' parameters:     ${@:--}"
 
   TMP=$(mktemp)
 
-  if pyenv virtualenv $PYVER $ENVNAME ; then
-    wo "$ENVNAME"
+  if python$PYVER -m venv --prompt $ENVNAME .venv ; then
+    source .venv/bin/activate
     echo "${H_YELO}Virtual${C_REST} environment '${H_GREN}$ENVNAME${C_REST}' active: ${H_GREN}$(python --version)${C_REST}"
   else
     cat "$TMP"
     echo "${H_REDD}ERROR:${C_REST} something went wrong."
   fi
-  # _always_ remove SUPER IRRITATING .python-version file, THAT JUST SUCKS
-  rm -f .python-version
   rm "$TMP"
 }
 
