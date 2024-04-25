@@ -70,13 +70,20 @@ wo() {
 
 # Create Virtual Environment
 cvi() {
+  local PYVER
+  local DIR_NAME
+  local DIR_SUFFIX
   PYVER=""
-  while getopts "hn:v:" OPT
+  DIR_SUFFIX=""
+  while getopts "hs:v:" OPT
   do
     case $OPT in
     h)
-      echo "USAGE: cvi [-v python_version] ENVNAME [-- mkvirtualenv_param,...]"
+      echo "USAGE: cvi [-v python_version] [-s DIR_SUFFIX] ENVNAME"
       return
+      ;;
+    s)
+      DIR_SUFFIX=".$OPTARG"
       ;;
     v)
       PYVER="$OPTARG"
@@ -86,18 +93,20 @@ cvi() {
   shift "$((OPTIND - 1))"
 
   [[ -z "$PYVER" ]] && PYVER=$(python3 --version | awk '{print $2}' | sed -E 's/\.[0-9]+$//')
-  echo "PYVER=$PYVER"
   ENVNAME="${1:-}"
+  DIR_NAME=".venv$DIR_SUFFIX"
+
   [ -n "$ENVNAME" ] && shift || ENVNAME="$(basename $PWD)"
 
   echo "Using python version:                       $PYVER"
   echo "Using virtualenv name:                      $ENVNAME"
+  echo "Using virtualenv dir:                       $DIR_NAME"
   echo "Additional 'python -m venv' parameters:     ${@:--}"
 
   TMP=$(mktemp)
 
-  if python$PYVER -m venv --prompt $ENVNAME .venv ; then
-    source .venv/bin/activate
+  if python$PYVER -m venv --prompt $ENVNAME "$DIR_NAME" ; then
+    source "$DIR_NAME/bin/activate"
     echo "${H_YELO}Virtual${C_REST} environment '${H_GREN}$ENVNAME${C_REST}' active: ${H_GREN}$(python --version)${C_REST}"
   else
     cat "$TMP"
