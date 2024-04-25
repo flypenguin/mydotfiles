@@ -53,6 +53,8 @@ alias git-branch-clean="git fetch -p && git branch -vv | awk '/: gone]/{print \$
 alias git-branch-clean-f="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -D"
 # overwrite some predefined aliases
 alias gb="git --no-pager branch -vv"
+# stash only staging area
+alias gsts="git stash push -S"
 
 # ls
 if which eza >/dev/null 2>&1; then
