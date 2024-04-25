@@ -260,6 +260,14 @@ function giba() {
   echo "Created backup branch: $CURRENT_COMMIT -> '$BACKUP_BRANCH'"
 }
 
+# gdelb = git delete branch
+# $1 - name of branch to delete
+function gdelb() {
+  branch_to_delete="$1"
+  git branch -D "$branch_to_delete" && \
+    git push origin ":$branch_to_delete"
+}
+
 
 # ###########################################################################
 #
