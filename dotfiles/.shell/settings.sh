@@ -5,9 +5,11 @@ export LESS='-iMRS#15'
 export LESSOPEN="|$HOME/bin/_lessfilter %s"
 
 # set & create GOPATH ...
-export GOPATH="$HOME/Dev/gopath"
-mkdir -p "$GOPATH"
-echo "This directory is created by $HOME/.shells/settings.sh" > "$GOPATH/REALLY-README.md"
+export GOPATH="$HOME/Dev/GOPATH"
+if [ ! -d "$GOPATH" ]; then
+  mkdir -p "$GOPATH"
+  echo "This directory is created by $HOME/.shells/settings.sh" > "$GOPATH/REALLY-README.md"
+fi
 
 # less awful java font rendering
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=on'
@@ -17,9 +19,6 @@ export EDITOR='vim'
 unset VIRTUAL_ENV_DISABLE_PROMPT
 # now I DON'T want it ;)
 #export VIRTUAL_ENV_DISABLE_PROMPT=1
-
-# fucking go
-export GOPATH=$HOME/dev/go-modules
 
 # fucking terraform, this is insane
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
