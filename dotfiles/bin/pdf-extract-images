@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+for PDF_FULL in "$@" ; do
+
+  PDF_FULL=$(realpath "$PDF_FULL")
+  PDF_PATH="${PDF_FULL%/*}"
+  PDF_NAME="${PDF_FULL##*/}"
+  OUT_PATH=$(mktemp -d -p "$PDF_PATH" "$PDF_NAME.XXXX")
+  #echo "PDF_PATH=$PDF_PATH"
+  #echo "PDF_NAME=$PDF_NAME"
+  #echo "OUT_PATH=$OUT_PATH"
+
+  pushd . > /dev/null 2>&1
+  cd "$OUT_PATH"
+  pdfimages -all -p "$PDF_FULL" "$PDF_NAME" > "log.txt" 2>&1
+  popd > /dev/null 2>&1
+
+  echo "$OUT_PATH"
+
+done
