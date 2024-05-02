@@ -5,16 +5,21 @@ for PDF_FULL in "$@" ; do
   PDF_FULL=$(realpath "$PDF_FULL")
   PDF_PATH="${PDF_FULL%/*}"
   PDF_NAME="${PDF_FULL##*/}"
-  OUT_PATH=$(mktemp -d -p "$PDF_PATH" "$PDF_NAME.XXXX")
+  PDF_BASENAME="${PDF_NAME%.*}"
+  OUT_PATH="$PDF_PATH"
+  LOG_FILE="$PDF_PATH/$PDF_BASENAME.error.txt"
+  TMP_FILE=$(mktemp)
+  # OUT_PATH=$(mktemp -d -p "$PDF_PATH" "$PDF_NAME.XXXX")
   #echo "PDF_PATH=$PDF_PATH"
   #echo "PDF_NAME=$PDF_NAME"
   #echo "OUT_PATH=$OUT_PATH"
 
   pushd . > /dev/null 2>&1
   cd "$OUT_PATH"
-  pdfimages -all -p "$PDF_FULL" "$PDF_NAME" > "log.txt" 2>&1
+  pdfimages -all -p "$PDF_FULL" "$PDF_BASENAME" > "$TMP_FILE" 2>&1 \
+    && rm "$TMP_FILE" \
+    || mv "$TMP_FILE" "$LOG_FILE"
   popd > /dev/null 2>&1
 
-  echo "$OUT_PATH"
 
 done
