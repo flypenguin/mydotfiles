@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Tuple, Union
 
 
-DEFAULT_EXCLUDE = ["\.DS_Store"]
+DEFAULT_EXCLUDE = ["\\.DS_Store"]
 STAT644 = stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
 config = None
 exclude_patterns = []
