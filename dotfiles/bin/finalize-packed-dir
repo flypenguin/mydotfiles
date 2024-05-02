@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+[ -z "$1" ] && DIR="." || DIR="$1"
+
+if [ ! -d "$DIR" ]; then
+  echo "ERROR: not a directory: $DIR. Aborting."
+  exit 255
+fi
+
+rm -f "$DIR/FINAL.txt"
+
+echo -n "Finalizing '$DIR' ... "
+
+TMP=$(mktemp)
+echo -e "THIS IS FINAL @ $(date)\n" > "$TMP"
+find . -type f >> "$TMP"
+mv "$TMP" ./FINAL.txt
+
+echo "done. Created 'FINAL.txt'"
+
