@@ -22,6 +22,26 @@ clone_repo_to() {
 echo -e "\n\n * Installing zsh manager(s) ..."
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
+# find out where "brew" is
+for brew_dir in /opt/homebrew /usr/local /home/linuxbrew/.linuxbrew ; do
+  brew_dir=$brew_dir/bin
+  if test -x $brew_dir/brew ; then
+    BREW=$brew_dir/brew
+    echo "   * found homebrew: $BREW"
+    break
+  fi
+done
+
+# are we on a mac?
+[ test -d /Users ] && brew_add="mas-cli" || brew_add=""
+
+# add brew to path for now
+export PATH="$brew_dir:$PATH"
+
+# install stow cause we need it _right now_
+echo "   * Installing 'stow' using homebrew ..."
+$BREW install stow $brew_add
+
 # now use stow to manage shit. :)
 # first, save what might be overwritten.
 echo -e "\n\n * Updating dotfiles ..."
