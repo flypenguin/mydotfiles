@@ -33,14 +33,15 @@ for brew_dir in /opt/homebrew /usr/local /home/linuxbrew/.linuxbrew ; do
 done
 
 # are we on a mac?
-[ test -d /Users ] && brew_add="mas-cli" || brew_add=""
+brew_install="stow"
+[ -d /Users ] && brew_install="$brew_install mas" || true
 
 # add brew to path for now
 export PATH="$brew_dir:$PATH"
 
 # install stow cause we need it _right now_
-echo "   * Installing 'stow' using homebrew ..."
-$BREW install stow $brew_add
+echo "   * Installing essentials using brew: $brew_install"
+$BREW install $brew_install
 
 # now use stow to manage shit. :)
 # first, save what might be overwritten.
@@ -48,5 +49,9 @@ echo -e "\n\n * Updating dotfiles ..."
 "$HOME/.dotfiles/dotfiles/bin/dotfile-update" -f
 
 
-echo -e "\n\nIMPORTANT NOTE\nPlease remember to switch your shell to zsh :)\n"
-echo -e "\n... and have fun :)\n\n"
+echo -e "\n\nIMPORTANT NOTES:"
+echo -e "   * Please remember to switch your shell to zsh :)"
+echo -e "   * you could execute ..."
+echo -e "        '$BREW bundle --file ~/.dotfiles/Brewfile'"
+echo -e "     ... now, maybe? :)"
+echo -e "\n... have fun :)\n\n"
