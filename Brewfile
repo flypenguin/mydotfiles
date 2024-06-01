@@ -26,7 +26,7 @@ brew "mas"
 
 # editors
 cask "jetbrains-toolbox"
-cask "sublime-text-dev"
+cask "sublime-text@dev"
 cask "vscodium"
 cask "zed"
 
