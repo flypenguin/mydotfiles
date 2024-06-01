@@ -1,7 +1,5 @@
 # by https://github.com/Homebrew/homebrew-bundle
 tap "buo/cask-upgrade"
-tap "homebrew/cask-fonts"
-tap "homebrew/cask-versions"
 tap "homebrew/bundle"
 tap "aws/tap"
 
