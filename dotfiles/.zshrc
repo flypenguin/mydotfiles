@@ -59,6 +59,9 @@ source $ZSH/oh-my-zsh.sh
 
 export LANG=en_US.UTF-8
 
+# iterm2 shell integration
+test -f $HOME/.iterm2_shell_integration.zsh && . $HOME/.iterm2_shell_integration.zsh
+
 for sourceme in $HOME/.shell/*.sh{,.$UNAME} ; do
   source "$sourceme"
 done
