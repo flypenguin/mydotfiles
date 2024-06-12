@@ -18,11 +18,19 @@ DWARN="${C_BYEL}${C_BOLD}WARNING:${C_REST}"
 
 # ###########################################################################
 #
-# configure generic helpers
+# configure "eval ..." setup scripts
 #
 
 # jump (autojump seems dead) - don't forget QUOTING!! :)
 whence jump >/dev/null 2>&1 && eval "$(jump shell zsh)"
+
+# zoxide (autojump alternative)
+if whence zoxide >/dev/null 2>&1 ; then
+  eval "$(zoxide init zsh)"
+  # let's not break existing muscle memory, also "honor" US keyboard key places
+  alias j=z ; alias ji=zi
+  alias y=z ; alias yi=zi
+fi
 
 # direnv - https://direnv.net/
 whence direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
