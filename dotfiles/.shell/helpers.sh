@@ -541,15 +541,6 @@ trim() {
 # brew
 #
 
-# update dynamic paths after brew operations ...
-brew() {
-  command brew "$@"
-  RES=$?
-  if [ "$1" = "install" -a "$RES" = "0" ]; then
-    update_dynamic_paths
-  fi
-}
-
 # brew - m1 vs. x86
 ibrew() {
   if [ -x /usr/local/bin/brew ]; then
