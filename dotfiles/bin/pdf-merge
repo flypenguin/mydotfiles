@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" -o "$1" == "-h" ]; then
+  echo "USAGE: $(basename $0) PDF_FILE[, PDF_FILE...]"
+  echo "       Combines all given PDF files into one"
+  exit 255
+fi
+
+if ! type -p pdftk > /dev/null ; then
+  echo "ERROR: pdftk is not installed. Aborting."
+  exit 255
+fi
+
+OUT_DIR="$(dirname "$1")"
+echo "OUT_DIR='$OUT_DIR'"
+
+TMP=$(mktemp)
+pdftk "$@" cat output "$OUT_DIR/Combined PDF $(date +%Y%m%d-%H%M%S).pdf"
