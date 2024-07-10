@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" -o "$1" = "-h" ]; then
+  echo ""
+  echo ""
+  echo "USAGE: $(basename $0) fqdn_or_ip [ssh-param ...]"
+  echo ""
+  echo ""
+  echo "You can set LOGIN_USER to change the login user from the default"
+  echo "'ec2-user' to something else (using '-l username' won't work!):"
+  echo ""
+  echo "    \$ LOGIN_USER=ubuntu   $(basename $0) 1.2.3.4"
+  echo ""
+  echo ""
+  echo "You can also set SSH_KEY_FILE to control which PUBLIC key is"
+  echo "sent to the instance:"
+  echo ""
+  echo "    \$ SSH_KEY_FILE=./my_key.pub   $(basename $0) host.doma.in"
+  echo ""
+  echo ""
+  echo "For the script to work, you need those tools on your system:"
+  echo ""
+  echo "            Install via homebrew      Install on Debian/Ubuntu"
+  echo "    jq      brew install jq           apt-get install -y jq"
+  echo "    aws     brew install awscli       apt-get install -y awscli"
+  echo "    dig     pre-installed             apt-get install -y dnsutils"
+  echo ""
+  echo ""
+  exit 255
+fi
+
+set -euo pipefail
+
+if echo $1 | grep -qE 'i-[a-z0-9]{8}([a-z0-9]{9})?$' ; then
+  JSON=$(aws ec2 describe-instances --instance-ids $1 --output json)
+  INSTANCE_ID="$1"
+  IP="$(echo $JSON | jq -r '.Reservations[0].Instances[0].PublicIpAddress')"
+  HOST="$IP"
+  PRIVATE_IP="$(echo $JSON | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')"
+  printf "%-32s: %s\\n" "AWS instance ID given" "$1"
+  printf "%-32s: %s\\n" "Private IP address" "$PRIVATE_IP"
+  printf "%-32s: %s\\n" "Public IP address" "${IP:-not found}"
+else
+  if ! echo $1 | grep -qE '^(\d+\.){3}\d+$' ; then
+    IP=$(dig +short $1)
+    HOST=$IP
+    printf "%-32s: %s\\n" "FQDN given, corresponding IP is" "$IP"
+  else
+    IP="$1"
+    HOST="$1"
+    printf "%-32s: %s\\n" "IP given" "$1"
+  fi
+  JSON=$(aws ec2 describe-instances --filter Name=ip-address,Values=$IP --output json)
+  INSTANCE_ID=$(echo "$JSON" | jq -r '.Reservations[0].Instances[0].InstanceId')
+  printf "%-32s: %s\\n" "Found instance ID" "$INSTANCE_ID"
+fi
+
+# "remove" param 1
+shift
+
+AZONE=$(echo "$JSON" | jq -r '.Reservations[0].Instances[0].Placement.AvailabilityZone')
+LOGIN_USER=${LOGIN_USER:-ec2-user}
+SSH_KEY_FILE="${SSH_KEY_FILE:-$HOME/.ssh/id_rsa.pub}"
+
+printf "%-32s: %s\\n" "Using login user" "$LOGIN_USER"
+printf "%-32s: %s\\n" "Using SSH key file" "$SSH_KEY_FILE"
+
+JSON=$(aws ec2-instance-connect send-ssh-public-key \
+  --availability-zone $AZONE \
+  --instance-id $INSTANCE_ID \
+  --instance-os-user $LOGIN_USER \
+  --ssh-public-key "file://$SSH_KEY_FILE" \
+)
+
+if [ -z "$HOST" -o "$HOST" = "null" ]; then
+  printf "%-32s: %s\\n" "NOTE" "No HOST found, not executing SSH"
+  printf "%-32s: %s\\n" "Connect Request ID" "$(echo $JSON | jq -r .RequestId)"
+  printf "%-32s: %s\\n" "Execution status" "Success=$(echo $JSON | jq -r .Success)"
+else
+  printf "%-32s: " "additional SSH params"
+  echo "$@"
+  exec ssh -l $LOGIN_USER $HOST "$@"
+fi
