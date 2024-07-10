@@ -31,53 +31,205 @@ fi
 
 set -euo pipefail
 
-if echo $1 | grep -qE 'i-[a-z0-9]{8}([a-z0-9]{9})?$' ; then
-  JSON=$(aws ec2 describe-instances --instance-ids $1 --output json)
-  INSTANCE_ID="$1"
-  IP="$(echo $JSON | jq -r '.Reservations[0].Instances[0].PublicIpAddress')"
-  HOST="$IP"
-  PRIVATE_IP="$(echo $JSON | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')"
-  printf "%-32s: %s\\n" "AWS instance ID given" "$1"
-  printf "%-32s: %s\\n" "Private IP address" "$PRIVATE_IP"
-  printf "%-32s: %s\\n" "Public IP address" "${IP:-not found}"
-else
-  if ! echo $1 | grep -qE '^(\d+\.){3}\d+$' ; then
-    IP=$(dig +short $1)
-    HOST=$IP
-    printf "%-32s: %s\\n" "FQDN given, corresponding IP is" "$IP"
-  else
-    IP="$1"
-    HOST="$1"
-    printf "%-32s: %s\\n" "IP given" "$1"
-  fi
-  JSON=$(aws ec2 describe-instances --filter Name=ip-address,Values=$IP --output json)
-  INSTANCE_ID=$(echo "$JSON" | jq -r '.Reservations[0].Instances[0].InstanceId')
-  printf "%-32s: %s\\n" "Found instance ID" "$INSTANCE_ID"
-fi
+BASTION_HOST_TAG="${BASTION_HOST_TAG:-bastion-host}"
+VPC_TAG="${VPC_TAG:-stack}"
 
-# "remove" param 1
-shift
 
-AZONE=$(echo "$JSON" | jq -r '.Reservations[0].Instances[0].Placement.AvailabilityZone')
+# $1 = instance JSON
+find_bastion_host_id_for() {
+    local VPC_ID="$(echo $JSON | jq -r '.Reservations[0].Instances[0].VpcId')"
+    local BASTION_JSON="$(aws ec2 describe-instances \
+        --filters Name=vpc-id,Values=$VPC_ID \
+                  Name=tag-key,Values=$BASTION_HOST_TAG \
+        | jq -r '.Reservations[0].Instances[0]' \
+    )"
+    [ -z "$BASTION_JSON" -o "$BASTION_JSON" = "null" ] && return
+    local BASTION_PUBLIC_IP=$(echo $BASTION_JSON | jq -r '.PublicIpAddress')
+    local BASTION_AZ=$(echo $BASTION_JSON | jq -r '.Placement.AvailabilityZone')
+}
+
+
 LOGIN_USER=${LOGIN_USER:-ec2-user}
 SSH_KEY_FILE="${SSH_KEY_FILE:-$HOME/.ssh/id_rsa.pub}"
 
 printf "%-32s: %s\\n" "Using login user" "$LOGIN_USER"
 printf "%-32s: %s\\n" "Using SSH key file" "$SSH_KEY_FILE"
 
-JSON=$(aws ec2-instance-connect send-ssh-public-key \
-  --availability-zone $AZONE \
-  --instance-id $INSTANCE_ID \
-  --instance-os-user $LOGIN_USER \
-  --ssh-public-key "file://$SSH_KEY_FILE" \
-)
+# $1 - output message
+# $2 - instance JSON without "surrounding stuff" (only the inner object)
+prime() {
+  local AZONE=$(echo "$2" | jq -r '.Placement.AvailabilityZone')
+  local IID=$(echo "$2" | jq -r '.InstanceId')
+  local PUBLIC_IP=$(echo "$2" | jq -r '.PublicIpAddress')
+  printf "%-32s: %s\\n" "*** Enabling SSH key for ***" "$1"
+  local CLI_JSON=$(aws ec2-instance-connect send-ssh-public-key \
+    --availability-zone $AZONE \
+    --instance-id $IID \
+    --instance-os-user $LOGIN_USER \
+    --ssh-public-key "file://$SSH_KEY_FILE" \
+  )
+  printf "%-32s: %s\\n" "Host public IP address" "$PUBLIC_IP"
+  printf "%-32s: %s\\n" "AWS instance ID" "$IID"
+  printf "%-32s: %s\\n" "Connect Request ID" "$(echo $CLI_JSON | jq -r .RequestId)"
+  printf "%-32s: %s\\n" "Execution status" "Success=$(echo $CLI_JSON | jq -r .Success)"
+}
 
-if [ -z "$HOST" -o "$HOST" = "null" ]; then
-  printf "%-32s: %s\\n" "NOTE" "No HOST found, not executing SSH"
-  printf "%-32s: %s\\n" "Connect Request ID" "$(echo $JSON | jq -r .RequestId)"
-  printf "%-32s: %s\\n" "Execution status" "Success=$(echo $JSON | jq -r .Success)"
+
+# $1 - JSON structure
+# $2 - jq expression
+get_field() {
+  local FIELD_VALUE="$(echo "$1" | jq -r "$2")"
+  if [[ $FIELD_VALUE = "null" ]] || [[ -z $FIELD_VALUE ]]; then
+    echo ""
+  else
+    echo "$FIELD_VALUE"
+  fi
+}
+
+
+# $1 - host JSON (just the inner object)
+get_target_public_ip() {
+  echo "$(get_field "$1" ".PublicIpAddress")"
+}
+
+
+# $1 - host JSON (just the inner object)
+get_target_private_ip() {
+  echo "$(get_field "$1" ".PrivateIpAddress")"
+}
+
+
+# $1 - target host json (only the object, not the outer stuff)
+find_bastion_for_target() {
+  local VPC_ID=$(get_field "$1" ".VpcId")
+  local BASTION_JSON="$(aws ec2 describe-instances \
+    --filters Name=vpc-id,Values=$VPC_ID \
+              Name=tag-key,Values=bastion-host \
+    | jq -r '.Reservations[0].Instances[0]')"
+  if [[ $BASTION_JSON == "null" ]] || [[ -z $BASTION_JSON ]]; then
+    echo ""
+  else
+    echo "$BASTION_JSON"
+  fi
+}
+
+
+# $1 - target host json (only the object, not the outer stuff)
+find_bastion_for_target() {
+  local VPC_ID=$(get_field "$1" ".VpcId")
+  local TMP_JSON="$(aws ec2 describe-instances \
+    --filters Name=vpc-id,Values=$VPC_ID \
+              Name=tag-key,Values=bastion-host \
+    | jq -r '.Reservations[0].Instances[0]')"
+  if [[ $TMP_JSON == "null" ]] || [[ -z $TMP_JSON ]]; then
+    echo ""
+  else
+    echo "$TMP_JSON"
+  fi
+}
+
+
+# $1 - tag key
+# $2 - tag value
+# return: VPC JSON field
+get_vpc_by_tag() {
+  local TMP_JSON="$(aws ec2 describe-vpcs --filters "Name=tag:$1,Values=$2" --output json | jq '.Vpcs[0]')"
+  if [[ $TMP_JSON == "null" ]] || [[ -z $TMP_JSON ]]; then
+    echo ""
+  else
+    echo "$TMP_JSON"
+  fi
+}
+
+
+# $1 - VPC JSON
+# $2 - host private IP
+# return: host JSON
+get_vpc_host() {
+  local VPC_ID=$(get_field "$1" '.VpcId')
+  local TMP_JSON="$(aws ec2 describe-instances \
+    --filters "Name=vpc-id,Values=$VPC_ID" \
+              "Name=private-ip-address,Values=$2" \
+    --output json \
+    | jq -r '.Reservations[0].Instances[0]' \
+  )"
+  if [[ $TMP_JSON == "null" ]] || [[ -z $TMP_JSON ]]; then
+    echo ""
+  else
+    echo "$TMP_JSON"
+  fi
+}
+
+# all parameters go directly to 'ssh'
+# we rely on the following variables to be set:
+#    JSON         the target host JSON object
+#    HOST         IP and HOST of the target host (even if empty)
+ssh_into() {
+  if [[ -z $HOST ]] || [[ $HOST = "null" ]]; then
+    printf "%-32s: %s\\n" "NOTE" "No public IP found, trying to find bastion host"
+    IP=$(get_target_public_ip "$JSON")
+    if [[ -n "$IP" ]]; then
+      HOST="$IP"
+      SSH_PARAMS="$LOGIN_USER@$IP"
+    else
+      BASTION_JSON="$(find_bastion_for_target "$JSON")"
+      if [ -z "$BASTION_JSON" ]; then
+        HOST=""
+        SSH_PARAMS=""
+        printf "%-32s: %s\\n" "NOTE" "Could not find bastion host, skipping SSH"
+      else
+        HOST="$(get_target_private_ip "$JSON")"
+        SSH_PARAMS="-J $LOGIN_USER@$(get_target_public_ip "$BASTION_JSON") $HOST"
+        prime "bastion host" "$BASTION_JSON"
+      fi
+    fi
+  else
+    SSH_PARAMS="$LOGIN_USER@$HOST"
+  fi
+  prime "target host" "$JSON"
+  if [[ -z $HOST ]] || [[ $HOST = "null" ]]; then
+    printf "%-32s: %s\\n" "NOTE" "No HOST found, not executing SSH"
+    printf "%-32s: %s\\n" "Execution status" "Success=$(echo $JSON | jq -r .Success)"
+  else
+    set -x
+    exec ssh -A $SSH_PARAMS "$@"
+  fi
+}
+
+
+IP=""
+HOST=""
+if echo $1 | grep -qE '^[^:]+:[^:]+:[^:]+$' ; then
+  # FORMAT: VPC_TAG_NAME : VPC_TAG_VALUE : PRIVATE_IP_ADDRESS
+  VPC_TAG="${1%%:*}"
+  VPC_TAG_VALUE="${1#*:}"
+  VPC_TAG_VALUE="${VPC_TAG_VALUE%%:*}"
+  PRIVATE_IP="${1#*:}"
+  PRIVATE_IP="${PRIVATE_IP#*:}" # remember: IPv6 is a thing ...
+  printf "%-32s: %s\\n" "Looking up VPC tag" "$VPC_TAG"
+  printf "%-32s: %s\\n" "... with value" "$VPC_TAG_VALUE"
+  VPC_JSON=$(get_vpc_by_tag "$VPC_TAG" "$VPC_TAG_VALUE")
+  JSON="$(get_vpc_host "$VPC_JSON" $PRIVATE_IP)"
+elif echo $1 | grep -qE '^[^:]+:[^:]+:[^:]+:[^:]+$' ; then
+  # FORMAT: VPC_TAG_NAME : VPC_TAG_VALUE : HOST_TAG_NAME : HOST_TAG_VALUE
+  echo "NOT WORKING YET."
+  exit
+elif echo $1 | grep -qE 'i-[a-z0-9]{8}([a-z0-9]{9})?$' ; then
+  printf "%-32s: %s\\n" "AWS instance ID given" "$1"
+  JSON=$(aws ec2 describe-instances --instance-ids $1 --output json | jq '.Reservations[0].Instances[0]')
 else
-  printf "%-32s: " "additional SSH params"
-  echo "$@"
-  exec ssh -l $LOGIN_USER $HOST "$@"
+  if ! echo $1 | grep -qE '^(\d+\.){3}\d+$' ; then
+    HOST="$1"
+    IP=$(dig +short $HOST)
+    printf "%-32s: %s\\n" "FQDN" "$HOST"
+  else
+    HOST="$1"
+    IP="$1"
+  fi
+  printf "%-32s: %s\\n" "IP" "$IP"
+  JSON=$(aws ec2 describe-instances --filter Name=ip-address,Values=$IP --output json | jq '.Reservations[0].Instances[0]')
 fi
+
+# "remove" param 1
+shift
+ssh_into "$@"
