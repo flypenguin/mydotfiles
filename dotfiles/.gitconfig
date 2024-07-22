@@ -1,52 +1,54 @@
 [user]
-	name = Axel Bock
-	email = ab@a3b3.de
+    name = Axel Bock
+    email = ab@a3b3.de
 [push]
-	default = simple
+    default = simple
 [color]
-	ui = true
+    ui = true
 [mergetool]
 	keepBackup = true
 [core]
-	editor = vim
-	eol = lf
-	autocrlf = input
-	commitGraph = true
-	pager = delta
+    editor = vim
+    eol = lf
+    autocrlf = input
+    commitGraph = true
+    pager = delta
 [merge]
-	tool = smerge
+    tool = smerge
 [pull]
-	rebase = true
+    rebase = true
 [init]
-	defaultBranch = main
+    defaultBranch = main
 [alias]
-	d = diff
-	p = push
-	s = status
-	dc = !git diff --cached
-	ds = !git --no-pager diff --stat
-	ra = rebase --abort
-	pf = push --force
-	ri = rebase --interactive
-	apa = "add --patch"
-	ls = !git --no-pager log -n 40 --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short
-	lc = !git            log       --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short
-	ll = !git log --pretty=format:'%C(yellow)%h %C(yellow reverse)%aD%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --numstat
-	ld = !git log --pretty=format:'%C(white reverse)%n%h%C(yellow reverse)%ad%Creset %C(white reverse)%s%Creset %C(brightblue)[%cn]%C(red)%d%Creset' --decorate --date=short -p
+    d = diff
+    p = push
+    s = status
+    dc = !git diff --cached
+    ds = !git --no-pager diff --stat
+    ra = rebase --abort
+    pf = push --force
+    ri = rebase --interactive
+    apa = "add --patch"
+    ls = !git --no-pager log -n 40 --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short
+    lc = !git            log       --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short
+    ll = !git log --pretty=format:'%C(yellow)%h %C(yellow reverse)%aD%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --numstat
+    ld = !git log --pretty=format:'%C(white reverse)%n%h%C(yellow reverse)%ad%Creset %C(white reverse)%s%Creset %C(brightblue)[%cn]%C(red)%d%Creset' --decorate --date=short -p
 [interactive]
-	diffFilter = delta --color-only
+    diffFilter = delta --color-only
 [color "diff"]
-	meta = 11
-	frag = magenta bold
-	func = 146 bold
-	commit = yellow bold
-	old = red bold
-	new = green bold
-	whitespace = red reverse
+    meta = 11
+    frag = magenta bold
+    func = 146 bold
+    commit = yellow bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
 [delta]
-	line-numbers = true
-	zero-style = dim syntax
-	minus-style = red bold
-        plus-style = green bold
-	hunk-header-decoration-style =
-	file-decoration-style = blue ol
+    line-numbers = true
+    zero-style = dim syntax
+    minus-style = red bold
+    plus-style = green bold
+    hunk-header-decoration-style =
+    file-decoration-style = blue ol
+[credential]
+    helper = store
