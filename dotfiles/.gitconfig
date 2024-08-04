@@ -33,6 +33,7 @@
     lc = !git            log       --pretty=format:'%C(yellow)%h %ad%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --date=short
     ll = !git log --pretty=format:'%C(yellow)%h %C(yellow reverse)%aD%Creset %s %Cblue[%cn]%Cred%d%Creset' --decorate --numstat
     ld = !git log --pretty=format:'%C(white reverse)%n%h%C(yellow reverse)%ad%Creset %C(white reverse)%s%Creset %C(brightblue)[%cn]%C(red)%d%Creset' --decorate --date=short -p
+    stash-untracked = "!f()  { git stash; git stash -u; git stash pop stash@{1}; }; f"
 [interactive]
     diffFilter = delta --color-only
 [color "diff"]
