@@ -3,27 +3,31 @@
 if [ -z "$1" -o "$1" = "-h" ]; then
   echo ""
   echo ""
-  echo "USAGE: $(basename $0) fqdn_or_ip [ssh-param ...]"
+  echo "USAGE: $(basename $0) CONNECTION_THING [ssh-param ...]"
+  echo ""
+  echo "'CONNECTION_THING' can be one of ..."
+  echo "  - 'select'          <--   (you might want this :)"
+  echo "  - HOSTNAME_OR_IP          (must be public)"
+  echo "  - 'i-......'              (AWS instance ID)"
   echo ""
   echo ""
-  echo "You can set LOGIN_USER to change the login user from the default"
-  echo "'ec2-user' to something else (using '-l username' won't work!):"
+  echo "Available environment variables (can be combined):"
   echo ""
-  echo "    \$ LOGIN_USER=ubuntu   $(basename $0) 1.2.3.4"
-  echo ""
-  echo ""
-  echo "You can also set SSH_KEY_FILE to control which PUBLIC key is"
-  echo "sent to the instance:"
+  echo "    \$ FORCE_BASTION=1     $(basename $0) select"
+  echo "       L  will go via bastion even if host has a public IP"
   echo ""
   echo "    \$ SSH_KEY_FILE=./my_key.pub   $(basename $0) host.doma.in"
+  echo "       L  (use this SSH key to connect to the target hosts"
   echo ""
   echo ""
-  echo "For the script to work, you need those tools on your system:"
+  echo "For the script to (fully) work, those tools are required:"
   echo ""
-  echo "            Install via homebrew      Install on Debian/Ubuntu"
-  echo "    jq      brew install jq           apt-get install -y jq"
+  echo "    Tool    Install on Mac            Install on Debian/Ubuntu"
+  echo "    ......  ........................  ..........................."
   echo "    aws     brew install awscli       apt-get install -y awscli"
-  echo "    dig     pre-installed             apt-get install -y dnsutils"
+  echo "    dig     (pre-installed)           apt-get install -y dnsutils"
+  echo "    fzf     brew install fzf          apt-get install -y fzf"
+  echo "    jq      brew install jq           apt-get install -y jq"
   echo ""
   echo ""
   exit 255
@@ -31,8 +35,11 @@ fi
 
 set -euo pipefail
 
+
 BASTION_HOST_TAG="${BASTION_HOST_TAG:-bastion-host}"
-VPC_TAG="${VPC_TAG:-stack}"
+EC2_CONNECT_USER_TAG="${EC2_CONNECT_USER_TAG:-ec2-connect-user}"
+DEFAULT_LOGIN_USER="${DEFAULT_LOGIN_USER:-ubuntu}"
+SSH_KEY_FILE="${SSH_KEY_FILE:-$HOME/.ssh/id_rsa.pub}"
 
 
 # $1 = instance JSON
@@ -49,18 +56,14 @@ find_bastion_host_id_for() {
 }
 
 
-LOGIN_USER=${LOGIN_USER:-ec2-user}
-SSH_KEY_FILE="${SSH_KEY_FILE:-$HOME/.ssh/id_rsa.pub}"
-
-printf "%-32s: %s\\n" "Using login user" "$LOGIN_USER"
-printf "%-32s: %s\\n" "Using SSH key file" "$SSH_KEY_FILE"
-
 # $1 - output message
 # $2 - instance JSON without "surrounding stuff" (only the inner object)
+# $3 - login user name
 prime() {
   local AZONE=$(echo "$2" | jq -r '.Placement.AvailabilityZone')
   local IID=$(echo "$2" | jq -r '.InstanceId')
   local PUBLIC_IP=$(echo "$2" | jq -r '.PublicIpAddress')
+  local LOGIN_USER="${3:-$DEFAULT_LOGIN_USER}"
   printf "%-32s: %s\\n" "*** Enabling SSH key for ***" "$1"
   local CLI_JSON=$(aws ec2-instance-connect send-ssh-public-key \
     --availability-zone $AZONE \
@@ -70,8 +73,10 @@ prime() {
   )
   printf "%-32s: %s\\n" "Host public IP address" "$PUBLIC_IP"
   printf "%-32s: %s\\n" "AWS instance ID" "$IID"
+  printf "%-32s: %s\\n" "Enabled login user" "$LOGIN_USER"
   printf "%-32s: %s\\n" "Connect Request ID" "$(echo $CLI_JSON | jq -r .RequestId)"
   printf "%-32s: %s\\n" "Execution status" "Success=$(echo $CLI_JSON | jq -r .Success)"
+  echo ""
 }
 
 
@@ -81,6 +86,19 @@ get_field() {
   local FIELD_VALUE="$(echo "$1" | jq -r "$2")"
   if [[ $FIELD_VALUE = "null" ]] || [[ -z $FIELD_VALUE ]]; then
     echo ""
+  else
+    echo "$FIELD_VALUE"
+  fi
+}
+
+
+# $1 - JSON structure
+# $2 - tag key name
+# $3 - default value, or nothing
+get_tag() {
+  local FIELD_VALUE="$(echo "$1" | jq -r ".Tags[] | select(.Key==\"$2\").Value")"
+  if [[ $FIELD_VALUE = "null" ]] || [[ -z $FIELD_VALUE ]]; then
+    echo "${3:-}"
   else
     echo "$FIELD_VALUE"
   fi
@@ -99,18 +117,9 @@ get_target_private_ip() {
 }
 
 
-# $1 - target host json (only the object, not the outer stuff)
-find_bastion_for_target() {
-  local VPC_ID=$(get_field "$1" ".VpcId")
-  local BASTION_JSON="$(aws ec2 describe-instances \
-    --filters Name=vpc-id,Values=$VPC_ID \
-              Name=tag-key,Values=bastion-host \
-    | jq -r '.Reservations[0].Instances[0]')"
-  if [[ $BASTION_JSON == "null" ]] || [[ -z $BASTION_JSON ]]; then
-    echo ""
-  else
-    echo "$BASTION_JSON"
-  fi
+# $1 - host JSON (just the inner object)
+get_login_name() {
+  echo "$(get_tag "$1" "$EC2_CONNECT_USER_TAG" "$DEFAULT_LOGIN_USER")"
 }
 
 
@@ -163,71 +172,109 @@ get_vpc_host() {
 # all parameters go directly to 'ssh'
 # we rely on the following variables to be set:
 #    JSON         the target host JSON object
-#    HOST         IP and HOST of the target host (even if empty)
+#    HOST         FQDN of the target, empty if not known
 ssh_into() {
-  if [[ -z $HOST ]] || [[ $HOST = "null" ]]; then
-    printf "%-32s: %s\\n" "NOTE" "No public IP found, trying to find bastion host"
-    IP=$(get_target_public_ip "$JSON")
-    if [[ -n "$IP" ]]; then
-      HOST="$IP"
-      SSH_PARAMS="$LOGIN_USER@$IP"
+  printf "%-32s: %s\\n" "Using SSH key file" "$SSH_KEY_FILE"
+  IP=$(get_field "$JSON" ".PublicIpAddress")
+  LOGIN_USER="$(get_login_name "$JSON")"
+
+  if [[ -z $IP ]] || [[ -n "${FORCE_BASTION:-}" ]]; then
+    printf "%-32s: %s\\n\\n" "NOTE" "Locating bastion host (no public IP, or FORCE_BASTION set)"
+    BASTION_JSON="$(find_bastion_for_target "$JSON")"
+    if [ -z "$BASTION_JSON" ]; then
+      HOST=""
+      SSH_PARAMS=""
+      printf "%-32s: %s\\n" "NOTE" "Could not find bastion host, skipping SSH"
     else
-      BASTION_JSON="$(find_bastion_for_target "$JSON")"
-      if [ -z "$BASTION_JSON" ]; then
-        HOST=""
-        SSH_PARAMS=""
-        printf "%-32s: %s\\n" "NOTE" "Could not find bastion host, skipping SSH"
-      else
-        HOST="$(get_target_private_ip "$JSON")"
-        SSH_PARAMS="-J $LOGIN_USER@$(get_target_public_ip "$BASTION_JSON") $HOST"
-        prime "bastion host" "$BASTION_JSON"
-      fi
+      HOST="$(get_target_private_ip "$JSON")"
+      BASTION_HOST="$(get_target_public_ip "$BASTION_JSON")"
+      BASTION_LOGIN_USER="$(get_login_name "$BASTION_JSON")"
+      SSH_PARAMS="-J $BASTION_LOGIN_USER@$BASTION_HOST"
+      prime "bastion host" "$BASTION_JSON" "$BASTION_LOGIN_USER"
     fi
   else
-    SSH_PARAMS="$LOGIN_USER@$HOST"
+    HOST="${HOST:-$IP}"
   fi
-  prime "target host" "$JSON"
+
   if [[ -z $HOST ]] || [[ $HOST = "null" ]]; then
     printf "%-32s: %s\\n" "NOTE" "No HOST found, not executing SSH"
     printf "%-32s: %s\\n" "Execution status" "Success=$(echo $JSON | jq -r .Success)"
   else
+    prime "target host" "$JSON" "$LOGIN_USER"
     set -x
-    exec ssh -A $SSH_PARAMS "$@"
+    exec ssh -A $SSH_PARAMS "$LOGIN_USER@$HOST" "$@"
   fi
 }
 
 
 IP=""
 HOST=""
-if echo $1 | grep -qE '^[^:]+:[^:]+:[^:]+$' ; then
-  # FORMAT: VPC_TAG_NAME : VPC_TAG_VALUE : PRIVATE_IP_ADDRESS
-  VPC_TAG="${1%%:*}"
-  VPC_TAG_VALUE="${1#*:}"
-  VPC_TAG_VALUE="${VPC_TAG_VALUE%%:*}"
-  PRIVATE_IP="${1#*:}"
-  PRIVATE_IP="${PRIVATE_IP#*:}" # remember: IPv6 is a thing ...
-  printf "%-32s: %s\\n" "Looking up VPC tag" "$VPC_TAG"
-  printf "%-32s: %s\\n" "... with value" "$VPC_TAG_VALUE"
-  VPC_JSON=$(get_vpc_by_tag "$VPC_TAG" "$VPC_TAG_VALUE")
-  JSON="$(get_vpc_host "$VPC_JSON" $PRIVATE_IP)"
-elif echo $1 | grep -qE '^[^:]+:[^:]+:[^:]+:[^:]+$' ; then
-  # FORMAT: VPC_TAG_NAME : VPC_TAG_VALUE : HOST_TAG_NAME : HOST_TAG_VALUE
-  echo "NOT WORKING YET."
-  exit
+if [[ $1 = "select" ]]; then
+
+  declare -A VPCS
+  while read vpc_id vpc_name
+  do
+    VPCS[$vpc_id]="$vpc_name"
+  done <<< $(
+    # https://stackoverflow.com/a/16854326
+    aws ec2 describe-vpcs \
+      --query "Vpcs[*].[VpcId, (Tags[?Key=='Name'].Value | [0]) || '-']" \
+      --output text
+  )
+
+  declare -A INSTANCE_NAMES
+  declare -A INSTANCE_VPCS
+  declare -A INSTANCE_IPS
+  while read vpc_id instance_id instance_ipaddress instance_name
+  do
+    INSTANCE_NAMES[$instance_id]="$instance_name"
+    INSTANCE_IPS[$instance_id]="$instance_ipaddress"
+    INSTANCE_VPCS[$instance_id]="$vpc_id"
+  done <<< $(
+    # https://stackoverflow.com/a/16854326
+    aws ec2 describe-instances \
+      --query "Reservations[*].Instances[*].[VpcId, InstanceId, PrivateIpAddress, (Tags[?Key=='Name'].Value | [0]) || '-']" \
+      --filters Name=instance-state-name,Values=running \
+      --output text
+  )
+
+  FZF_FILE="$(mktemp)"
+  for instance_id in "${!INSTANCE_NAMES[@]}"; do
+      vpc_id="${INSTANCE_VPCS[$instance_id]}"
+      #echo vpc_id=$vpc_id
+      vpc_name="${VPCS[$vpc_id]}"
+      #echo vpc_name=$vpc_name
+      instance_name="${INSTANCE_NAMES[$instance_id]}"
+      instance_ipaddress="${INSTANCE_IPS[$instance_id]}"
+      printf "%-23s" "$vpc_id"
+      printf "%-22s" "$instance_id"
+      printf "%-17s" "$instance_ipaddress"
+      printf "[%-30s]    " "$vpc_name"
+      printf "%-s" "$instance_name"
+      printf "\n"
+  done | sort > "$FZF_FILE"
+
+  read vpc_id instance_id instance_ipaddress rest <<< $(fzf < "$FZF_FILE")
+  JSON=$(aws ec2 describe-instances --instance-ids $instance_id --output json | jq '.Reservations[0].Instances[0]')
+
 elif echo $1 | grep -qE 'i-[a-z0-9]{8}([a-z0-9]{9})?$' ; then
+
   printf "%-32s: %s\\n" "AWS instance ID given" "$1"
   JSON=$(aws ec2 describe-instances --instance-ids $1 --output json | jq '.Reservations[0].Instances[0]')
+
 else
+
   if ! echo $1 | grep -qE '^(\d+\.){3}\d+$' ; then
     HOST="$1"
     IP=$(dig +short $HOST)
-    printf "%-32s: %s\\n" "FQDN" "$HOST"
+    printf "%-32s: %s\\n" "Resolving host name" "$HOST"
   else
     HOST="$1"
     IP="$1"
   fi
   printf "%-32s: %s\\n" "IP" "$IP"
   JSON=$(aws ec2 describe-instances --filter Name=ip-address,Values=$IP --output json | jq '.Reservations[0].Instances[0]')
+
 fi
 
 # "remove" param 1
