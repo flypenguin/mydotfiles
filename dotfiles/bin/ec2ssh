@@ -1,23 +1,71 @@
 #!/usr/bin/env bash
 
-if [ -z "$1" -o "$1" = "-h" ]; then
+# ###########################################################################
+#                        .........................                          #
+#                               VARIABLES                                   #
+#                        .........................                          #
+# ###########################################################################
+#                                                                           #
+# You can override those variables on the command line. You should not      #
+# have to, though, with the _ONE_ exception of ...                          #
+#                                                                           #
+#   - "FORCE_JUMP=1"                                                        #
+#                                                                           #
+# ###########################################################################
+
+
+# override if needed
+SSH_KEY_FILE="${SSH_KEY_FILE:-}"
+FORCE_JUMP="${FORCE_JUMP:-}"
+SSH_KEY_FILE="${SSH_KEY_FILE:-$HOME/.ssh/id_rsa.pub}"
+
+# you should not need to override those
+DEFAULT_LOGIN_USER="${DEFAULT_LOGIN_USER:-ubuntu}"
+TARGET_USER="${TARGET_USER:-}"
+JUMP_USER="${JUMP_USER:-}"
+
+# you really SHOULD NOT override those
+EC2_CONNECT_USER_TAG="${EC2_CONNECT_USER_TAG:-ec2-connect-user}"
+EC2_BASTION_HOST_TAG="${EC2_BASTION_HOST_TAG:-bastion-host}"
+
+
+# ###########################################################################
+#                        .........................                          #
+#                                                                           #
+#                                 START                                     #
+#                                                                           #
+#                        .........................                          #
+# ###########################################################################
+#                                                                           #
+# DO NOT change anything below here, unless you really know what you're     #
+# doing. I mean it. :)                                                      #
+#                                                                           #
+# ###########################################################################
+
+
+
+help() {
   echo ""
   echo ""
   echo "USAGE: $(basename $0) CONNECTION_THING [ssh-param ...]"
   echo ""
   echo "'CONNECTION_THING' can be one of ..."
-  echo "  - 'select'          <--   (you might want this :)"
+  echo "  - '-s'              <--   (you might want this :)"
   echo "  - HOSTNAME_OR_IP          (must be public)"
   echo "  - 'i-......'              (AWS instance ID)"
   echo ""
   echo ""
   echo "Available environment variables (can be combined):"
   echo ""
-  echo "    \$ FORCE_BASTION=1     $(basename $0) select"
-  echo "       L  will go via bastion even if host has a public IP"
+  echo "    \$ (JUMP|TARGET)_USER=myuser   $(basename $0) -s"
+  echo "       |  forces the user name of the bastion host and/or"
+  echo "       L  final target host user"
+  echo ""
+  echo "    \$ FORCE_JUMP=1                $(basename $0) i-0deadbeef12345"
+  echo "       L  will go via jump host even if target host has a public IP"
   echo ""
   echo "    \$ SSH_KEY_FILE=./my_key.pub   $(basename $0) host.doma.in"
-  echo "       L  (use this SSH key to connect to the target hosts"
+  echo "       L  use this SSH key to connect to the target hosts"
   echo ""
   echo ""
   echo "For the script to (fully) work, those tools are required:"
@@ -31,28 +79,6 @@ if [ -z "$1" -o "$1" = "-h" ]; then
   echo ""
   echo ""
   exit 255
-fi
-
-set -euo pipefail
-
-
-BASTION_HOST_TAG="${BASTION_HOST_TAG:-bastion-host}"
-EC2_CONNECT_USER_TAG="${EC2_CONNECT_USER_TAG:-ec2-connect-user}"
-DEFAULT_LOGIN_USER="${DEFAULT_LOGIN_USER:-ubuntu}"
-SSH_KEY_FILE="${SSH_KEY_FILE:-$HOME/.ssh/id_rsa.pub}"
-
-
-# $1 = instance JSON
-find_bastion_host_id_for() {
-    local VPC_ID="$(echo $JSON | jq -r '.Reservations[0].Instances[0].VpcId')"
-    local BASTION_JSON="$(aws ec2 describe-instances \
-        --filters Name=vpc-id,Values=$VPC_ID \
-                  Name=tag-key,Values=$BASTION_HOST_TAG \
-        | jq -r '.Reservations[0].Instances[0]' \
-    )"
-    [ -z "$BASTION_JSON" -o "$BASTION_JSON" = "null" ] && return
-    local BASTION_PUBLIC_IP=$(echo $BASTION_JSON | jq -r '.PublicIpAddress')
-    local BASTION_AZ=$(echo $BASTION_JSON | jq -r '.Placement.AvailabilityZone')
 }
 
 
@@ -62,8 +88,9 @@ find_bastion_host_id_for() {
 prime() {
   local AZONE=$(echo "$2" | jq -r '.Placement.AvailabilityZone')
   local IID=$(echo "$2" | jq -r '.InstanceId')
+  local VPCID=$(echo "$2" | jq -r '.VpcId')
   local PUBLIC_IP=$(echo "$2" | jq -r '.PublicIpAddress')
-  local LOGIN_USER="${3:-$DEFAULT_LOGIN_USER}"
+  local LOGIN_USER="${3:-DEFAULT_LOGIN_USER}"
   printf "%-32s: %s\\n" "*** Enabling SSH key for ***" "$1"
   local CLI_JSON=$(aws ec2-instance-connect send-ssh-public-key \
     --availability-zone $AZONE \
@@ -71,11 +98,12 @@ prime() {
     --instance-os-user $LOGIN_USER \
     --ssh-public-key "file://$SSH_KEY_FILE" \
   )
+  local REQ_ID="$(echo $CLI_JSON | jq -r .RequestId)"
+  local SUCCESS="$(echo $CLI_JSON | jq -r .Success)"
   printf "%-32s: %s\\n" "Host public IP address" "$PUBLIC_IP"
-  printf "%-32s: %s\\n" "AWS instance ID" "$IID"
+  printf "%-32s: %s\\n" "AWS VPC / instance ID" "$VPCID / $IID"
   printf "%-32s: %s\\n" "Enabled login user" "$LOGIN_USER"
-  printf "%-32s: %s\\n" "Connect Request ID" "$(echo $CLI_JSON | jq -r .RequestId)"
-  printf "%-32s: %s\\n" "Execution status" "Success=$(echo $CLI_JSON | jq -r .Success)"
+  printf "%-32s: %s\\n" "Connect Request ID / status" "$REQ_ID (Success=$SUCCESS)"
   echo ""
 }
 
@@ -118,8 +146,9 @@ get_target_private_ip() {
 
 
 # $1 - host JSON (just the inner object)
-get_login_name() {
-  echo "$(get_tag "$1" "$EC2_CONNECT_USER_TAG" "$DEFAULT_LOGIN_USER")"
+# $2 - a default login user if no user was found
+get_ec2c_login_name() {
+  echo "$(get_tag "$1" "$EC2_CONNECT_USER_TAG" "${2:-$DEFAULT_LOGIN_USER}")"
 }
 
 
@@ -128,7 +157,7 @@ find_bastion_for_target() {
   local VPC_ID=$(get_field "$1" ".VpcId")
   local TMP_JSON="$(aws ec2 describe-instances \
     --filters Name=vpc-id,Values=$VPC_ID \
-              Name=tag-key,Values=bastion-host \
+              Name=tag-key,Values="$EC2_BASTION_HOST_TAG" \
     | jq -r '.Reservations[0].Instances[0]')"
   if [[ $TMP_JSON == "null" ]] || [[ -z $TMP_JSON ]]; then
     echo ""
@@ -138,37 +167,6 @@ find_bastion_for_target() {
 }
 
 
-# $1 - tag key
-# $2 - tag value
-# return: VPC JSON field
-get_vpc_by_tag() {
-  local TMP_JSON="$(aws ec2 describe-vpcs --filters "Name=tag:$1,Values=$2" --output json | jq '.Vpcs[0]')"
-  if [[ $TMP_JSON == "null" ]] || [[ -z $TMP_JSON ]]; then
-    echo ""
-  else
-    echo "$TMP_JSON"
-  fi
-}
-
-
-# $1 - VPC JSON
-# $2 - host private IP
-# return: host JSON
-get_vpc_host() {
-  local VPC_ID=$(get_field "$1" '.VpcId')
-  local TMP_JSON="$(aws ec2 describe-instances \
-    --filters "Name=vpc-id,Values=$VPC_ID" \
-              "Name=private-ip-address,Values=$2" \
-    --output json \
-    | jq -r '.Reservations[0].Instances[0]' \
-  )"
-  if [[ $TMP_JSON == "null" ]] || [[ -z $TMP_JSON ]]; then
-    echo ""
-  else
-    echo "$TMP_JSON"
-  fi
-}
-
 # all parameters go directly to 'ssh'
 # we rely on the following variables to be set:
 #    JSON         the target host JSON object
@@ -176,42 +174,42 @@ get_vpc_host() {
 ssh_into() {
   printf "%-32s: %s\\n" "Using SSH key file" "$SSH_KEY_FILE"
   IP=$(get_field "$JSON" ".PublicIpAddress")
-  LOGIN_USER="$(get_login_name "$JSON")"
 
-  if [[ -z $IP ]] || [[ -n "${FORCE_BASTION:-}" ]]; then
-    printf "%-32s: %s\\n\\n" "NOTE" "Locating bastion host (no public IP, or FORCE_BASTION set)"
-    BASTION_JSON="$(find_bastion_for_target "$JSON")"
-    if [ -z "$BASTION_JSON" ]; then
+  if [[ -z $IP ]] || [[ -n "${FORCE_JUMP:-}" ]]; then
+    printf "%-32s: %s\\n\\n" "NOTE" "Locating bastion host (no public IP, or FORCE_JUMP set)"
+    JUMP_JSON="$(find_bastion_for_target "$JSON")"
+    if [ -z "$JUMP_JSON" ]; then
       HOST=""
       SSH_PARAMS=""
       printf "%-32s: %s\\n" "NOTE" "Could not find bastion host, skipping SSH"
     else
       HOST="$(get_target_private_ip "$JSON")"
-      BASTION_HOST="$(get_target_public_ip "$BASTION_JSON")"
-      BASTION_LOGIN_USER="$(get_login_name "$BASTION_JSON")"
-      SSH_PARAMS="-J $BASTION_LOGIN_USER@$BASTION_HOST"
-      prime "bastion host" "$BASTION_JSON" "$BASTION_LOGIN_USER"
+      JUMP_HOST="$(get_target_public_ip "$JUMP_JSON")"
+      [[ -n $JUMP_USER ]] || JUMP_USER="$(get_ec2c_login_name "$JUMP_JSON")"
+      SSH_PARAMS="-J $JUMP_USER@$JUMP_HOST"
+      prime "bastion host" "$JUMP_JSON" "$JUMP_USER"
     fi
   else
     HOST="${HOST:-$IP}"
+    SSH_PARAMS=""
   fi
 
   if [[ -z $HOST ]] || [[ $HOST = "null" ]]; then
     printf "%-32s: %s\\n" "NOTE" "No HOST found, not executing SSH"
     printf "%-32s: %s\\n" "Execution status" "Success=$(echo $JSON | jq -r .Success)"
   else
-    prime "target host" "$JSON" "$LOGIN_USER"
+    [[ -n $TARGET_USER ]] || TARGET_USER="$(get_ec2c_login_name "$JSON")"
+    prime "target host" "$JSON" "$TARGET_USER"
     set -x
-    exec ssh -A $SSH_PARAMS "$LOGIN_USER@$HOST" "$@"
+    exec ssh -o StrictHostKeyChecking=no -A $SSH_PARAMS "$TARGET_USER@$HOST" "$@"
   fi
 }
 
 
-IP=""
-HOST=""
-if [[ $1 = "select" ]]; then
-
-  declare -A VPCS
+# displays a list of all running instances and lets the user select one.
+# prints ("returns") the instance json to the caller.
+select_instance() {
+    declare -A VPCS
   while read vpc_id vpc_name
   do
     VPCS[$vpc_id]="$vpc_name"
@@ -255,22 +253,52 @@ if [[ $1 = "select" ]]; then
   done | sort > "$FZF_FILE"
 
   read vpc_id instance_id instance_ipaddress rest <<< $(fzf < "$FZF_FILE")
-  JSON=$(aws ec2 describe-instances --instance-ids $instance_id --output json | jq '.Reservations[0].Instances[0]')
+
+  aws ec2 describe-instances --instance-ids $instance_id --output json | jq '.Reservations[0].Instances[0]'
+}
+
+
+# ###########################################################################
+#                        .........................                          #
+#                                                                           #
+#                             EXECUTION START                               #
+#                                                                           #
+#                        .........................                          #
+# ###########################################################################
+
+
+IP=""
+HOST=""
+
+if [ -z "$1" -o "$1" = "-h" ]; then
+
+  help
+  exit 255
+
+elif [[ $1 = "-s" ]]; then
+
+  # let the user select an instance from a list of all instances
+  JSON="$(select_instance)"
 
 elif echo $1 | grep -qE 'i-[a-z0-9]{8}([a-z0-9]{9})?$' ; then
 
+  # use the instance id given. (WARNING: no error check :/ ...)
   printf "%-32s: %s\\n" "AWS instance ID given" "$1"
   JSON=$(aws ec2 describe-instances --instance-ids $1 --output json | jq '.Reservations[0].Instances[0]')
 
 else
 
-  if ! echo $1 | grep -qE '^(\d+\.){3}\d+$' ; then
+  # interpret parameter either as ...
+  if echo $1 | grep -qE '^(\d+\.){3}\d+$' ; then
+    # IP, or ...
+    HOST="$1"
+    IP="$1"
+  else
+    # ... host name, which will be resolved.
+    # (again no error check if host not found)
     HOST="$1"
     IP=$(dig +short $HOST)
     printf "%-32s: %s\\n" "Resolving host name" "$HOST"
-  else
-    HOST="$1"
-    IP="$1"
   fi
   printf "%-32s: %s\\n" "IP" "$IP"
   JSON=$(aws ec2 describe-instances --filter Name=ip-address,Values=$IP --output json | jq '.Reservations[0].Instances[0]')
@@ -279,4 +307,6 @@ fi
 
 # "remove" param 1
 shift
+
+# "do it" :)
 ssh_into "$@"
