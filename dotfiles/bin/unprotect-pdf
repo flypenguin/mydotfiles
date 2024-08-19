@@ -9,7 +9,7 @@ for file in "$@" ; do
     echo -n "Unprotecting $file ... "
     backup_file="${file%.*}.orig.$(pwgen -An 3 1).pdf"
     mv "$file" "$backup_file"
-    \gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile="$file" -f "$file.orig"
+    \gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile="$file" -f "$backup_file"
     touch -r "$backup_file" "$file"
     echo "done."
 done
