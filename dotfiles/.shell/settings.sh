@@ -2,7 +2,35 @@
 
 # less - from http://bit.ly/1r1VoYA
 export LESS='-iMRS#15'
-export LESSOPEN="|$HOME/bin/_lessfilter %s"
+if command -v lesspipe.sh > /dev/null ; then
+  export LESSOPEN="|/usr/local/bin/lesspipe.sh %s"
+fi
+
+# pygmentize - LOWER priority, will be overwritten below
+if command -v pygmentize > /dev/null ; then
+  export PYGMENTIZE_STYLE='monokai'
+  export LESSCOLORIZER="pygmentize"
+  # there is _also_ a global alias "P", which comes from ...
+  # ... probably the pygmentize package. I stole the alias
+  # from there.
+  alias -g  LC="2>&1| pygmentize -l pytb"
+  alias -g PYG="2>&1| pygmentize -l pytb"
+fi
+
+# bat - HIGHER priority, must come _after_ pygmentize above
+if command -v bat > /dev/null ; then
+  export BAT_THEME="Monokai Extended"
+  export LESSCOLORIZER="bat"
+  alias -g  LC="|bat --paging=always --color=always"
+  alias -g BAT="|bat --paging=always --color=always"
+fi
+
+if [[ -f /usr/share/vim/vim90/macros/less.sh ]]; then
+  lessc() { /usr/share/vim/vim90/macros/less.sh "$@" }
+  # yes, we overwrite the LC alias ...
+  alias -g LC="| lessc"
+  alias    lc="lessc"
+fi
 
 # set & create GOPATH ...
 export GOPATH="$HOME/Dev/GOPATH"
