@@ -2,7 +2,8 @@
 
 if [ -z "$1" -o "$1" == "-h" ]; then
   echo "USAGE: $(basename $0) PDF_FILE[, PDF_FILE...]"
-  echo "       Combines all given PDF files into one"
+  echo "       Replaces PDF file and keeps only pages 2, 1"
+  echo "       (in that order)"
   exit 255
 fi
 
