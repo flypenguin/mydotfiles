@@ -89,7 +89,8 @@ prime() {
   local AZONE=$(echo "$2" | jq -r '.Placement.AvailabilityZone')
   local IID=$(echo "$2" | jq -r '.InstanceId')
   local VPCID=$(echo "$2" | jq -r '.VpcId')
-  local PUBLIC_IP=$(echo "$2" | jq -r '.PublicIpAddress')
+  local PUBLIC_IP=$(get_field "$2" '.PublicIpAddress')
+  local PRIVATE_IP=$(get_field "$2" '.PrivateIpAddress')
   local LOGIN_USER="${3:-DEFAULT_LOGIN_USER}"
   printf "%-32s: %s\\n" "*** Enabling SSH key for ***" "$1"
   local CLI_JSON=$(aws ec2-instance-connect send-ssh-public-key \
@@ -181,7 +182,8 @@ ssh_into() {
     if [ -z "$JUMP_JSON" ]; then
       HOST=""
       SSH_PARAMS=""
-      printf "%-32s: %s\\n" "NOTE" "Could not find bastion host, skipping SSH"
+      printf "%-32s: %s\\n" "NOTE" "Could not find bastion host, exiting."
+      exit 255
     else
       HOST="$(get_target_private_ip "$JSON")"
       JUMP_HOST="$(get_target_public_ip "$JUMP_JSON")"
@@ -253,6 +255,8 @@ select_instance() {
   done | sort > "$FZF_FILE"
 
   read vpc_id instance_id instance_ipaddress rest <<< $(fzf < "$FZF_FILE")
+  rm -f "$FZF_FILE"
+  [[ -z $instance_id ]] && return 1 || true
 
   aws ec2 describe-instances --instance-ids $instance_id --output json | jq '.Reservations[0].Instances[0]'
 }
@@ -303,6 +307,11 @@ else
   printf "%-32s: %s\\n" "IP" "$IP"
   JSON=$(aws ec2 describe-instances --filter Name=ip-address,Values=$IP --output json | jq '.Reservations[0].Instances[0]')
 
+fi
+
+if [[ -z $JSON ]]; then
+    echo "Aborting."
+    exit 255
 fi
 
 # "remove" param 1
