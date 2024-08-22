@@ -633,7 +633,7 @@ ecr-login() {
     export AWS_REGION="eu-central-1"
   fi
   local ACC_ID="$(aws sts get-caller-identity --query Account --output text)"
-  for cmd in podman docker ; do
+  for cmd in podman docker skopeo ; do
     if ! command -v $cmd > /dev/null ; then continue ; fi
     echo "Logging in to $cmd ..."
     aws ecr get-login-password \
