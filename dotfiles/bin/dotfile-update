@@ -2,7 +2,7 @@
 
 # directories that may not be symlinks and must be directories
 # relative to $HOME
-MUST_BE_DIR=".config .ssh .ssh/sockets"
+MUST_BE_DIR=".config .ssh/sockets .hammerspoon/Spoons"
 
 # maybe ... change later.
 DOTDIR="$HOME/.dotfiles"
