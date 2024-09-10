@@ -259,11 +259,6 @@ alias aws-ssh-fingerprint=ssh-key-hash
 alias ssh-aws-fingerprint=ssh-key-hash
 alias aws-fp=ssh-key-hash
 
-# ###########################################################################
-#
-# git
-#
-
 # gitignore service :)
 function giti() { curl -L -s https://www.gitignore.io/api/$@; }
 
@@ -290,6 +285,21 @@ function gdelb() {
 #
 # AWS
 #
+
+ecr-login() {
+  AWS_REGION=${AWS_REGION:-$AWS_DEFAULT_REGION}
+  if [[ -z $AWS_REGION ]]; then
+    echo "WARNING: Setting AWS_REGION to 'eu-central-1'"
+    export AWS_REGION="eu-central-1"
+  fi
+  local ACC_ID="$(aws sts get-caller-identity --query Account --output text)"
+  for cmd in podman docker skopeo ; do
+    if ! command -v $cmd > /dev/null ; then continue ; fi
+    echo "Logging in to $cmd ..."
+    aws ecr get-login-password \
+      | $cmd login --username AWS --password-stdin $ACC_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+  done
+}
 
 AWS_TOKEN_DURATION=28800 # AWS_8h
 
@@ -618,25 +628,5 @@ update_dynamic_paths() {
         echo "path=(\"$CHECK_PATH\" \$path)" >>"$DYNPATH"
       fi
     done
-  done
-}
-
-# ###########################################################################
-#
-# AWS helpers
-#
-
-ecr-login() {
-  AWS_REGION=${AWS_REGION:-$AWS_DEFAULT_REGION}
-  if [[ -z $AWS_REGION ]]; then
-    echo "WARNING: Setting AWS_REGION to 'eu-central-1'"
-    export AWS_REGION="eu-central-1"
-  fi
-  local ACC_ID="$(aws sts get-caller-identity --query Account --output text)"
-  for cmd in podman docker skopeo ; do
-    if ! command -v $cmd > /dev/null ; then continue ; fi
-    echo "Logging in to $cmd ..."
-    aws ecr get-login-password \
-      | $cmd login --username AWS --password-stdin $ACC_ID.dkr.ecr.$AWS_REGION.amazonaws.com
   done
 }
