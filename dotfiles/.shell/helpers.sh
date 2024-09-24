@@ -288,7 +288,7 @@ function gdelb() {
 
 ks() {
   set -euo pipefail
-  CONTEXTS="$(kubectl config get-contexts 2>1 | sed -e 1d -Ee 's/^.{8}//g' | awk '{print $1}')"
+  CONTEXTS="$(kubectl config get-contexts 2>&1 | sed -e 1d -Ee 's/^.{8}//g' | awk '{print $1}')"
   CONTEXT="$(echo $CONTEXTS | fzf)"
   [[ -z $CONTEXT ]] && return
   set +euo pipefail
