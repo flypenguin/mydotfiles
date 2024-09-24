@@ -16,7 +16,7 @@ for dir_to_pack in "$@"; do
 
   echo "Archiving directory:   [$dir_to_pack]"
 
-  picture-dir-tool create-thumbnails "$dir_to_pack"
+  picture-dir-tool create-thumbnails -n 4 "$dir_to_pack"
   pack-directory -c 0 "$dir_to_pack"
 
   zip -r -0 "$BASENAME.pack/$BASENAME.thumbs.zip" "$THUMBS_DIR" >"$THUMBS_DIR.progress.txt"
