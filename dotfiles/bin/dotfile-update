@@ -106,7 +106,7 @@ EOF
 
 # ensure MUST_BE_DIRs are actually directories :)
 for dir in $MUST_BE_DIR ; do
-  rm -f "$HOME/$dir"
+  [[ ! -d "$dir" ]] && rm -f "$HOME/$dir"
   mkdir -p "$HOME/$dir"
 done
 
