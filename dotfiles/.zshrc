@@ -20,6 +20,7 @@ for PATH_SEARCH in \
   "/home/linuxbrew/.linuxbrew/bin" \
   "/usr/local/bin" \
   "/opt/homebrew/bin" \
+  "$HOME/.local/bin" \
   "$HOME/bin" \
 ; do
   if [ -d "$PATH_SEARCH" ]; then
