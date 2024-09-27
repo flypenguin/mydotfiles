@@ -117,7 +117,6 @@ alias -g YAML="| python3 -c 'import sys, yaml, json; yaml.safe_dump(json.load(sy
 # OPS AWS
 alias aws-list-instances="aws ec2 describe-instances | jq '.Reservations[].Instances[] | {IP: .PrivateIpAddress, ID: .InstanceId, Name: .Tags[] | select(.Key==\"Name\").Value}'"
 alias aws-list-tagged-volumes="aws ec2 describe-volumes | jq '.Volumes[] | select(has(\"Tags\")) | {ID: .VolumeId, Size: .Size, Name: .Tags[] | select(.Key==\"Name\").Value}'"
-alias ecr-list-repos="aws ecr describe-repositories --query 'repositories[*].repositoryUri' | jq -r '.[]' | sort"
 
 # azure
 alias azgroups="az group list --query '[].name'"

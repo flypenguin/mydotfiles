@@ -300,12 +300,16 @@ ks() {
 # AWS
 #
 
-ecr-login() {
+_set_aws_region() {
   AWS_REGION=${AWS_REGION:-$AWS_DEFAULT_REGION}
   if [[ -z $AWS_REGION ]]; then
-    echo "WARNING: Setting AWS_REGION to 'eu-central-1'"
+    echo "WARNING: Setting AWS_REGION to 'eu-central-1'" >&2
     export AWS_REGION="eu-central-1"
   fi
+}
+
+ecr-login() {
+  _set_aws_region
   local ACC_ID="$(aws sts get-caller-identity --query Account --output text)"
   for cmd in podman docker skopeo ; do
     if ! command -v $cmd > /dev/null ; then continue ; fi
@@ -313,6 +317,48 @@ ecr-login() {
     aws ecr get-login-password \
       | $cmd login --username AWS --password-stdin $ACC_ID.dkr.ecr.$AWS_REGION.amazonaws.com
   done
+}
+
+# $1 - optional filter parameter
+ecr-list-repos() {
+  local GREP_FILTER
+  GREP_FILTER="${1:-}"
+  shift
+  _set_aws_region
+  aws ecr describe-repositories \
+    --query "repositories[*].repositoryUri" \
+    | jq -r '.[]' \
+    | sort \
+    | grep -E "$GREP_FILTER" "$@"
+}
+
+# $1 - repo name (required)
+# $2 - optional filter parameter
+ecr-list-images() {
+  local ECR_REPO
+  local GREP_FILTER
+  ECR_REPO="${1:-}"
+  if [[ -z $ECR_REPO ]] || [[ $ECR_REPO = -h ]]; then
+    echo "USAGE: ecr-list-repo REPONAME [GREP_FILTER]"
+    return 1
+  else
+    shift
+  fi
+  # make sure we can post _any_ full ECR image "thing",
+  # and just extract the repo name.
+  ECR_REPO="${ECR_REPO#*.com/}"
+  ECR_REPO="${ECR_REPO%:*}"
+  GREP_FILTER="${1:-}"
+  [[ -z $GREP_FILTER ]] || shift
+  _set_aws_region
+  aws ecr list-images \
+    --repository-name "$ECR_REPO" \
+    --query 'imageIds[*].[imageTag]' \
+    --output text \
+    | awk "{print \"$ECR_REPO:\"\$1}" \
+    | sort \
+    | uniq -c \
+    | grep -E "$GREP_FILTER" "$@"
 }
 
 AWS_TOKEN_DURATION=28800 # AWS_8h
