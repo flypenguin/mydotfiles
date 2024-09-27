@@ -1,4 +1,5 @@
 .cache
+temp-*
 temp/
 test/
 tmp/
