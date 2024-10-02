@@ -24,10 +24,12 @@ alias ssh-clean="rm -f '$HOME/.ssh/sockets/'*"
 
 # git
 alias  gco="git checkout"
+alias gcob="git checkout -b"
 alias  gnp="git --no-pager"
 alias  gri="git rebase --interactive"
 alias  gra="git rebase --abort"
 alias  grc="git rebase --continue"
+alias gcpa="git cherry-pick --abort"
 alias  gpf="git push --force"
 alias   gp="git push"
 alias   gs="git status"
