@@ -53,4 +53,4 @@
     hunk-header-decoration-style =
     file-decoration-style = blue ol
 [credential]
-	helper = osxkeychain
+    helper = osxkeychain
