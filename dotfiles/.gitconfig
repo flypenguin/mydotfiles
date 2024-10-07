@@ -6,7 +6,8 @@
 [color]
     ui = true
 [mergetool]
-	keepBackup = true
+    keepBackup = true
+    prompt = false
 [core]
     editor = vim
     eol = lf
@@ -15,7 +16,7 @@
     pager = delta
     excludesFile = ~/.gitignore
 [merge]
-    tool = smerge
+    tool = Kaleidoscope
 [pull]
     rebase = true
 [init]
@@ -54,3 +55,13 @@
     file-decoration-style = blue ol
 [credential]
     helper = osxkeychain
+[diff]
+    tool = Kaleidoscope
+[difftool "Kaleidoscope"]
+    cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+[difftool]
+    prompt = false
+    trustExitCode = true
+[mergetool "Kaleidoscope"]
+    cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+    trustExitCode = true
