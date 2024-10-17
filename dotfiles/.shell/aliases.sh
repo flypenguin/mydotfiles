@@ -50,6 +50,7 @@ alias  gld="git log --pretty=format:'%C(white reverse)%n%h %C(yellow reverse)%ad
 alias  gds="git --no-pager diff --stat"
 alias  glf="git log --stat --oneline --pretty='%n%C(yellow reverse)%h%C(reset) %C(yellow)%ad%C(red)%d%C(reset) %C(white)%s%C(reset) %C(blue)[%an]%C(reset)'"
 alias  gpb="git push --set-upstream origin \$(git rev-parse --abbrev-ref HEAD)"
+alias gr-h="git reset --hard"
 # from here: https://stackoverflow.com/a/38404202/902327
 alias git-branch-clean="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -d"
 alias git-branch-clean-f="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -D"
