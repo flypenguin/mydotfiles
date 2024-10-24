@@ -23,6 +23,10 @@ alias sshconfig="vim \$HOME/.ssh/config"
 alias ssh-clean="rm -f '$HOME/.ssh/sockets/'*"
 
 # git
+# delete all branches not on remote - https://stackoverflow.com/a/38404202/902327
+alias git-branch-clean="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -D"
+alias git-clean-branches="git-branch-clean"
+# short aliases
 alias  gco="git checkout"
 alias gcob="git checkout -b"
 alias  gnp="git --no-pager"
@@ -51,9 +55,6 @@ alias  gds="git --no-pager diff --stat"
 alias  glf="git log --stat --oneline --pretty='%n%C(yellow reverse)%h%C(reset) %C(yellow)%ad%C(red)%d%C(reset) %C(white)%s%C(reset) %C(blue)[%an]%C(reset)'"
 alias  gpb="git push --set-upstream origin \$(git rev-parse --abbrev-ref HEAD)"
 alias gr-h="git reset --hard"
-# from here: https://stackoverflow.com/a/38404202/902327
-alias git-branch-clean="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -d"
-alias git-branch-clean-f="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -D"
 # overwrite some predefined aliases
 alias gb="git --no-pager branch -vv"
 # stash only staging area
