@@ -68,14 +68,16 @@ help() {
   echo "       L  use this SSH key to connect to the target hosts"
   echo ""
   echo ""
-  echo "For the script to (fully) work, those tools are required:"
+  echo "For the script to work, those tools are required:"
   echo ""
-  echo "    Tool    Install on Mac            Install on Debian/Ubuntu"
-  echo "    ......  ........................  ..........................."
-  echo "    aws     brew install awscli       apt-get install -y awscli"
-  echo "    dig     (pre-installed)           apt-get install -y dnsutils"
-  echo "    fzf     brew install fzf          apt-get install -y fzf"
-  echo "    jq      brew install jq           apt-get install -y jq"
+  echo "    Tool        Install on Mac            Install on Debian/Ubuntu"
+  echo "    ......      ........................  ..........................."
+  echo "    aws         brew install awscli       apt-get install -y awscli"
+  echo "    bash v5+    brew install bash                 --"
+  echo "    dig         (pre-installed)           apt-get install -y dnsutils"
+  echo "    fzf         brew install fzf          apt-get install -y fzf"
+  echo "    GNU grep    brew install grep                 --"
+  echo "    jq          brew install jq           apt-get install -y jq"
   echo ""
   echo ""
   exit 255
@@ -89,8 +91,7 @@ prime() {
   local AZONE=$(echo "$2" | jq -r '.Placement.AvailabilityZone')
   local IID=$(echo "$2" | jq -r '.InstanceId')
   local VPCID=$(echo "$2" | jq -r '.VpcId')
-  local PUBLIC_IP=$(get_field "$2" '.PublicIpAddress')
-  local PRIVATE_IP=$(get_field "$2" '.PrivateIpAddress')
+  local PUBLIC_IP=$(echo "$2" | jq -r '.PublicIpAddress')
   local LOGIN_USER="${3:-DEFAULT_LOGIN_USER}"
   printf "%-32s: %s\\n" "*** Enabling SSH key for ***" "$1"
   local CLI_JSON=$(aws ec2-instance-connect send-ssh-public-key \
@@ -182,8 +183,7 @@ ssh_into() {
     if [ -z "$JUMP_JSON" ]; then
       HOST=""
       SSH_PARAMS=""
-      printf "%-32s: %s\\n" "NOTE" "Could not find bastion host, exiting."
-      exit 255
+      printf "%-32s: %s\\n" "NOTE" "Could not find bastion host, skipping SSH"
     else
       HOST="$(get_target_private_ip "$JSON")"
       JUMP_HOST="$(get_target_public_ip "$JUMP_JSON")"
@@ -255,10 +255,37 @@ select_instance() {
   done | sort > "$FZF_FILE"
 
   read vpc_id instance_id instance_ipaddress rest <<< $(fzf < "$FZF_FILE")
-  rm -f "$FZF_FILE"
-  [[ -z $instance_id ]] && return 1 || true
 
   aws ec2 describe-instances --instance-ids $instance_id --output json | jq '.Reservations[0].Instances[0]'
+}
+
+
+check_requirements() {
+  for cmd in aws dig fzf jq ; do
+    if not command -v $cmd > /dev/null ; then
+      echo "ERROR: Required command '$cmd' is not installed."
+      echo "Aborting."
+      exit 255
+    fi
+  done
+
+  if ! grep --help 2>&1 | grep -q gnu ; then
+    echo "ERROR: You are not using GNU grep."
+    echo "       On a mac, use homebrew to install it, then add it to"
+    echo "       your path (which you must do manually)."
+    echo "       Installation (Mac):"
+    echo "         brew install grep"
+    echo "       Add to path (Mac):"
+    echo "         export PATH=\"/usr/local/opt/grep/libexec/gnubin:\$PATH\""
+    exit 255
+  fi
+
+  if ! bash --version 2>&1 | grep -q "version 5" ; then
+    echo "ERROR: You are not using bash v5+"
+    echo "       On a mac, use homebrew to install it."
+    echo "       Installation (Mac):"
+    echo "         brew install bash"
+    exit 255
 }
 
 
@@ -274,12 +301,16 @@ select_instance() {
 IP=""
 HOST=""
 
-if [ -z "$1" -o "$1" = "-h" ]; then
+set -euo pipefail
 
+if [ -z "$1" -o "$1" = "-h" ]; then
   help
   exit 255
+fi
 
-elif [[ $1 = "-s" ]]; then
+check_requirements
+
+if [[ $1 = "-s" ]]; then
 
   # let the user select an instance from a list of all instances
   JSON="$(select_instance)"
@@ -293,7 +324,7 @@ elif echo $1 | grep -qE 'i-[a-z0-9]{8}([a-z0-9]{9})?$' ; then
 else
 
   # interpret parameter either as ...
-  if echo $1 | grep -qE '^(\d+\.){3}\d+$' ; then
+  if echo $1 | grep -qP '^(\d+\.){3}\d+$' ; then
     # IP, or ...
     HOST="$1"
     IP="$1"
@@ -307,11 +338,6 @@ else
   printf "%-32s: %s\\n" "IP" "$IP"
   JSON=$(aws ec2 describe-instances --filter Name=ip-address,Values=$IP --output json | jq '.Reservations[0].Instances[0]')
 
-fi
-
-if [[ -z $JSON ]]; then
-    echo "Aborting."
-    exit 255
 fi
 
 # "remove" param 1
