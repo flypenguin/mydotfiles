@@ -344,37 +344,76 @@ ecr-login() {
   done
 }
 
-# $1 - optional filter parameter
+# $@ - optional grep filter parameters
 ecr-list-repos() {
-  local GREP_FILTER
-  GREP_FILTER="${1:-}"
-  shift
+  if [[ ${1:-} = -h ]]; then
+    echo "USAGE: ecr-list-repos [GREP_PARAM,...]"
+    echo "       List all ecr repos in the currently active account"
+    echo "       GREP_PARAM is passed to a grep expression to filter"
+    echo "       the output."
+    echo "EXAMPLES:"
+    echo "       List all repos:"
+    echo "           ecr-list-repos"
+    echo "       List all repos starting with '/test':"
+    echo "           ecr-list-repos \\aws.com/test"
+    echo "       List all repos with 'air' anywhere in the name:"
+    echo "           ecr-list-repos air"
+    echo "       List all repos without 'a' in the name:"
+    echo "           ecr-list-repos -v a"
+    echo "       Colorize grep output (makes only sense with a grep pattern):"
+    echo "           ecr-list-repos --color=yes PATTERN"
+    echo "       ... etc."
+    return 255
+  fi
   _set_aws_region
-  aws ecr describe-repositories \
+  local REPOS=$(aws ecr describe-repositories \
     --query "repositories[*].repositoryUri" \
     | jq -r '.[]' \
-    | sort \
-    | grep -E "$GREP_FILTER" "$@"
+    | sort
+  )
+  if [[ -z $REPOS ]]; then
+    echo "No repositories found." > /sys/stderr
+    return 2
+  fi
+  # only call 'grep' if we actually _have_ grep parameters.
+  # grep without a pattern will result in an error.
+  local GREP_CMD=("cat")
+  [[ -z $1 ]] || GREP_CMD=("grep" "-P")
+  # let's REMOVE the "1234.dkr.[...]aws.com/" part, and apply the grep
+  # _only_ to the actual repo name. then re-add the whole thing, so
+  # you can copy-paste the output.
+  local FQDN="${REPOS%%/*}"
+  local REPO
+  (while read REPO ; do echo "${REPO#*/}"; done < <(echo $REPOS)) \
+  | "${GREP_CMD[@]}" "$@" \
+  | sed -Ee "s:^:$FQDN/:"
 }
 
-# $1 - repo name (required)
-# $2 - optional filter parameter
+# $1    - repo name (required)
+# $2..n - optional grep parameters
 ecr-list-images() {
   local ECR_REPO
-  local GREP_FILTER
   ECR_REPO="${1:-}"
   if [[ -z $ECR_REPO ]] || [[ $ECR_REPO = -h ]]; then
-    echo "USAGE: ecr-list-repo REPONAME [GREP_FILTER]"
+    echo "USAGE: ecr-list-images REPONAME [GREP_FILTER,...]"
+    echo "       List all image tags in the ECR repo 'REPONAME'"
+    echo "EXAMPLES:"
+    echo "       List all images with 'prod' in the name:"
+    echo "           ecr-list-images prod"
+    echo "       List all images with 'prod' _not_ in the name:"
+    echo "           ecr-list-images -v prod"
     return 1
-  else
-    shift
   fi
+  shift
   # make sure we can post _any_ full ECR image "thing",
   # and just extract the repo name.
   ECR_REPO="${ECR_REPO#*.com/}"
   ECR_REPO="${ECR_REPO%:*}"
-  GREP_FILTER="${1:-}"
-  [[ -z $GREP_FILTER ]] || shift
+  # same as above - only call 'grep' in case we have actual patterns
+  # given as parameters.
+  local GREP_CMD=("cat")
+  [[ -z $1 ]] || GREP_CMD=("grep" "-P")
+  # gooooo ...
   _set_aws_region
   aws ecr list-images \
     --repository-name "$ECR_REPO" \
@@ -382,8 +421,8 @@ ecr-list-images() {
     --output text \
     | awk "{print \"$ECR_REPO:\"\$1}" \
     | sort \
-    | uniq -c \
-    | grep -E "$GREP_FILTER" "$@"
+    | uniq \
+    | "${GREP_CMD[@]}" "$@"
 }
 
 AWS_TOKEN_DURATION=28800 # AWS_8h
