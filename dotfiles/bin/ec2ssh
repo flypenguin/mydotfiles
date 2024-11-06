@@ -286,6 +286,7 @@ check_requirements() {
     echo "       Installation (Mac):"
     echo "         brew install bash"
     exit 255
+  fi
 }
 
 
