@@ -284,6 +284,14 @@ alias aws-ssh-fingerprint=ssh-key-hash
 alias ssh-aws-fingerprint=ssh-key-hash
 alias aws-fp=ssh-key-hash
 
+# create a backup branch of the current one
+gibb() {
+  @set -euo pipefail
+  BBRANCH="backup/$$(git rev-parse --abbrev-ref HEAD)/$$(date "+%Y%m%d-%H%M%S")"
+  git branch "$$BBRANCH"
+  echo "$$BBRANCH"
+}
+
 # gitignore service :)
 function giti() { curl -L -s https://www.gitignore.io/api/$@; }
 
