@@ -284,6 +284,15 @@ alias aws-ssh-fingerprint=ssh-key-hash
 alias ssh-aws-fingerprint=ssh-key-hash
 alias aws-fp=ssh-key-hash
 
+grH() {
+  if [[ -z "${1:-}" ]] ; then
+    echo "USAGE: grHH <num-of-commits>"
+    echo "       executes 'git reset --hard HEAD~<num-of-commits'"
+    return 1
+  fi
+  git reset --hard HEAD~$1
+}
+
 # create a backup branch of the current one
 gibb() {
   BBRANCH="backup/$(git rev-parse --abbrev-ref HEAD)/$(date "+%Y%m%d-%H%M%S")"
