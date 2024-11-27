@@ -3,6 +3,9 @@
 # SETTINGS (global)
 #
 
+# gpg
+export GPG_TTY=$(tty)
+
 # less - from http://bit.ly/1r1VoYA
 export LESS='-iMRS#15'
 if command -v lesspipe.sh > /dev/null ; then

@@ -11,6 +11,7 @@ cask "dropzone"
 # "exactscan" ist NOT "exactscan PRO"
 cask "firefox"
 cask "gpg-suite"
+brew "pinentry-mac"       # required for gpg-suite ...
 cask "hazel"
 cask "iterm2"
 cask "nextcloud"
@@ -31,6 +32,8 @@ cask "vscodium"
 cask "zed"
 
 # replace Mac OS command line utils
+brew "bash"
+brew "coreutils"
 brew "curl"
 brew "emacs"
 brew "findutils"
@@ -38,11 +41,10 @@ brew "gnu-sed"
 brew "gnu-tar"
 brew "gnu-time"
 brew "gnu-which"
+brew "grep"
+brew "openssl"
 brew "stow"
 brew "vim"
-brew "coreutils"
-brew "openssl"
-brew "bash"
 
 # previously uninstalled command line utils
 brew "eza"
@@ -55,7 +57,9 @@ brew "htop"
 brew "imagemagick"
 brew "jq"
 brew "nmap"
+brew "parallel"
 brew "pv"
+brew "spacer"
 brew "ripgrep"
 brew "the_silver_searcher"      # "ag" :)
 brew "tmux"
@@ -63,6 +67,7 @@ brew "watch"
 brew "wget"
 brew "xz"
 brew "yq"
+brew "zoxide"
 
 # coding and work related
 brew "autoenv"
@@ -80,17 +85,23 @@ brew "pyenv"
 brew "pyenv-virtualenv"
 brew "telnet"
 brew "terraform"
+brew "uv"
 cask "boop"
+cask "clop"
 cask "devutils"
-cask "docker"
 cask "fork"
+cask "podman-desktop"
 cask "postgres-unofficial"
 cask "slack"
 
 # (mac) ui appliccations
 cask "cyberduck"
+cask "mountain-duck"
+cask "imageoptim"
+cask "jordanbaird-ice"
+cask "karabiner-elements"
 cask "libreoffice"
-cask "logitech-options"
+cask "logi-options+"
 cask "pdf-expert"
 cask "rocket"
 cask "typora"             # markdown editor
@@ -152,4 +163,5 @@ mas "Keka", id: 470158793
 mas "MoneyMoney", id: 872698314
 mas "Pastebot", id: 1179623856
 mas "PhotoSync", id: 418818452
+mas "rcmd", id: 1596283165
 mas "The Unarchiver", id: 425424353
