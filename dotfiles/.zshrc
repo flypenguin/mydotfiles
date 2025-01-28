@@ -29,6 +29,13 @@ for PATH_SEARCH in \
   fi
 done
 
+# see https://github.com/paulirish/git-open?tab=readme-ov-file#oh-my-zsh
+# for installation instructions
+if [ -d $HOME/.oh-my-zsh/custom/plugins/git-open ]; then
+  echo "add git-open"
+  ADD_PLUGINS+="git-open"
+fi
+
 export ZSH="$HOME/.oh-my-zsh"
 export UPDATE_ZSH_DAYS=13
 

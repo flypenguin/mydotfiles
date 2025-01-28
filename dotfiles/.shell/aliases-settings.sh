@@ -104,11 +104,15 @@ alias ssp="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no"
 alias sshconfig="vim \$HOME/.ssh/config"
 alias ssh-clean="rm -f '$HOME/.ssh/sockets/'*"
 
+# python
+alias de="deactivate"
+
 # git
 # delete all branches not on remote - https://stackoverflow.com/a/38404202/902327
 alias git-branch-clean="git fetch -p && git branch -vv | awk '/: gone]/{print \$1}' | xargs git branch -D"
 alias git-clean-branches="git-branch-clean"
 # short aliases
+alias gcop="git checkout --patch"
 alias  gco="git checkout"
 alias gcob="git checkout -b"
 alias  gnp="git --no-pager"
