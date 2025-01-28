@@ -2,14 +2,37 @@
 
 if [ -z "$1" ] ; then
     echo "USAGE: $(basename $0) FILE[, FILE...]"
+    echo "       $(basename $0) -p FILE..."
+    echo "PARAMETERS: -p - ask for password"  
     exit 255
 fi
 
+if [[ "${1:-}" = "-p" ]]; then
+  ASKPW=1
+  shift
+else
+  ASKPW=0
+fi
+
 for file in "$@" ; do
-    echo -n "Unprotecting $file ... "
-    backup_file="${file%.*}.orig.$(pwgen -An 3 1).pdf"
-    mv "$file" "$backup_file"
-    \gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile="$file" -f "$backup_file"
-    touch -r "$backup_file" "$file"
-    echo "done."
+  if [[ ! -f $file ]]; then
+    echo "File '$file' not found, continuing."
+    continue
+  fi
+  orig_file="${file%.*}.orig.$(pwgen -An 3 1).pdf"
+  tmp_file="$(mktemp -up . )"
+  if ! pdftk "$file" output "$tmp_file" do_ask ; then
+    echo "ERROR during processing '$file'."
+    rm -f "$tmp_file"
+  else
+    mv "$file" "$orig_file"
+    mv "$tmp_file" "$file"
+    echo "Unprotected $file."
+  fi
 done
+
+# "old" method using ghostscript:
+#   WITH password:
+#     \gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile="$file" -dPDFSTOPONERROR -sPDFPassword="$PDFPASS" -f "$backup_file"
+#   withOUT password:
+#     \gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile="$file" -dPDFSTOPONERROR -f "$backup_file"
