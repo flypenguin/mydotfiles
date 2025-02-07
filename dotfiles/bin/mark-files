@@ -9,14 +9,14 @@ from pathlib import Path
 
 
 CHARS = string.ascii_lowercase + string.digits
-MARKER_REX = re.compile(r"(\.\[tag_(\w+)\])")
-MARKER_STR = ".[tag_{}]"
+MARKER_REX = re.compile(r"([ ._-]\[(mark|tag)[ _-](\w+)\])", re.I)
+MARKER_STR = " [mark {}]"
 
 
 def detect_first_marker(files: list[Path]) -> str:
     for f in files:
         if match := MARKER_REX.search(f.name):
-            marker = match.group(2)
+            marker = match.group(3)
             break
     else:
         marker = "".join(random.choices(CHARS, k=config.num_chars))
@@ -24,19 +24,15 @@ def detect_first_marker(files: list[Path]) -> str:
 
 
 def unmark_files(*files: list[Path]):
-    print("unmark_files")
-    print(files)
     files = [f.rename(f.parent / re.sub(MARKER_REX, "", f.name)) for f in files]
     return files
 
 
 def mark_files(files, marker):
-    print("mark_files")
-    print(files)
     files = unmark_files(*files)
     marked_files = []
     for f in files:
-        if len(f.suffix) <= 4:
+        if len(f.suffix) <= 4 and not f.is_dir():
             new_name = f.parent / (f.stem + MARKER_STR.format(marker) + f.suffix)
         else:
             new_name = f.parent / (f.name + MARKER_STR.format(marker))
