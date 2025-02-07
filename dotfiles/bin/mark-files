@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+
+import random
+import re
+import string
+import sys
+from argparse import ArgumentParser
+from pathlib import Path
+
+
+CHARS = string.ascii_lowercase + string.digits
+MARKER_REX = re.compile(r"(\.\[tag_(\w+)\])")
+MARKER_STR = ".[tag_{}]"
+
+
+def detect_first_marker(files: list[Path]) -> str:
+    for f in files:
+        if match := MARKER_REX.search(f.name):
+            marker = match.group(2)
+            break
+    else:
+        marker = "".join(random.choices(CHARS, k=config.num_chars))
+    return marker
+
+
+def unmark_files(*files: list[Path]):
+    print("unmark_files")
+    print(files)
+    files = [f.rename(f.parent / re.sub(MARKER_REX, "", f.name)) for f in files]
+    return files
+
+
+def mark_files(files, marker):
+    print("mark_files")
+    print(files)
+    files = unmark_files(*files)
+    marked_files = []
+    for f in files:
+        if len(f.suffix) <= 4:
+            new_name = f.parent / (f.stem + MARKER_STR.format(marker) + f.suffix)
+        else:
+            new_name = f.parent / (f.name + MARKER_STR.format(marker))
+        marked_files.append(f.rename(new_name))
+    return marked_files
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("files", nargs="+", help="Files to mark")
+    parser.add_argument("-m", "--marker", default=None, help="Define marker string")
+    parser.add_argument(
+        "-n", "--num-chars", default=5, help="Set marker string length (default: 5)"
+    )
+    parser.add_argument("-u", "--unmark", action="store_true", help="UNmark files")
+    config = parser.parse_args()
+
+    config.files = [Path(f) for f in config.files]
+    config.files = [f for f in config.files if f.exists()]
+    if not config.files:
+        print("Nothing to do (sure the files exist?) ... . Exiting.", file=sys.stderr)
+        sys.exit(1)
+
+    if config.unmark:
+        unmark_files(*config.files)
+    else:
+        marker = config.marker or detect_first_marker(config.files)
+        mark_files(config.files, marker)
