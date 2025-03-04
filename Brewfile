@@ -2,6 +2,7 @@
 tap "buo/cask-upgrade"
 tap "homebrew/bundle"
 tap "aws/tap"
+tap "hashicorp/tap"
 
 # super essential
 cask "contexts"
@@ -86,7 +87,7 @@ brew "pyenv"
 brew "pyenv-virtualenv"
 brew "stern"
 brew "telnet"
-brew "terraform"
+brew "hashicorp/terraform"
 brew "uv"
 cask "boop"
 cask "clop"
