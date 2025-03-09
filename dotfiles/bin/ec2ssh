@@ -15,9 +15,13 @@
 
 
 # override if needed
-SSH_KEY_FILE="${SSH_KEY_FILE:-}"
+if [[ -z $SSH_KEY_FILE ]]; then
+  for file in ed25519 rsa; do
+    SSH_KEY_FILE="$HOME/.ssh/id_${file}.pub"
+    [[ -f "$SSH_KEY_FILE" ]] && break || true
+  done
+fi
 FORCE_JUMP="${FORCE_JUMP:-}"
-SSH_KEY_FILE="${SSH_KEY_FILE:-$HOME/.ssh/id_rsa.pub}"
 
 # you should not need to override those
 DEFAULT_LOGIN_USER="${DEFAULT_LOGIN_USER:-ubuntu}"
@@ -66,6 +70,9 @@ help() {
   echo ""
   echo "    \$ SSH_KEY_FILE=./my_key.pub   $(basename $0) host.doma.in"
   echo "       L  use this SSH key to connect to the target hosts"
+  echo ""
+  echo "    NOTE: The environment variable will be set to 'eu-central-1' if"
+  echo "    not previously set."
   echo ""
   echo ""
   echo "For the script to work, those tools are required:"
@@ -262,7 +269,7 @@ select_instance() {
 
 check_requirements() {
   for cmd in aws dig fzf jq ; do
-    if not command -v $cmd > /dev/null ; then
+    if ! command -v $cmd > /dev/null ; then
       echo "ERROR: Required command '$cmd' is not installed."
       echo "Aborting."
       exit 255
@@ -280,7 +287,7 @@ check_requirements() {
     exit 255
   fi
 
-  if ! bash --version 2>&1 | grep -q "version 5" ; then
+  if ! bash --version 2>&1 | grep -iq "version 5" ; then
     echo "ERROR: You are not using bash v5+"
     echo "       On a mac, use homebrew to install it."
     echo "       Installation (Mac):"
@@ -302,9 +309,11 @@ check_requirements() {
 IP=""
 HOST=""
 
+export AWS_REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-eu-central-1}}"
+
 set -euo pipefail
 
-if [ -z "$1" -o "$1" = "-h" ]; then
+if [ -z "${1:-}" -o "${1:-}" = "-h" ]; then
   help
   exit 255
 fi
@@ -332,8 +341,13 @@ else
   else
     # ... host name, which will be resolved.
     # (again no error check if host not found)
+    # Update 2025-01-06: sometimes dig returns TWO lines like this:
+    #    ;; Warning: Client COOKIE mismatch
+    #    123.124.125.6
+    # ... so we need to filter this shit out -- let's simply grep for an IP address
+    # at the line start.
     HOST="$1"
-    IP=$(dig +short $HOST)
+    IP=$(dig +short $HOST | grep -P '^(\d+\.){3}\d+$' )
     printf "%-32s: %s\\n" "Resolving host name" "$HOST"
   fi
   printf "%-32s: %s\\n" "IP" "$IP"
