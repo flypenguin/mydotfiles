@@ -36,6 +36,7 @@ Temporary Items
 .apdisk
 
 # End of https://www.toptal.com/developers/gitignore/api/osx
+
 # Created by https://www.toptal.com/developers/gitignore/api/microsoftoffice
 # Edit at https://www.toptal.com/developers/gitignore?templates=microsoftoffice
 
@@ -61,3 +62,29 @@ Backup of *.doc*
 *.~vsd*
 
 # End of https://www.toptal.com/developers/gitignore/api/microsoftoffice
+
+# Created by https://www.toptal.com/developers/gitignore/api/vim
+# Edit at https://www.toptal.com/developers/gitignore?templates=vim
+
+### Vim ###
+# Swap
+[._]*.s[a-v][a-z]
+!*.svg  # comment out if you don't need vector files
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+tags
+# Persistent undo
+[._]*.un~
+
+# End of https://www.toptal.com/developers/gitignore/api/vim
