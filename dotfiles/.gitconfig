@@ -22,6 +22,7 @@
 [init]
     defaultBranch = main
 [alias]
+    root = rev-parse --show-toplevel
     d = diff
     p = push
     s = status
