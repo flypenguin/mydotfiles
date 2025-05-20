@@ -1,0 +1,2 @@
+variables:
+  geometry: [margin=1cm, includehead=true, includefoot=true, centering]

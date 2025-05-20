@@ -1,7 +1,69 @@
 #!/usr/bin/env bash
 
-for infile in "$@" ; do
+FILES_BASE="$(dirname "$0")/$(basename "$0")"
 
-    pandoc -f markdown -t pdf   "${infile}"   -o "${infile%.*}.pdf"
+if [ -z "$1" ]; then
+    echo "USAGE: $(basename $0) MARKDOWN_FILE..."
+    echo ""
+    echo "You can set the following env variables:"
+    echo "   - PDF_STYLE    (default: 'eisvogel')"
+    echo "   - PDF_DEBUG    (default: 0 -- set to '1' for debug)"
+    echo "   - PDF_ENGINE   (default: lualatex)"
+    echo "Relevant files are here: ${FILES_BASE}.*.{include,yaml,template}"
+    exit 255
+fi
+
+set -euo pipefail
+
+PDF_ENGINE=${PDF_ENGINE:-lualatex}
+PDF_STYLE="${PDF_STYLE:-eisvogel}"
+PDF_DEBUG=${PDF_DEBUG:-0}
+
+USE_TEMPLATE="$FILES_BASE.$PDF_STYLE.template"
+USE_INCLUDE="$FILES_BASE.$PDF_STYLE.include"
+USE_DEFAULTS="$FILES_BASE.$PDF_STYLE.yaml"
+
+[ -f "$USE_TEMPLATE" ] || USE_TEMPLATE="default"
+[ -f "$USE_INCLUDE" ] || USE_INCLUDE="$FILES_BASE.default.include"
+[ -f "$USE_DEFAULTS" ] || USE_DEFAULTS="$FILES_BASE.default.yaml"
+
+echo "Using PDF engine:     $PDF_ENGINE"
+echo "Using template:       $USE_TEMPLATE"
+echo "Using include file:   $USE_INCLUDE"
+echo "Using defaults file:  $USE_DEFAULTS"
+
+if [[ $PDF_DEBUG = 1 ]]; then
+    echo "****           +DEBUG MODE+              ****"
+    echo "     only creating latex output, no PDF."
+    echo "****           -DEBUG MODE-               ****"
+    OUT_FORMAT="latex"
+    OUT_EXT="tex"
+fi
+
+for infile in "$@" ; do
+    export OUT_DIR="$(dirname "$infile")"
+    export OUT_BASENAME="${infile%.*}"
+    export PDF_ENGINE PDF_DEBUG
+    export USE_TEMPLATE USE_DEFAULTS USE_INCLUDE
+
+    (
+        set -x
+        pandoc \
+            -f markdown \
+            -t ${OUT_FORMAT:-pdf} \
+            --pdf-engine "$PDF_ENGINE" \
+            --template "$USE_TEMPLATE" \
+            --defaults "$USE_DEFAULTS" \
+            --include-in-header "$USE_INCLUDE" \
+            "${infile}" \
+            -o "${OUT_BASENAME}.${OUT_EXT:-pdf}"
+    )
+
+    if [[ $PDF_DEBUG = 1 ]]; then
+        # run latex manually
+        $PDF_ENGINE "${infile%.*}.$OUT_EXT"
+    else
+        rm -f  "${OUT_BASENAME}".{out,log,tex,aux} "$OUT_DIR/texput.log"
+    fi
 
 done
