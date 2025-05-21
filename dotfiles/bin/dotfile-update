@@ -114,9 +114,12 @@ done
 mkdir -p "$DOTDIR/tmp"
 
 # pull / update all repos we need
+# oh-my-zsh is already installed in _all_ cases here, so ... that's fine.
 echo " * Updating all dotfile requirements ..."
+ZSH_CUSTOM=${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}
 clone_or_update_repo https://github.com/seebi/dircolors-solarized.git   "$HOME/.solarized"
 clone_or_update_repo https://github.com/gmarik/Vundle.vim.git           "$HOME/.vim/bundle/Vundle.vim"
+clone_or_update_repo https://github.com/paulirish/git-open.git          "$ZSH_CUSTOM/plugins/git-open"
 
 # update our "constructed" files
 echo " * Updating constructed files ..."
