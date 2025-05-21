@@ -48,6 +48,7 @@ brew "stow"
 brew "vim"
 
 # previously uninstalled command line utils
+brew "atuin"
 brew "eza"
 brew "dos2unix"
 brew "entr"

@@ -1,0 +1,18 @@
+## which style to use
+## possible values: auto, full, compact
+style = "compact"
+
+## characters that count as a part of a word
+word_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789äöüßÄÖÜ"
+
+## Defaults to true. If enabled, upon hitting enter Atuin will immediately execute the command. Press tab to return to the shell and edit.
+# This applies for new installs. Old installs will keep the old behaviour unless configured otherwise.
+enter_accept = false
+
+[keys]
+# Defaults to true. If disabled, using the up/down key won't exit the TUI when scrolled past the first/last entry.
+scroll_exits = false
+# Defaults to true. The left arrow key will exit the TUI when scrolling before the first character
+exit_past_line_start = false
+# Defaults to true. The right arrow key performs the same functionality as Tab and copies the selected line to the command line to be modified.
+accept_past_line_end = false
