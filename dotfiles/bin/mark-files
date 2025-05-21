@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# pylint: max-line-length=120
+# FOR RUFF please set defaults globally.
 
 import random
 import re
@@ -8,30 +10,70 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 
+DEFAULT_LEN: int = 7
 CHARS = string.ascii_lowercase + string.digits
-MARKER_REX = re.compile(r"([ ._-]\[(mark|tag)[ _-](\w+)\])", re.I)
-MARKER_STR = " [mark {}]"
+MARKER_REX = re.compile(r"( \[(mark|tag|m)[ _-](\w+)\])", re.I)
+MARKER_STR = " [m-{}]"
 
 
-def detect_first_marker(files: list[Path]) -> str:
-    for f in files:
-        if match := MARKER_REX.search(f.name):
-            marker = match.group(3)
-            break
-    else:
-        marker = "".join(random.choices(CHARS, k=config.num_chars))
-    return marker
+def new_marker() -> str:
+    return "".join(random.choices(CHARS, k=config.num_chars))
 
 
-def unmark_files(*files: list[Path]):
-    files = [f.rename(f.parent / re.sub(MARKER_REX, "", f.name)) for f in files]
-    return files
+def extract_marker_from_name(filename: str) -> str | None:
+    """
+    'filename' is the actual fileNAME, without path.
+    """
+    return match.group(3) if (match := MARKER_REX.search(filename)) else None
 
 
-def mark_files(files, marker):
-    files = unmark_files(*files)
+def get_marker() -> str:
+    if config.marker:
+        # if specified: always use this one, and imply --force.
+        # also ignore marker length.
+        return config.marker
+    if config.force:
+        return new_marker()
+
+    markers = {marker for f in config.files if (marker := extract_marker_from_name(f.name)) is not None}
+    match num_markers := len(markers):
+        case 0:
+            return new_marker()
+        case 1:
+            marker = markers.pop()
+            if (marker_len := len(marker)) != config.num_chars:
+                print(
+                    "ERROR: Pre-existing marker has different length than required: "
+                    f"{marker_len} != {config.num_chars}. Aborting.",
+                    file=sys.stderr,
+                )
+                sys.exit(-1)
+            return marker
+
+    print(
+        f"ERROR: Multiple ({num_markers}) existing markers found, unable to determine\n"
+        "which one to use. Aborting.\n"
+        "(You can use -f to force new marker creation, or -m to specify a\nspedific one)",
+        file=sys.stderr,
+    )
+    sys.exit(-1)
+
+
+def unmark_files() -> list[Path]:
+    """
+    Return the new file names, because the 'original' file names are (naturally) no longer
+    valid after a rename.
+    """
+    return [f.rename(f.parent / re.sub(MARKER_REX, "", f.name).strip()) for f in config.files]
+
+
+def mark_files(marker):
+    """
+    Always use config.files as "source" for files. Gotta make sure this is always correct, e.g.
+    after removing potentially pre-existing markers.
+    """
     marked_files = []
-    for f in files:
+    for f in config.files:
         if len(f.suffix) <= 4 and not f.is_dir():
             new_name = f.parent / (f.stem + MARKER_STR.format(marker) + f.suffix)
         else:
@@ -42,22 +84,95 @@ def mark_files(files, marker):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("files", nargs="+", help="Files to mark")
-    parser.add_argument("-m", "--marker", default=None, help="Define marker string")
-    parser.add_argument(
-        "-n", "--num-chars", default=5, help="Set marker string length (default: 5)"
+
+    subparsers = parser.add_subparsers()
+
+    # MARK files
+    sub_parser = subparsers.add_parser("mark", help="Mark files")
+    sub_parser.set_defaults(action="mark")
+    sub_parser.add_argument("files", nargs="+", help="Files to mark")
+    sub_parser.add_argument(
+        "-m",
+        "--marker",
+        metavar="STR",
+        default=None,
+        help="Define marker string (implies --force, and ignores --num-chars)",
     )
-    parser.add_argument("-u", "--unmark", action="store_true", help="UNmark files")
+    sub_parser.add_argument(
+        "-d",
+        "--include-dirs",
+        default=False,
+        action="store_true",
+        help="Include directories (default is filtering them out)",
+    )
+    sub_parser.add_argument(
+        "-f",
+        "--force",
+        default=False,
+        action="store_true",
+        help="Ignore existing marker strings and always create a new one",
+    )
+    sub_parser.add_argument(
+        "-n",
+        "--num-chars",
+        metavar="#",
+        type=int,
+        default=DEFAULT_LEN,
+        help=f"Set marker string length (default: {DEFAULT_LEN})",
+    )
+
+    # UNMARK files
+    sub_parser = subparsers.add_parser("unmark", help="UNmark files")
+    sub_parser.set_defaults(action="unmark")
+    sub_parser.add_argument("files", nargs="+", help="Files to mark")
+    sub_parser.add_argument(
+        "-d",
+        "--include-dirs",
+        default=False,
+        action="store_true",
+        help="Include directories (default is filtering them out)",
+    )
+
+    # EXTRACT marker strings
+    sub_parser = subparsers.add_parser("get", help="Extract marker strings from file names (for scripting)")
+    sub_parser.set_defaults(action="get")
+    sub_parser.add_argument("files", nargs="+", help="Files to extract marker strings from")
+    sub_parser.add_argument("-u", "--unique", default=False, action="store_true", help="Only print unique markers")
+    sub_parser.add_argument(
+        "-d",
+        "--include-dirs",
+        default=False,
+        action="store_true",
+        help="Include directories (default is filtering them out)",
+    )
+
     config = parser.parse_args()
 
+    # filter files
     config.files = [Path(f) for f in config.files]
     config.files = [f for f in config.files if f.exists()]
+    if not config.include_dirs:
+        config.files = [f for f in config.files if not f.is_dir()]
     if not config.files:
         print("Nothing to do (sure the files exist?) ... . Exiting.", file=sys.stderr)
         sys.exit(1)
 
-    if config.unmark:
-        unmark_files(*config.files)
-    else:
-        marker = config.marker or detect_first_marker(config.files)
-        mark_files(config.files, marker)
+    # now actually do something
+    match config.action:
+        case "mark":
+            marker = get_marker()
+            config.files = unmark_files()
+            mark_files(marker)
+
+        case "unmark":
+            unmark_files()
+
+        case "get":
+            markers = [marker for f in config.files if (marker := extract_marker_from_name(f.name)) is not None]
+            if config.unique:
+                markers = sorted(set(markers))
+            print("\n".join(markers))
+
+        case _:
+            print(f"ERROR. This should not happen. (undefined action: {config.action})")
+            sys.exit(255)
