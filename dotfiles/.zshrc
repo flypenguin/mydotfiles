@@ -7,7 +7,7 @@
 #   $ZDOTDIR/.zlogout                   # login-shells (on exit)
 # see here: http://bit.ly/1sGzo6g
 
-local check_for_plugins=(brew git fzf kubectl podman aws)
+local check_for_plugins=()
 
 # we need this :/
 UNAME=$(uname -s)
@@ -20,9 +20,6 @@ ADD_PLUGINS=()
 # later = higher preference, so /usr/local is "first" in the
 # list
 for PATH_SEARCH in \
-  "/home/linuxbrew/.linuxbrew/bin" \
-  "/usr/local/bin" \
-  "/opt/homebrew/bin" \
   "$HOME/.local/bin" \
   "$HOME/bin" \
 ; do
@@ -37,12 +34,6 @@ for cmd in $check_for_plugins; do
   fi
 done
 unset cmd check_for_plugins
-
-if [[ $+commands[brew] -eq 1 ]]; then
-  # we have brew, so let's add the completions dir ...
-  # see https://is.gd/1qNH1K
-  fpath+=$(brew --prefix)/share/zsh-completions
-fi
 
 # Adding _all_ custom plugins.
 # see readme files in the respective directories for more info.
@@ -65,7 +56,7 @@ fi
 DISABLE_UPDATE_PROMPT="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(direnv common-aliases)
+plugins=(brew direnv common-aliases git podman fzf kubectl aws)
 plugins+=(${ADD_PLUGINS[@]})
 
 # CASE_SENSITIVE="true"
@@ -83,6 +74,7 @@ plugins+=(${ADD_PLUGINS[@]})
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 autoload -U compinit && compinit
 
+echo plugins=$plugins
 source "$ZSH/oh-my-zsh.sh"
 
 # ===========================================================================

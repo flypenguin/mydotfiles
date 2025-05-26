@@ -708,7 +708,13 @@ ibrew() {
 # mac os & homebrew - if the coreutils are installed, use them instead of the OS X ones.
 # see "brew info coreutils". should not have an effect on linux ;)
 # from: https://apple.stackexchange.com/a/371984
-update_dynamic_paths() {
+#
+# IMPORTANT!
+#   Make sure that MANPATH _always_ (!!) starts with ":", e.g.
+#   MANPATH=:/opt/one:/opt/two:..."
+#   this changes the lookup behavior of man (tested, info from chatgpt).
+#
+update-dynamic-paths() {
   local DYNPATH="$HOME/.shell/dynamic-paths.sh"
   echo "Purging $DYNPATH"
   echo "# Last update: $(date +%Y-%m-%d\ %H:%M:%S)" >"$DYNPATH"
@@ -721,10 +727,10 @@ update_dynamic_paths() {
       if [[ -d "$a" ]]; then
         find "$a" -type d -name gnubin | while read gnu_dir; do
           echo "Adding bin dir: $gnu_dir"
-          echo "   path=(\"$gnu_dir\" \$path)" >>"$DYNPATH"
+          echo "    path=(\"$gnu_dir\" \$path)" >>"$DYNPATH"
           local MANPATH=${gnu_dir//gnubin/gnuman}
           echo "Adding man dir: $MANPATH"
-          echo "manpath=(\"${gnu_dir//gnubin/gnuman}\" \$manpath)" >>"$DYNPATH"
+          echo "manpath+=(${gnu_dir//gnubin/gnuman})" >>"$DYNPATH"
         done
       fi
     done
