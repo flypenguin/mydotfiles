@@ -1,7 +1,5 @@
 # by https://github.com/Homebrew/homebrew-bundle
 tap "buo/cask-upgrade"
-tap "homebrew/bundle"
-tap "aws/tap"
 tap "hashicorp/tap"
 
 # super essential
@@ -77,7 +75,6 @@ brew "zoxide"
 
 # coding and work related
 brew "autoenv"
-brew "awscli"
 brew "ansible"
 brew "awscli"
 brew "git-delta"
