@@ -42,7 +42,7 @@ fi
 export GOPATH="$HOME/Dev/GOPATH"
 if [ ! -d "$GOPATH" ]; then
   mkdir -p "$GOPATH"
-  echo "This directory is created by $HOME/.shells/settings.sh" > "$GOPATH/REALLY-README.md"
+  echo "This directory is created by $HOME/.shells/aliases-settings.sh" > "$GOPATH/REALLY-README.md"
 fi
 
 # less awful java font rendering
@@ -97,7 +97,11 @@ alias -g SED=" | sed"
 # "BAT" & "L" are set in helpers.sh
 alias    tma="tmux attach"
 
-#
+# generic stuff
+if command -v nvim > /dev/null ; then
+  alias nv="nvim"
+fi
+
 # ssh
 alias ssr="ssh -l root"
 alias ssp="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no"
