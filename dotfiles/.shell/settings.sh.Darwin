@@ -1,4 +1,0 @@
-# fix gpg on mac cli
-
-GPG_TTY=$(tty)
-export GPG_TTY

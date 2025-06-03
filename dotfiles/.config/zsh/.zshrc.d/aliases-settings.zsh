@@ -154,22 +154,6 @@ if command -v git > /dev/null ; then
   alias gsts="git stash push -S"
 fi
 
-# ls
-if command -v eza >/dev/null 2>&1; then
-  unalias ls
-  alias  ls="eza"
-  alias  ll="ls -lh"
-  alias  la="ll -a"
-  alias  lg="ll -G"
-  alias dir="lg"
-else
-  unalias ls
-  alias  ls="ls --color=auto"
-  alias  ll="ls -lh"
-  alias  la="ls -lha"
-  alias dir="ls -lh"
-fi
-
 # arch
 if command -v pacman > /dev/null ; then
   alias  pi="sudo pacman -S"
