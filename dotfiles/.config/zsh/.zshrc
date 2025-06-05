@@ -8,6 +8,24 @@
 #   $ZDOTDIR/.zlogout                   # login-shells (on exit)
 # see here: http://bit.ly/1sGzo6g
 
+# Set the list of directories that zsh searches for commands.
+# do this _HERE_, because after ~/.zshenv, zsh sources /etc/zprofile,
+# which turn executes /usr/libexec/path_helper, which will rearrange
+# the path again to our DISpleasure.
+
+# Ensure path arrays do not contain duplicates.
+typeset -gU path fpath
+
+path=(
+  $HOME/{,s}bin(N)
+  $HOME/.local/{,s}bin(N)
+  /opt/{homebrew,local}/{,s}bin(N)
+  /usr/local/{,s}bin(N)
+  $path
+)
+
+# start with .zshrc
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of .zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -35,6 +53,7 @@ fi
 # Create an amazing Zsh config using antidote plugins.
 source ${ANTIDOTE_PATH}/antidote.zsh
 antidote load
+
 
 # Source anything in .zshrc.d.
 setopt +o nomatch
