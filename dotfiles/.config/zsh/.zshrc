@@ -56,15 +56,25 @@ antidote load
 
 
 # Source anything in .zshrc.d.
-setopt +o nomatch
-for _rc in ${ZDOTDIR:-$HOME}/.zshrc.d/*.{zsh,sh}; do
+# see chatgpt ... :roll_eyes_ ...
+# _RC_FILES=(...) -> array var
+#    ... /path/*  -> glob expansion
+#    ... (.N)     -> zsh glob *qualifier*, saying "no result if
+#                    nothing found (note: not *modifier*)
+# and here we are, and it works.
+# see here:
+# https://zsh.sourceforge.io/Doc/Release/Expansion.html#Glob-Qualifiers
+# Also, the difference between NULL_GLOB and NOMATCH seems to be that
+# NOMATCH keeps the *glob expression* (e.g. "*.sh", verbatim) if nothing
+# is found -- which we do NOT want.
+_RC_FILES=(${ZDOTDIR:-$HOME}/.zshrc.d/*(.N))
+for _rc in $_RC_FILES ; do
   # Ignore tilde files.
   if [[ $_rc:t != '~'* ]]; then
     source "$_rc"
   fi
 done
-unset _rc
-setopt -o nomatch
+unset _rc _RC_FILES
 
 # To customize prompt, run `p10k configure` or edit .p10k.zsh.
 [[ ! -f ${ZDOTDIR}/.p10k.zsh ]] || source ${ZDOTDIR}/.p10k.zsh
