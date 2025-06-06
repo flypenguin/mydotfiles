@@ -11,70 +11,6 @@ DOTDIR="$HOME/.dotfiles"
 TIMESTAMP="$(date +%Y%m%d.%H%M%S)"
 
 
-# $1 repo URL to be cloned
-# $2 target directory, must be set
-clone_or_update_repo() {
-  TMPFILE="$(mktemp $DOTDIR/tmp/XXXXXXXX)"
-  if ! [ -d "$2" ] ; then
-    echo -n "   * Cloning $1 -> $2 ... "
-    mkdir -p "$(dirname $2)"
-    git clone "$1" "$2" > "$TMPFILE" 2>&1 \
-      && echo "OK" \
-      || (echo "ERROR." ; cat "$TMPFILE")
-  else
-    echo -n "   * Pulling $2 ... "
-    export TMPFILE
-    (
-      cd "$2" && git pull > "$TMPFILE" 2>&1 \
-        && echo "OK" \
-        || (echo "ERROR." ; cat "$TMPFILE")
-    )
-  fi
-}
-
-update_basefiles() {
-  echo " * Updating base files ..."
-  (
-    cd "$DOTDIR/dotfiles"
-    find . -name "*_base" | while read BASEFILE ; do
-      FINALFILE="$HOME/${BASEFILE%_base}"
-      TMPFILE="$(mktemp $DOTDIR/tmp/XXXXXXXX)"
-      mkdir -p "$(dirname $FINALFILE)"
-      touch "$FINALFILE"
-      (cat "$BASEFILE" ; echo -e '\n#BASEEND') >> "$TMPFILE"
-      cat "$FINALFILE" | sed -r '1,/#BASEEND/d'  >> "$TMPFILE"
-      if ! diff "$FINALFILE" "$TMPFILE" > /dev/null 2>&1 ; then
-        echo "   * UPDATED:   $BASEFILE"
-        mv -f "$TMPFILE" "$FINALFILE"
-      else
-        echo "   * UNCHANGED: $BASEFILE"
-      fi
-    done
-  )
-}
-
-# move away all files that might be already present
-backup_existing_dotfiles() {
-  echo " * Backup of existing dotfiles ..."
-  (
-    cd "$DOTDIR/dotfiles"
-    BACKUP_BASE="$DOTDIR/backups/$TIMESTAMP"
-    echo "   * backup dir is: $BACKUP_BASE"
-    find . -type f | while read f ; do
-      CHECK_FILE="$HOME/$f"
-      BACKUP_DIR="$(dirname $BACKUP_BASE/$f)"
-      if [ -L "$CHECK_FILE" ] ; then
-        echo "   * LINK DELETED: $CHECK_FILE ($(readlink -f $CHECK_FILE))"
-        rm -f "$CHECK_FILE"
-      elif [ -f "$CHECK_FILE" ] ; then
-        echo "   * BACKUP:       $CHECK_FILE"
-        mkdir -p "$BACKUP_DIR"
-        mv "$CHECK_FILE" "$BACKUP_DIR"
-      fi
-    done
-  )
-}
-
 print_help() {
   cat <<EOF
 
@@ -104,6 +40,9 @@ EOF
 # check for help
 [ "$1" == "-h" ] && print_help
 
+set -euo pipefail
+cd "$HOME"
+
 # ensure MUST_BE_DIRs are actually directories :)
 for dir in $MUST_BE_DIR ; do
   [[ ! -d "$dir" ]] && rm -f "$HOME/$dir"
@@ -112,21 +51,6 @@ done
 
 # our private temp dir
 mkdir -p "$DOTDIR/tmp"
-
-# pull / update all repos we need
-# oh-my-zsh is already installed in _all_ cases here, so ... that's fine.
-echo " * Updating all dotfile requirements ..."
-ZSH_CUSTOM=${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}
-clone_or_update_repo https://github.com/seebi/dircolors-solarized.git   "$HOME/.solarized"
-clone_or_update_repo https://github.com/gmarik/Vundle.vim.git           "$HOME/.vim/bundle/Vundle.vim"
-clone_or_update_repo https://github.com/paulirish/git-open.git          "$ZSH_CUSTOM/plugins/git-open"
-
-# update our "constructed" files
-echo " * Updating constructed files ..."
-update_basefiles
-
-# check whether we should move shit out of the way first
-[ "$1" == "-f" ] && backup_existing_dotfiles
 
 # actually link dotfiles
 STOW_LOG="$DOTDIR/logs/stow_$TIMESTAMP"
