@@ -149,6 +149,8 @@ if __name__ == "__main__":
     config = parser.parse_args()
 
     # filter files
+    config.include_dirs = config.include_dirs if hasattr(config, "include_dirs") else []
+    config.files = config.files if hasattr(config, "files") else []
     config.files = [Path(f) for f in config.files]
     config.files = [f for f in config.files if f.exists()]
     if not config.include_dirs:
