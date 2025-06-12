@@ -715,24 +715,34 @@ ibrew() {
 #   this changes the lookup behavior of man (tested, info from chatgpt).
 #
 update-dynamic-paths() {
-  local DYNPATH="$HOME/.shell/dynamic-paths.sh"
-  echo "Purging $DYNPATH"
-  echo "# Last update: $(date +%Y-%m-%d\ %H:%M:%S)" >"$DYNPATH"
+  if [[ -z "$ZDOTDIR" ]]; then
+    echo "ERROR: \$ZDOTDIR not set. Exiting."
+    return 1
+  fi
+  local DYNPATH="${ZDOTDIR}/.zshrc.d"
+  if [[ ! -d "$DYNPATH" ]]; then
+    echo "ERROR: $DYNPATH does not exist. Exiting."
+    return 1
+  fi
+  local OUTFILE="$DYNPATH/local-dynpaths.sh"
+  echo "Purging $OUTFILE"
+  echo "# Last update: $(date +%Y-%m-%d\ %H:%M:%S)" >"$OUTFILE"
 
-  if [[ "$UNAME" = "Darwin" ]]; then
+  if is-macos ; then
     for a in \
-      /usr/local \
-      /opt/homebrew \
+      /opt/homebrew/opt \
     ; do
-      if [[ -d "$a" ]]; then
-        find "$a" -type d -name gnubin | while read gnu_dir; do
-          echo "Adding bin dir: $gnu_dir"
-          echo "    path=(\"$gnu_dir\" \$path)" >>"$DYNPATH"
-          local MANPATH=${gnu_dir//gnubin/gnuman}
-          echo "Adding man dir: $MANPATH"
-          echo "manpath+=(${gnu_dir//gnubin/gnuman})" >>"$DYNPATH"
-        done
-      fi
+      find -L "$a" -type d -name "gnubin" 2>/dev/null | while read gnu_dir; do
+        echo "Adding bin dir: $gnu_dir"
+        echo "    path=(\"$gnu_dir\" \$path)" >>"$OUTFILE"
+        local MANPATH=${gnu_dir//gnubin/gnuman}
+        if [[ -d "$MANPATH" ]]; then
+          echo "   ... man dir: $MANPATH"
+          echo "manpath+=(\"${gnu_dir//gnubin/gnuman}\")" >>"$OUTFILE"
+        else
+          echo "   ... No corresponding manpath found."
+        fi
+      done
     done
   else
     echo "Skipping homebrew path search (not on Mac)."
@@ -747,7 +757,7 @@ update-dynamic-paths() {
     "$HOME/.krew/bin"; do
     if [ -d "$PATH_SEARCH" ]; then
       echo "APpending path: $PATH_SEARCH"
-      echo "path=(\$path \"$PATH_SEARCH\")" >>"$DYNPATH"
+      echo "path=(\$path \"$PATH_SEARCH\")" >>"$OUTFILE"
     fi
   done
 
@@ -758,7 +768,7 @@ update-dynamic-paths() {
     "/usr/local/opt/openjdk/bin"; do
     if [ -d "$PATH_SEARCH" ]; then
       echo "PREpending path: $PATH_SEARCH"
-      echo "path=(\"$PATH_SEARCH\" \$path)" >>"$DYNPATH"
+      echo "path=(\"$PATH_SEARCH\" \$path)" >>"$OUTFILE"
     fi
   done
 
@@ -771,7 +781,7 @@ update-dynamic-paths() {
       CHECK_PATH="$CHECK_PATH/$PATH_SEARCH/bin"
       if [ -d "$CHECK_PATH" ]; then
         echo "adding keg-only binary: $PATH_SEARCH"
-        echo "path=(\"$CHECK_PATH\" \$path)" >>"$DYNPATH"
+        echo "path=(\"$CHECK_PATH\" \$path)" >>"$OUTFILE"
       fi
     done
   done
