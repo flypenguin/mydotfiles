@@ -50,10 +50,27 @@ fi
 # Set any zstyles you might use for configuration.
 [[ ! -f ${ZDOTDIR}/.zstyles ]] || source ${ZDOTDIR}/.zstyles
 
+# some super-generic zsh configs
+DISABLE_CORRECTION="true"                   # might be oh-my-zsh only
+set -k                                      # recognize inline comments on the command line
+setopt HIST_IGNORE_SPACE                    # start with " " -> no history entry
+setopt SHARE_HISTORY                        # reload history after every command
+setopt INC_APPEND_HISTORY                   # directly append to history file
+setopt autocd                               # change into dir when entered as "command"
+unsetopt correct                            # might be oh-my-zsh only
+zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
+
+# configure ENV settings for plugins HERE ...
+export ATUIN_NOBIND="true"
+
 # Create an amazing Zsh config using antidote plugins.
 source ${ANTIDOTE_PATH}/antidote.zsh
 antidote load
 
+# perform plugin AFTER-work here ...
+# atuin
+bindkey '^r'        atuin-search
+bindkey '^[[1;2A'   atuin-up-search     # should be SHIFT-UP
 
 # Source anything in .zshrc.d.
 # see chatgpt ... :roll_eyes_ ...
@@ -75,9 +92,6 @@ for _rc in $_RC_FILES ; do
   fi
 done
 unset _rc _RC_FILES
-
-# To customize prompt, run `p10k configure` or edit .p10k.zsh.
-[[ ! -f ${ZDOTDIR}/.p10k.zsh ]] || source ${ZDOTDIR}/.p10k.zsh
 
 # find this out later ...
 # we need this :/

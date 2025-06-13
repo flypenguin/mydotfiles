@@ -4,16 +4,16 @@
 #
 
 # gpg
-export GPG_TTY=$(tty)
+is-macos && export GPG_TTY=$(tty)
 
 # less - from http://bit.ly/1r1VoYA
 export LESS='-iMRS#15'
-if command -v lesspipe.sh > /dev/null ; then
+if whence lesspipe.sh > /dev/null ; then
   export LESSOPEN="|/usr/local/bin/lesspipe.sh %s"
 fi
 
 # pygmentize - LOWER priority, will be overwritten below
-if command -v pygmentize > /dev/null ; then
+if whence pygmentize > /dev/null ; then
   export PYGMENTIZE_STYLE='monokai'
   export LESSCOLORIZER="pygmentize"
   # there is _also_ a global alias "P", which comes from ...
@@ -24,7 +24,7 @@ if command -v pygmentize > /dev/null ; then
 fi
 
 # bat - HIGHER priority, must come _after_ pygmentize above
-if command -v bat > /dev/null ; then
+if whence bat > /dev/null ; then
   export BAT_THEME="Monokai Extended"
   export LESSCOLORIZER="bat"
   alias -g  LC="|bat --paging=always --color=always"
@@ -58,20 +58,6 @@ unset VIRTUAL_ENV_DISABLE_PROMPT
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
 
-# ZSH settings
-
-set -k                          # recognize inline comments on the command line
-
-setopt HIST_IGNORE_SPACE        # start with " " -> no history entry
-setopt SHARE_HISTORY            # reload history after every command
-setopt INC_APPEND_HISTORY       # directly append to history file
-setopt autocd                   # change into dir when entered as "command"
-unsetopt correct                # might be oh-my-zsh only
-
-DISABLE_CORRECTION="true"       # might be oh-my-zsh only
-
-zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
-
 # AWS
 
 # disable pager
@@ -98,7 +84,7 @@ alias -g SED=" | sed"
 alias    tma="tmux attach"
 
 # generic stuff
-if command -v nvim > /dev/null ; then
+if whence nvim > /dev/null ; then
   alias nv="nvim"
 fi
 
@@ -111,8 +97,22 @@ alias ssh-clean="rm -f '$HOME/.ssh/sockets/'*"
 # python
 alias de="deactivate"
 
+
+# save my muscle memory ... :)
+if whence zoxide >/dev/null 2>&1 ; then
+  eval "$(zoxide init zsh)"
+  # let's not break existing muscle memory, also "honor" US keyboard key places
+  alias j=z ; alias ji=zi
+  alias y=z ; alias yi=zi
+fi
+
+
 # git
-if command -v git > /dev/null ; then
+if whence git > /dev/null ; then
+  # defined in helpers.sh
+  # NOTE: "git upd" alias defined in helpers.sh ... this is WEIRD.
+  # thanks for git-commit plugin (see here: https://is.gd/RBWNcg)
+
   # yes, I know -- this will _always_ be installed. still ...
   #
   # delete all branches not on remote - https://stackoverflow.com/a/38404202/902327
@@ -155,7 +155,7 @@ if command -v git > /dev/null ; then
 fi
 
 # arch
-if command -v pacman > /dev/null ; then
+if whence pacman > /dev/null ; then
   alias  pi="sudo pacman -S"
   alias  pq="pacman -Qs"
   alias pqs="pq"
@@ -172,7 +172,7 @@ fi
 alias tms="tmux list-sessions"
 
 # docker - no longer a "no-brainer" ... (podman, etc.)
-if command -v docker > /dev/null ; then
+if whence docker > /dev/null ; then
   alias docker-clean-images="docker images | grep '<none>' | awk '{print \$3}' | xargs docker rmi"
   alias docker-rm-all="docker ps -a | grep Exited | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker rm -f"
   alias docker-stop-all="docker ps | cut -d ' ' -f 1 | grep -v CONTAINER | xargs docker stop"
@@ -198,7 +198,7 @@ alias azgroups="az group list --query '[].name'"
 ## HERE ARE THE ALIASES ...
 
 # kubernetes (we already have aliases from ... somewhere, so just add missing)
-if command -v kubectl > /dev/null ; then
+if whence kubectl > /dev/null ; then
   alias        k=kubectl
   alias       ka="kubectl apply"
   alias      kaf="kubectl apply -f"
