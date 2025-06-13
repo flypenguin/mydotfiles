@@ -48,6 +48,7 @@ brew "vim"
 # previously uninstalled command line utils
 brew "atuin"
 brew "bat"
+brew "broot"
 brew "dos2unix"
 brew "entr"
 brew "eza"
