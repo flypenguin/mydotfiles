@@ -3,26 +3,26 @@ tap "buo/cask-upgrade"
 tap "hashicorp/tap"
 
 # super essential
-cask "contexts"
+# NOTE:
+#   - "exactscan" is NOT exactscan-pro
+#   - some apps are installed via app store, notably ... :
+#     - pastebot
+brew "pinentry-mac"       # required for gpg-suite ...
+brew "mas"                # required for installing from app store below
 cask "a-better-finder-rename"
+cask "contexts"
 cask "dropbox"
 cask "dropzone"
-# "exactscan" ist NOT "exactscan PRO"
 cask "firefox"
 cask "gpg-suite"
-brew "pinentry-mac"       # required for gpg-suite ...
 cask "hazel"
 cask "iterm2"
+cask "lunar"
 cask "nextcloud"
 cask "onedrive"
 cask "telegram"           # the correct one
 cask "typinator"
 cask "whatsapp"
-# pastebot -> see below "mac app store"
-cask "lunar"
-
-# app store command line interface
-brew "mas"
 
 # editors
 cask "jetbrains-toolbox"
@@ -47,24 +47,27 @@ brew "vim"
 
 # previously uninstalled command line utils
 brew "atuin"
-brew "eza"
+brew "bat"
 brew "dos2unix"
 brew "entr"
+brew "eza"
 brew "fzf"
 brew "fzy"
 brew "git"
+brew "git-extras"
 brew "gnupg"
 brew "htop"
 brew "imagemagick"
 brew "jq"
+brew "neovim"
 brew "nmap"
 brew "parallel"
 brew "pdfcpu"
 brew "pdftk"
 brew "poppler"
 brew "pv"
-brew "spacer"
 brew "ripgrep"
+brew "spacer"
 brew "the_silver_searcher"      # "ag" :)
 brew "tmux"
 brew "watch"
@@ -74,25 +77,25 @@ brew "yq"
 brew "zoxide"
 
 # coding and work related
-brew "autoenv"
 brew "ansible"
+brew "autoenv"
 brew "awscli"
-brew "git-delta"
 brew "doctl"
+brew "git-delta"
+brew "hashicorp/terraform"
 brew "helm"
 brew "helmsman"
 brew "k9s"
 brew "kubectx"
 brew "kubernetes-cli"
+brew "mise"
 brew "multimarkdown"
 brew "pgcli"
 brew "pyenv"
 brew "pyenv-virtualenv"
 brew "stern"
 brew "telnet"
-brew "hashicorp/terraform"
 brew "uv"
-cask "boop"
 cask "clop"
 cask "devutils"
 cask "fork"
@@ -102,12 +105,12 @@ cask "slack"
 
 # (mac) ui appliccations
 cask "cyberduck"
-cask "mountain-duck"
 cask "imageoptim"
 cask "jordanbaird-ice"
 cask "karabiner-elements"
 cask "libreoffice"
 cask "logi-options+"
+cask "mountain-duck"
 cask "pdf-expert"
 cask "rocket"
 cask "typora"             # markdown editor
