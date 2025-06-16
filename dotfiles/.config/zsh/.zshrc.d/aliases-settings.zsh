@@ -29,6 +29,7 @@ if whence bat > /dev/null ; then
   export LESSCOLORIZER="bat"
   alias -g  LC="|bat --paging=always --color=always"
   alias -g BAT="|bat --paging=always --color=always"
+  alias less="bat"
 fi
 
 if [[ -f /usr/share/vim/vim90/macros/less.sh ]]; then
