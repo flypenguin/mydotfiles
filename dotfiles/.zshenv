@@ -23,6 +23,10 @@ export HISTFILE="${ZCACHEDIR}/zsh_history"
 export LANG=en_US.UTF-8
 export ZSH_THEME="robbyrussell"
 
+# GPG tools don't work if this is not in the $HOME/.zshenv ... it won't get picked up
+# from the UI (!) otherwise.
+export GPG_TTY=$(tty)
+
 # Set the list of directories that zsh searches for commands in
 # $HOME/.config/zsh/.zshrc !!
 # Reason: after ~/.zshenv, zsh sources /etc/zprofile, which turn
