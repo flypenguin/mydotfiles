@@ -8,14 +8,8 @@
 #   $ZDOTDIR/.zlogout                   # login-shells (on exit)
 # see here: http://bit.ly/1sGzo6g
 
-# Set the list of directories that zsh searches for commands.
-# do this _HERE_, because after ~/.zshenv, zsh sources /etc/zprofile,
-# which turn executes /usr/libexec/path_helper, which will rearrange
-# the path again to our DISpleasure.
-
-# Ensure path arrays do not contain duplicates.
-typeset -gU path fpath
-
+# see remarks (2), (3)
+typeset -gU path fpath                  # no dupes in path
 path=(
   $HOME/{,s}bin(N)
   $HOME/.local/{,s}bin(N)
@@ -23,8 +17,6 @@ path=(
   /usr/local/{,s}bin(N)
   $path
 )
-
-# start with .zshrc
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of .zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -50,51 +42,86 @@ fi
 # Set any zstyles you might use for configuration.
 [[ ! -f ${ZDOTDIR}/.zstyles ]] || source ${ZDOTDIR}/.zstyles
 
-# some super-generic zsh configs
-DISABLE_CORRECTION="true"                   # might be oh-my-zsh only
+# PRE-antidote configs (e.g. the ones modifying plugin init behavior)
+export DISABLE_CORRECTION="true"            # might be oh-my-zsh only
+export ATUIN_NOBIND="true"                  # I want my own key bindings
+
+
+source ${ANTIDOTE_PATH}/antidote.zsh        # load antidote
+antidote load
+
+
+# POST antidote configs (antidote also loads plugins)
 set -k                                      # recognize inline comments on the command line
+bindkey '^r'        atuin-search            # bind atuin keys (reverse-search)
+bindkey '^[[1;2A'   atuin-up-search         # SHIFT-UP instead of UP
 setopt HIST_IGNORE_SPACE                    # start with " " -> no history entry
 setopt SHARE_HISTORY                        # reload history after every command
 setopt INC_APPEND_HISTORY                   # directly append to history file
 setopt autocd                               # change into dir when entered as "command"
 unsetopt correct                            # might be oh-my-zsh only
+zstyle ':completion:*' menu no              # see remark (1)
 zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'  # ...
 
-# configure ENV settings for plugins HERE ...
-export ATUIN_NOBIND="true"
-
-# Create an amazing Zsh config using antidote plugins.
-source ${ANTIDOTE_PATH}/antidote.zsh
-antidote load
-
-# perform plugin AFTER-work here ...
-# atuin
-bindkey '^r'        atuin-search
-bindkey '^[[1;2A'   atuin-up-search     # should be SHIFT-UP
-
-# Source anything in .zshrc.d.
-# see chatgpt ... :roll_eyes_ ...
-# _RC_FILES=(...) -> array var
-#    ... /path/*  -> glob expansion
-#    ... (.N)     -> zsh glob *qualifier*, saying "no result if
-#                    nothing found (note: not *modifier*)
-# and here we are, and it works.
-# see here:
-# https://zsh.sourceforge.io/Doc/Release/Expansion.html#Glob-Qualifiers
-# Also, the difference between NULL_GLOB and NOMATCH seems to be that
-# NOMATCH keeps the *glob expression* (e.g. "*.sh", verbatim) if nothing
-# is found -- which we do NOT want.
+# see remark (2)
 _RC_FILES=(${ZDOTDIR:-$HOME}/.zshrc.d/*(.N))
 for _rc in $_RC_FILES ; do
   # Ignore tilde files.
-  if [[ $_rc:t != '~'* ]]; then
-    source "$_rc"
-  fi
+  [[ $_rc:t == '~'* ]] || source "$_rc"
 done
 unset _rc _RC_FILES
 
-# find this out later ...
-# we need this :/
-#ZSH_CUSTOM=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}
-#fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
-#autoload -U compinit && compinit
+
+# ##==========================================================================
+
+# REMARKS:
+#
+# (1) from: https://www.youtube.com/watch?v=ud7YxC33Z3w&t=67s
+#
+#     - (Try to) set case-insensitive matching (does not work)
+#       #  zstyle ':completion:*' matcher-list 'm:{a-Z}={A-Za-z}'
+#     - activate fzf-preview on shell tab completion hints (really nice)
+#
+#
+# (2) from: chatGPT
+#
+#     Glob expressions:
+#       path=(..., /some/path/*(N), ...)
+#       $ _RC_FILES=(${ZDOTDIR:-$HOME}/.zshrc.d/*(.N))
+#     Let's break it down:
+#       - _RC_FILES=(...) -> create/modify array var using glob expression(s)
+#       - *.sh(.N)        -> the simplified glob expression
+#       - (.N)            -> a zsh *modifier*, meaning "NULL_GLOB"
+#
+#     That modifier ... well, modifies the behavior of the glob expression.
+#     In this case it will activate the "NULL_GLOB" flag, which means
+#     basically "simply create an empty array var if you do not find any
+#     matches". Which is exactly what we want.
+#
+#     There also is the "NOMATCH" modifier, which is _almost_ the same. It says
+#     "if you find nothing, take the literal string '*.sh' (use the glob
+#     expression verbatim) as result, which would then try to source the
+#     file '*.sh' (the star is the _name_, and not something that is expanced),
+#     which of course does not exist.
+#
+#     Finally: What is (.N) vs (N)? ... No idea. Both seems to work, too lazy
+#     to look just now.
+#
+#     ZSH modifiers list:
+#       - https://zsh.sourceforge.io/Doc/Release/Expansion.html#Glob-Qualifiers
+#
+#
+# (3) Why do we set the path _here_, and not in .zshenv?
+#
+#     Simple reason, probably specific to MacOS: After ~/.zshenv, zsh sources
+#     /etc/zprofile, which in turn executes /usr/libexec/path_helper, which
+#     will rearrange the path again to our DISpleasure. That might be a MacOS
+#     "feature", I have no Linux system at hand to verify this.
+#
+#
+# (4) Remains of older .zshrc versions, unsure if we still require this.
+#
+#     $ ZSH_CUSTOM=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}
+#     $ fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+#     $ autoload -U compinit && compinit
