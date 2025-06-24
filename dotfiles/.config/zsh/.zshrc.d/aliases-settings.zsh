@@ -8,8 +8,9 @@ is-macos && export GPG_TTY=$(tty)
 
 # less - from http://bit.ly/1r1VoYA
 export LESS='-iMRS#15'
+
 if whence lesspipe.sh > /dev/null ; then
-  export LESSOPEN="|/usr/local/bin/lesspipe.sh %s"
+  export LESSOPEN="| lesspipe.sh %s"
 fi
 
 # pygmentize - LOWER priority, will be overwritten below
@@ -26,9 +27,10 @@ fi
 # bat - HIGHER priority, must come _after_ pygmentize above
 if whence bat > /dev/null ; then
   export BAT_THEME="Monokai Extended"
-  export LESSCOLORIZER="bat"
+  unset LESSCOLORIZER  # let's not have bat call LESSOPEN call bat ...
   alias -g  LC="|bat --paging=always --color=always"
   alias -g BAT="|bat --paging=always --color=always"
+  alias -g   P="|bat --paging=always --color=always -p" # PLAIN (no line numbers)
   alias less="bat"
 fi
 
