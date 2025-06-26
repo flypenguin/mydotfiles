@@ -89,6 +89,7 @@ alias    tma="tmux attach"
 # generic stuff
 if whence nvim > /dev/null ; then
   alias nv="nvim"
+  alias vim="nvim"
 fi
 
 # ssh
