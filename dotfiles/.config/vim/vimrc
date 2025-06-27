@@ -1,0 +1,25 @@
+" vim.plug -- got this from here:
+"   https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation
+" also, assume XDG spec is active and followed ...
+let data_dir = '~/.config/vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+" now my personal settings.
+
+syntax on
+filetype plugin indent on
+
+" set search highlighting on, but use ENTER in normal mode to clear
+" http://is.gd/lUkBFh
+set hlsearch
+nnoremap <CR> :noh<CR><CR>
+
+set backspace=indent,eol,start
+set number
+set expandtab
+set sw=2
+set sts=2
+set ffs=unix

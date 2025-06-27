@@ -1,0 +1,13 @@
+# by https://github.com/Homebrew/homebrew-bundle
+tap "buo/cask-upgrade"
+tap "hashicorp/tap"
+
+# shell-related
+brew "atuin"
+brew "eza"
+brew "lesspipe"
+brew "nvim"
+
+# dev related
+brew "uv"
+brew "ruff"

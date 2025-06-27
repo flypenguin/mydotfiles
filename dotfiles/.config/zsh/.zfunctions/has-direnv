@@ -1,0 +1,4 @@
+# the direnv plugin prints a stupid error message if direnv is not
+# installed. let's prevent that.
+
+command -v direnv > /dev/null

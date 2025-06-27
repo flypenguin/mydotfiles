@@ -78,5 +78,3 @@
 [mergetool "Kaleidoscope"]
     cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
     trustExitCode = true
-[oh-my-zsh]
-	git-commit-alias = 95ef2516697aa764d1d4bb93ad3490584cc118ec

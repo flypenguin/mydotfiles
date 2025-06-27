@@ -1,0 +1,4 @@
+# the zoxide plugin prints a stupid error message if zoxide is not
+# installed. let's prevent that.
+
+command -v zoxide > /dev/null

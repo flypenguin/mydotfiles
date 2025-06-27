@@ -1,0 +1,10 @@
+# the eza plugin does not SILENTLY fail if there is no eza installed,
+# it actually aborts the zsh init process, and we will be locked out
+# of our own system.
+# so.
+# this.
+# (just to be DOUBLE careful, since this actually should no longer
+# happen in practice, after we enabled the "brew" plugin for all
+# systems)
+
+command -v eza > /dev/null

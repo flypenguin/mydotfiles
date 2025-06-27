@@ -1,0 +1,5 @@
+# let's find out if we're on a ubuntu minimized system.
+# on which we should disable the fzf plugin, because it will
+# print stupid things.
+
+[[ -f /etc/update-motd.d/60-unminimize ]]

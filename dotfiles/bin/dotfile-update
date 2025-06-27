@@ -43,6 +43,8 @@ EOF
 set -euo pipefail
 cd "$HOME"
 
+git -C .dotfiles pull
+
 # ensure MUST_BE_DIRs are actually directories :)
 for dir in $MUST_BE_DIR ; do
   [[ ! -d "$dir" ]] && rm -f "$HOME/$dir"
@@ -64,3 +66,8 @@ stow -v \
 
 # clean up
 rm -rf "$DOTDIR/tmp"
+
+export ANTIDOTE="$ZCACHEDIR/antidote/antidote.zsh"
+if [[ -f "$ANTIDOTE" ]] ; then
+    echo " * INFO: consider doing an 'antidote update' now."
+fi

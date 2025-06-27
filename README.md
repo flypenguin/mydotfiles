@@ -1,22 +1,20 @@
 # Dotfile collection
 
-This is my personal dotfile setup. I think it's pretty cool.
-
-It uses stow and some fancy (read: probably crappy) shell fu maneuvers to manage my personal dotfiles over a range of systems (Mac, Linux - Arch, Fedora, Ubuntu).
-
-It should be a one-stop-shop to get my personal environment up and running.
-
-Anyway, feel free to use it (as inspiration or just clone it).
-
+Naturally, the best dotfiles in the world.
 
 ## Quickstart
 
 ```
 # for Mac
-curl https://raw.githubusercontent.com/flypenguin/mydotfiles/master/setup/mac.sh  | bash
+curl https://raw.githubusercontent.com/flypenguin/mydotfiles/main/setup/mac.sh  | bash
+
+# for Debian (should work)
+curl https://raw.githubusercontent.com/flypenguin/mydotfiles/main/setup/debian-ubuntu.sh | bash
+
+# ---------
 
 # for Arch Linux (currently untested & probably NOT WORKING)
-curl https://raw.githubusercontent.com/flypenguin/mydotfiles/master/setup/arch.sh  | bash
+curl https://raw.githubusercontent.com/flypenguin/mydotfiles/main/setup/arch.sh  | bash
 ```
 
 
