@@ -237,6 +237,40 @@ ks() {
   k9s --context "$CONTEXT" -c pods
 }
 
+
+# (h)elm (s)ave (v)alues
+#   $1 - search term
+hsv() {
+  USAGE=0
+  [[ -z "${1:-}" ]] && USAGE=1
+  [[ "${1:-}" == "-h" ]] && USAGE=1
+  if [[ "$USAGE" -eq 1 ]]; then
+    echo ""
+    echo "${0##*/} SEARCH_TERM [...]"
+    echo ""
+    echo "Tries to find SEARCH_TERM in installed helm repos, and displays"
+    echo "the default values file of the first result to stdout."
+    echo "Basically performs ..."
+    echo "  \$ helm search repo -r [...] SEARCH_TERM"
+    echo "(yes, [...] is moved to the front)"
+    echo ""
+    return 1
+  fi
+
+  local SEARCH_TERM="$1"
+  shift
+
+  SEARCH_RESULT="$(helm search repo -o json -r "$@" "$SEARCH_TERM")"
+  if [[ -n "$SEARCH_RESULT" ]]; then
+    local REPO_NAME="$(printf "$SEARCH_RESULT" | jq -r ".[0].name")"
+    local REPO_VERSION="$(printf "$SEARCH_RESULT" | jq -r ".[0].version")"
+    local OUTFILE="${REPO_NAME//\//-}-$REPO_VERSION.yaml"
+    helm show values "$REPO_NAME" >"$OUTFILE"
+    echo -e "Default values of $REPO_NAME written to:\n    $OUTFILE"
+  fi
+}
+
+
 # ###########################################################################
 #
 # AWS
