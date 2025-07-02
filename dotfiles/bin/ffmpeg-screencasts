@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+if [[ -z "${1:-}" ]]; then
+  echo "USAGE:"
+  echo "  ${0##*/} VIDEO_FILE..."
+  echo "Will really shrink the given video file for posting on"
+  echo "technical forums online, etc."
+  exit 255
+fi
+
+cleanup() {
+  if [[ -n "${LOGFILE:-}" ]]; then
+    rm -f "$LOGFILE"
+  fi
+}
+
+set -euo pipefail
+trap cleanup EXIT
+
+for INFILE in "$@"; do
+  echo -ne "\nProcessing $INFILE: "
+  LOGFILE="${INFILE%.*}.ffmpeg.log"
+  OUTFILE="${INFILE%.*}.smaller.mp4"
+
+  echo -ne "PASS 1... "
+  ffmpeg \
+    -i "$INFILE" \
+    -y \
+    -passlogfile "$INFILE.passlog" \
+    -an -r 15 -b:v 125k \
+    -pass 1 \
+    -f mp4 \
+    /dev/null \
+    > "$LOGFILE" 2>&1 \
+  || cat "$LOGFILE"
+  echo -n "done, "
+  
+  echo -n "PASS 2... "
+  rm -f "$OUTFILE"
+  ffmpeg \
+    -i "$INFILE" \
+    -an -r 15 -b:v 125k -pass 2 \
+    -passlogfile "$INFILE.passlog" \
+    -c:v libx264 -movflags +faststart \
+    "$OUTFILE" \
+    > "$LOGFILE" 2>&1 \
+  || cat "$LOGFILE"
+  echo "done."
+
+  rm -f "$LOGFILE"
+done
+
+echo -e "\n\nAll done.\n"
+
