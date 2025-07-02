@@ -261,12 +261,14 @@ hsv() {
   shift
 
   SEARCH_RESULT="$(helm search repo -o json -r "$@" "$SEARCH_TERM")"
-  if [[ -n "$SEARCH_RESULT" ]]; then
+  if [[ "$SEARCH_RESULT" != "[]" ]]; then
     local REPO_NAME="$(printf "$SEARCH_RESULT" | jq -r ".[0].name")"
     local REPO_VERSION="$(printf "$SEARCH_RESULT" | jq -r ".[0].version")"
     local OUTFILE="${REPO_NAME//\//-}-$REPO_VERSION.yaml"
     helm show values "$REPO_NAME" >"$OUTFILE"
     echo -e "Default values of $REPO_NAME written to:\n    $OUTFILE"
+  else
+    echo "Error looking up '$SEARCH_TERM', no results found."
   fi
 }
 
