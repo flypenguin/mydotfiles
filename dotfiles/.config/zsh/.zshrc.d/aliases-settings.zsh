@@ -69,7 +69,7 @@ export AWS_PAGER=""
 
 # ###########################################################################
 #
-# ALIASES (global)
+# ALIASES (global / shell)
 #
 
 # UN-aliases
@@ -95,8 +95,14 @@ fi
 # ssh
 alias ssr="ssh -l root"
 alias ssp="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no"
-alias sshconfig="vim \$HOME/.ssh/config"
-alias ssh-clean="rm -f '$HOME/.ssh/sockets/'*"
+alias vissh="vim \$HOME/.ssh/config"
+alias visshlinked="vim \$HOME/.ssh/config.linked/ssh.config.linked"
+alias vilinked=visshlinked
+alias ssh-clean="( setopt rmstarsilent ; rm -f '\$HOME/.ssh/sockets/'* )"
+alias sshrm=ssh-clean
+alias vihelpers="vim \$ZDOTDIR/.zshrc.d/*helpers*"
+alias vialiases="vim \$ZDOTDIR/.zshrc.d/*aliases*"
+alias visettings="vim \$ZDOTDIR/.zshrc.d/*settings*"
 
 # python
 alias de="deactivate"
