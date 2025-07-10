@@ -241,32 +241,76 @@ ks() {
 # (h)elm (s)ave (v)alues
 #   $1 - search term
 hsv() {
-  USAGE=0
-  [[ -z "${1:-}" ]] && USAGE=1
-  [[ "${1:-}" == "-h" ]] && USAGE=1
-  if [[ "$USAGE" -eq 1 ]]; then
+  local RESULT=""
+  local DIR="."
+  local SEARCH_TERM="${1:-}"
+  while [[ "$SEARCH_TERM" == "-"* && "$DIR" != "-"* ]] ; do
+    case "$SEARCH_TERM" in
+      -h) break ;; # display help
+      -s) RESULT="Show"  ; shift ; SEARCH_TERM="${1:-}" ;;
+      -w) RESULT="Write" ; shift ; SEARCH_TERM="${1:-}" ;;
+      -d) RESULT="Write" ; shift ; DIR="${1:-}" ; shift ; SEARCH_TERM="${1:-}" ;;
+    esac
+  done
+  DIR="${DIR%/}"
+  if [[ ! -d "$DIR" ]]; then
+    echo -e "ERROR: Not a directory: '$DIR'.\nAborting." > /dev/stderr
+    return 1
+  elif [[ -z "$SEARCH_TERM" || "$SEARCH_TERM" == "-h" ]] ; then
+    [[ -z "$SEARCH_TERM" ]] && echo -e "\nERROR: Search term missing." > /dev/stderr
+    [[ "$DIR" == "-" ]] && echo -e "\nERROR: Output directory missing." > /dev/stderr
+    local ME="${0##*/}"
     echo ""
-    echo "${0##*/} SEARCH_TERM [...]"
+    echo "USAGE:"
     echo ""
-    echo "Tries to find SEARCH_TERM in installed helm repos, and displays"
-    echo "the default values file of the first result to stdout."
-    echo "Basically performs ..."
-    echo "  \$ helm search repo -r [...] SEARCH_TERM"
-    echo "(yes, [...] is moved to the front)"
+    echo "    ${ME} SEARCH_TERM [...]"
+    echo "    ${ME} SEARCH_TERM -s [...]"
+    echo "    ${ME} SEARCH_TERM -w [...]"
+    echo "    ${ME} SEARCH_TERM -d DIR [...]"
+    echo ""
+    echo "  Tries to find SEARCH_TERM in installed helm repos, and displays"
+    echo "  the default values file of the first result to stdout."
+    echo "  Basically performs ..."
+    echo "    \$ helm search repo -r [...] SEARCH_TERM"
+    echo "  (yes, [...] is moved to the front)"
+    echo ""
+    echo "  Parameters:"
+    echo "    -h   show help and exit"
+    echo "    -s   print default values to stdout"
+    echo "    -w   write default values into (REPO)--(CHART)-v(VERSION).yaml"
+    echo "         in the current working dir"
+    echo "    -d   writes file into DIR, implies -w"
+    echo ""
+    echo "  Without -s ('show' on stdout) or -w ('write' to file) $ME will"
+    echo "  ask what to do - write or show."
     echo ""
     return 1
   fi
 
-  local SEARCH_TERM="$1"
   shift
 
-  SEARCH_RESULT="$(helm search repo -o json -r "$@" "$SEARCH_TERM")"
+  local SEARCH_RESULT="$(helm search repo -o json -r "$@" "$SEARCH_TERM")"
   if [[ "$SEARCH_RESULT" != "[]" ]]; then
     local REPO_NAME="$(printf "$SEARCH_RESULT" | jq -r ".[0].name")"
     local REPO_VERSION="$(printf "$SEARCH_RESULT" | jq -r ".[0].version")"
-    local OUTFILE="${REPO_NAME//\//--}-$REPO_VERSION.yaml"
-    helm show values "$REPO_NAME" >"$OUTFILE"
-    echo -e "Default values of $REPO_NAME written to:\n    $OUTFILE"
+    local OUTFILE="${DIR}/${REPO_NAME//\//--}-$REPO_VERSION.yaml"
+    [[ -n "$RESULT" ]] || RESULT=$( \
+      echo -n "Show values\nSave values to '$OUTFILE'" \
+      | fzf \
+        --height=~100% \
+        --prompt 'Do what with the values?' \
+        --layout=reverse \
+        --accept-nth=1 --delimiter=" "
+    )
+    if [[ -z "$RESULT" ]]; then echo "Abort." ; return 1 ; fi
+    if [[ "$RESULT" == "Show" ]] ; then
+      local PAGER
+      command -v bat > /dev/null && PAGER=(bat -l yaml) || PAGER=(less)
+      helm show values "$REPO_NAME" | "${PAGER[@]}"
+    else
+      helm show values "$REPO_NAME" >"$OUTFILE"
+      echo -e "Default values of $REPO_NAME written to:\n    $OUTFILE"
+    fi
   else
     echo "Error looking up '$SEARCH_TERM', no results found."
   fi

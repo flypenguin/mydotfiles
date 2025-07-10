@@ -207,7 +207,11 @@ alias azgroups="az group list --query '[].name'"
 ## SINCE WE'RE NOT USING KUBECTL PLUGIN FROM ZSH ANY MORE (too high startup time on mac)
 ## HERE ARE THE ALIASES ...
 
-# kubernetes (we already have aliases from ... somewhere, so just add missing)
+# helm
+alias hsr="helm search repo"
+alias hrs="hsr"
+
+# kubectl
 if whence kubectl > /dev/null ; then
   alias        k=kubectl
   alias       ka="kubectl apply"
