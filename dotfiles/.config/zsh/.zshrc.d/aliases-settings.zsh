@@ -3,6 +3,8 @@
 # SETTINGS (global)
 #
 
+DOTFILES="$HOME/.dotfiles"
+
 # gpg
 is-macos && export GPG_TTY=$(tty)
 
@@ -32,13 +34,6 @@ if whence bat > /dev/null ; then
   alias -g BAT="|bat --paging=always --color=always"
   alias -g   P="|bat --paging=always --color=always -p" # PLAIN (no line numbers)
   alias less="bat"
-fi
-
-if [[ -f /usr/share/vim/vim90/macros/less.sh ]]; then
-  lessc() { /usr/share/vim/vim90/macros/less.sh "$@" }
-  # yes, we overwrite the LC alias ...
-  alias -g LC="| lessc"
-  alias    lc="lessc"
 fi
 
 # set & create GOPATH ...
@@ -76,11 +71,25 @@ export AWS_PAGER=""
 alias rm >/dev/null 2>&1 && unalias rm
 alias cp >/dev/null 2>&1 && unalias cp
 
+# quick dotfile / etc. management
+alias cdd="cd \$HOME/.dotfiles"
+alias vih="vim \$ZDOTDIR/.zshrc.d/helpers.zsh"
+alias vis="vim \$ZDOTDIR/.zshrc.d/aliases-settings.zsh"
+alias via=vis
+alias dgit="git -C \$HOME/.dotfiles"
+alias dgapa="gapa -C \$HOME/.dotfiles"
+alias dgp="gp -C \$HOME/.dotfiles"
+alias dgl="gl -C \$HOME/.dotfiles"
+
 # those nifgy G, L etc aliases :)
 alias -g WCL=" | wc -l"
 alias -g   S=" | sort"
 alias -g   U=" | uniq"
-alias -g SED=" | sed"
+alias -g  SE=" | sed"
+alias -g SEE=" | sed -E"
+alias -g   H=" | head"
+alias -g   C=" | cut"
+alias -g  GE=" | grep -E"
 
 # console helpers
 # "BAT" & "L" are set in helpers.sh
