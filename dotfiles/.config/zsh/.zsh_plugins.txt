@@ -62,4 +62,6 @@ z-shell/zsh-eza path:/              conditional:has-eza
 zsh-users/zsh-completions path:src kind:fpath
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-history-substring-search
+
+# this, apparently, should be last.
 zdharma-continuum/fast-syntax-highlighting
