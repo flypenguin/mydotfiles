@@ -91,6 +91,9 @@ alias -g   H=" | head"
 alias -g   C=" | cut"
 alias -g  GE=" | grep -E"
 
+# we alias ... aliases ;)
+alias -g SED=SE
+
 # console helpers
 # "BAT" & "L" are set in helpers.sh
 alias    tma="tmux attach"
