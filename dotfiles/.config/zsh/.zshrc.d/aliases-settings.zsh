@@ -80,6 +80,8 @@ alias dgit="git -C \$HOME/.dotfiles"
 alias dgapa="gapa -C \$HOME/.dotfiles"
 alias dgp="gp -C \$HOME/.dotfiles"
 alias dgl="gl -C \$HOME/.dotfiles"
+alias zshd="source \"\$ZDOTDIR/.zshrc.d/\"*"
+alias re-source=zshd
 
 # those nifgy G, L etc aliases :)
 alias -g WCL=" | wc -l"
