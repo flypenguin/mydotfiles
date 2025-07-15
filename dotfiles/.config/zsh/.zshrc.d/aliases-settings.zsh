@@ -30,9 +30,10 @@ fi
 if whence bat > /dev/null ; then
   export BAT_THEME="Monokai Extended"
   unset LESSCOLORIZER  # let's not have bat call LESSOPEN call bat ...
-  alias -g  LC="|bat --paging=always --color=always"
-  alias -g BAT="|bat --paging=always --color=always"
-  alias -g   P="|bat --paging=always --color=always -p" # PLAIN (no line numbers)
+  alias -g  LC=" |bat --color=always"
+  alias -g BAT=" |bat --paging=always --color=always"
+  alias -g   P=" |bat --color=never -p" # PLAIN (no line numbers)
+  alias -g  LA=" |bat --color=always --paging=always"
   alias less="bat"
 fi
 
