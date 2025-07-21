@@ -34,6 +34,8 @@ if whence bat > /dev/null ; then
   alias -g BAT=" |bat --paging=always --color=always"
   alias -g   P=" |bat --color=never -p" # PLAIN (no line numbers)
   alias -g  LA=" |bat --color=always --paging=always"
+  alias -g  LJ=" |bat --color=always -l json"
+  alias -g  LY=" |bat --color=always -l yaml"
   alias less="bat"
 fi
 
