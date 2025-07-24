@@ -42,6 +42,7 @@ brew "gnu-time"
 brew "gnu-which"
 brew "grep"
 brew "openssl"
+brew "rsync"
 brew "stow"
 brew "vim"
 
