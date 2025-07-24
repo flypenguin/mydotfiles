@@ -95,6 +95,8 @@ alias -g SEE=" | sed -E"
 alias -g   H=" | head"
 alias -g   C=" | cut"
 alias -g  GE=" | grep -E"
+alias -g  GI=" | grep -i"
+alias -g GEI=" | grep -Ei"
 
 # we alias ... aliases ;)
 alias -g SED=SE
