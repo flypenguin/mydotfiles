@@ -1,0 +1,4 @@
+# required for ...  don't remember. it is checked in my startup
+# scripts.
+
+command -v fzf > /dev/null
