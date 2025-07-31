@@ -102,6 +102,8 @@ alias    tma="tmux attach"
 if whence nvim > /dev/null ; then
   alias nv="nvim"
   alias vim="nvim"
+  # see https://is.gd/f11vSd, although it does not seem to work ...
+  lessc() { /opt/homebrew/share/nvim/runtime/scripts/less.sh "$@" ; }
 fi
 
 # ssh
