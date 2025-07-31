@@ -17,26 +17,18 @@ fi
 
 # pygmentize - LOWER priority, will be overwritten below
 if whence pygmentize > /dev/null ; then
+  # the colorizer should be picked up automatically from lesspipe ...
+  # so let's _not_ set it.
   export PYGMENTIZE_STYLE='monokai'
-  export LESSCOLORIZER="pygmentize"
   # there is _also_ a global alias "P", which comes from ...
   # ... probably the pygmentize package. I stole the alias
   # from there.
-  alias -g  LC="2>&1| pygmentize -l pytb"
   alias -g PYG="2>&1| pygmentize -l pytb"
 fi
 
 # bat - HIGHER priority, must come _after_ pygmentize above
 if whence bat > /dev/null ; then
   export BAT_THEME="Monokai Extended"
-  unset LESSCOLORIZER  # let's not have bat call LESSOPEN call bat ...
-  alias -g  LC=" |bat --color=always"
-  alias -g BAT=" |bat --paging=always --color=always"
-  alias -g   P=" |bat --color=never -p" # PLAIN (no line numbers)
-  alias -g  LA=" |bat --color=always --paging=always"
-  alias -g  LJ=" |bat --color=always -l json"
-  alias -g  LY=" |bat --color=always -l yaml"
-  alias less="bat"
 fi
 
 # set & create GOPATH ...
