@@ -68,6 +68,7 @@ alias cp >/dev/null 2>&1 && unalias cp
 
 # quick dotfile / etc. management
 alias cdd="cd \$HOME/.dotfiles"
+alias cdz="cd \$ZDOTDIR"
 alias vih="vim \$ZDOTDIR/.zshrc.d/helpers.zsh"
 alias vis="vim \$ZDOTDIR/.zshrc.d/aliases-settings.zsh"
 alias via=vis
