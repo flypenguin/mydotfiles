@@ -734,6 +734,7 @@ update-dynamic-paths() {
     "/snap/bin" \
     "$HOME/Dev/frameworks/flutter/bin" \
     "$HOME/Dev/frameworks/flutter/.pub-cache/bin" \
+    "$HOME/.bun/bin" \
     "$HOME/.krew/bin"; do
     if [ -d "$PATH_SEARCH" ]; then
       echo "APpending path: $PATH_SEARCH"
