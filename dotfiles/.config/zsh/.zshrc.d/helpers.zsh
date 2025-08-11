@@ -181,6 +181,41 @@ ssh-key-hash() {
   fi
 }
 
+ssh-test-key() {
+  if [[ -z "${1:-}" ]]; then
+    echo "USAGE: ssh-test-key  SSH_KEY  SSH_TARGET"
+    echo ""
+    echo "Examples:"
+    echo "    ssh-test-key  ./id_ed25519_key  git@github.com:Group/repo.git"
+    echo "    ssh-test-key  ./id_ed25519_key  myuser@myhost.com"
+    return
+  elif [[ ! -f "${1:-}" ]]; then
+    echo "ERROR: No such key file: '$1'."
+    return
+  fi
+  echo "Using key: $1"
+  local SSH_KEY_FILE="$1"
+  local SSH_TARGET="$2"
+  local GIT_TMP
+  GIT_TMP=(
+    ssh -o "IdentityFile=$SSH_KEY_FILE"
+        -o IdentitiesOnly=yes
+        -o IdentityAgent=none
+        -o IgnoreUnknown=UseKeyChain
+        -o StrictHostKeyChecking=no
+        -o UseKeyChain=no
+        -o UserKnownHostsFile=/dev/null
+        -F /dev/null
+  )
+  if [[ "$SSH_TARGET" == "git@"* ]]; then
+    echo "Checking git access ..."
+    GIT_SSH_COMMAND="${GIT_TMP}" git ls-remote $SSH_TARGET
+  else
+    echo "Checking SSH host access ..."
+    "${GIT_TMP[@]}" "$SSH_TARGET"
+  fi
+}
+
 # let's alias those
 alias aws-ssh-fingerprint=ssh-key-hash
 alias ssh-aws-fingerprint=ssh-key-hash
