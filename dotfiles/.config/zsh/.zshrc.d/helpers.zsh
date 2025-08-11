@@ -308,6 +308,9 @@ hsv() {
       helm show values "$REPO_NAME" | "${PAGER[@]}"
     else
       helm show values "$REPO_NAME" >"$OUTFILE"
+      helm show values "$REPO_NAME" \
+      | grep -Ev '^ *(#.*)?$' \
+      > "${OUTFILE%.yaml}.plain.yaml"
       echo -e "Default values of $REPO_NAME written to:\n    $OUTFILE"
     fi
   else
