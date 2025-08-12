@@ -2,6 +2,7 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
+#     "loguru",
 #     "pdfplumber",
 # ]
 # ///
@@ -18,10 +19,44 @@ from pprint import pprint
 from typing import Optional
 import datetime as dt
 import re
+from loguru import logger
 
 
 GERMAN_DATE_REGEX: str = r"(?P<day>\d{1,2})\.(?P<month>\d{1,2})\.(?P<year>\d{4})"
 ISO_DATE_REGEX: str = r"(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})"
+AMERICAN_DATE_LONG: str = r"(?P<month>\w+) (?P<day>\d{1,2}), (?P<year>\d{4})"
+
+MONTH_MAP = [
+    re.compile("jan", re.IGNORECASE),
+    re.compile("feb", re.IGNORECASE),
+    re.compile("mar", re.IGNORECASE),
+    re.compile("m[äa]r", re.IGNORECASE),
+    re.compile("apr", re.IGNORECASE),
+    re.compile("ma[iy]", re.IGNORECASE),
+    re.compile("jun", re.IGNORECASE),
+    re.compile("jul", re.IGNORECASE),
+    re.compile("aug", re.IGNORECASE),
+    re.compile("sep", re.IGNORECASE),
+    re.compile("o[ck]t", re.IGNORECASE),
+    re.compile("nov", re.IGNORECASE),
+    re.compile("de[cz]", re.IGNORECASE),
+]
+
+
+def to_month(val: str) -> None | int:
+    try:
+        logger.debug("Converting to int: {}", val)
+        val = int(val)
+        return val
+    except ValueError:
+        pass
+    val = val.lower()
+    for month, matcher in enumerate(MONTH_MAP, start=1):
+        logger.trace("... trying to match '{}'", matcher.pattern)
+        if matcher.fullmatch(val[:3]):
+            logger.debug("... got month '{}'", month)
+            return month
+    return None
 
 
 @dataclass
@@ -34,7 +69,11 @@ class Point:
         return (self.x, self.y)
 
     def distance(self, other) -> float:
-        return sqrt((self.top_left.x - other.top_left.x) ^ 2 + (self.top_left.y - other.top_left.y) ^ 2)
+        return sqrt(
+            (self.top_left.x - other.top_left.x)
+            ^ 2 + (self.top_left.y - other.top_left.y)
+            ^ 2
+        )
 
     def __mod__(self, other):
         """Modulo-operator does the same as distance()."""
@@ -274,7 +313,9 @@ class Line:
         """Returns a line and a list of 'unused' words (words not present in line)."""
         page_words: list[WordWrapper] = [WordWrapper.get(word) for word in page_words]
         # sort top-to-bottom, left-to-right
-        page_words: list[WordWrapper] = sorted(page_words, key=lambda x: tuple(reversed(x.top_left.tuple)))
+        page_words: list[WordWrapper] = sorted(
+            page_words, key=lambda x: tuple(reversed(x.top_left.tuple))
+        )
         unused_words: list[WordWrapper] = page_words
         page_lines: list[Line] = []
         while unused_words:
@@ -337,7 +378,6 @@ class InvoiceExtractor:
     _lines: list[Line]
     _date: dt.date
     _invoice_number: str
-    _vendor: str
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
@@ -347,7 +387,9 @@ class InvoiceExtractor:
         self._lines = lines
         self._date = None
         self._invoice_number = None
-        self._vendor = None
+        self.__post_init__()
+
+    def __post_init__(self): ...
 
     @classmethod
     def can_handle(cls, lines: list[Line]) -> Optional["InvoiceExtractor"]:
@@ -371,9 +413,11 @@ class InvoiceExtractor:
 
     def _get_from_marker(self, marker_str, value_regex):
         marker_str = marker_str.lower()
+        logger.debug("Checking for '{}'", marker_str)
         for line in self._lines:
             text = line.text.lower()
             if text.find(marker_str) > -1:
+                logger.debug("Found in line: '{}'", line.text)
                 # do NOT lower for the final extraction ...
                 match = re.search(value_regex, line.text)
                 if match:
@@ -385,8 +429,9 @@ class InvoiceExtractor:
         if not self._date:
             match = self._get_from_marker(self.date_marker, self.date_regex)
             if match:
+                logger.debug("Have date match: {}", match.groups())
                 year = int(match.group("year"))
-                month = int(match.group("month"))
+                month = to_month(match.group("month"))
                 day = int(match.group("day"))
                 self._date = dt.date(year, month, day)
         return self._date
@@ -394,7 +439,9 @@ class InvoiceExtractor:
     @property
     def invoice_number(self) -> dt.datetime:
         if not self._invoice_number:
-            match = self._get_from_marker(self.invoice_number_marker, self.invoice_number_regex)
+            match = self._get_from_marker(
+                self.invoice_number_marker, self.invoice_number_regex
+            )
             if match:
                 self._invoice_number = match.group(1)
         return self._invoice_number
@@ -406,7 +453,6 @@ class InvoiceExtractor:
 
 class AmazonInvoice(InvoiceExtractor):
     markers: list[str] = ["Umsatzsteuer erklärt durch Amazon"]
-
     date_marker: str = "/Lieferdatum"
     date_regex: str = GERMAN_DATE_REGEX
     invoice_number_marker = "Rechnungsnummer"
@@ -415,24 +461,38 @@ class AmazonInvoice(InvoiceExtractor):
     table_header_lines: int = 2
     vendor: str = "Amazon"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._vendor = "Amazon"
+
+class AnthropicInvoice(InvoiceExtractor):
+    markers: list[str] = ["Anthropic, PBC"]
+    table_marker: str = "Description"
+    date_marker: str = "Date of issue"
+    date_regex: str = AMERICAN_DATE_LONG
+    invoice_number_marker = "Invoice number"
+    invoice_number_regex = r": (\w+-\d+)"
+    vendor = "Anthropic"
+
+    def __post_init__(self):
+        for line in self._lines:
+            line.text = line.text.replace("\x00", "-")
 
 
 class HexonetInvoice(InvoiceExtractor):
     markers: list[str] = ["Key-Systems GmbH, Kaiserstraße"]
     table_marker: str = "Pos Beschreibung"
-
     date_marker: str = "Rechnung"  # yup, really ... sucks ...
     date_regex: str = ISO_DATE_REGEX
-
     invoice_number_marker = "Rechnung:"
     invoice_number_regex = r": ([\w_-]+)"
+    vendor = "Hexonet"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._vendor = "Amazon"
+
+class WasabiInvoice(InvoiceExtractor):
+    markers: list[str] = ["Key-Systems GmbH, Kaiserstraße"]
+    table_marker: str = "Pos Beschreibung"
+    date_marker: str = "Rechnung"  # yup, really ... sucks ...
+    date_regex: str = ISO_DATE_REGEX
+    invoice_number_marker = "Rechnung:"
+    invoice_number_regex = r": ([\w_-]+)"
 
 
 if __name__ == "__main__":
@@ -448,6 +508,8 @@ if __name__ == "__main__":
 
         lines = Line.page_lines(page_words)
         extractor = InvoiceExtractor.get_for(lines)
+        pprint([line.text for line in lines])
+        print(f"Extractor:      {extractor}")
         print(f"File:           {pdf_file}")
         print(f"Invoice date:   {extractor.date_str}")
         print(f"Invoice number: {extractor.invoice_number}")
