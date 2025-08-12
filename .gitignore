@@ -1,3 +1,8 @@
+# zsh sessions
+
+.zsh_sessions/
+
+
 # temp files
 tmp/
 
