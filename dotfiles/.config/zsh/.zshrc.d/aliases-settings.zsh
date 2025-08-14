@@ -71,6 +71,7 @@ alias cdc="cd \$HOME/.config"                 # $HOME/.config
 alias cdd="cd \$HOME/.dotfiles"               # dotfiles dir
 alias cdn="cd \$HOME/.config/nvim"            # nvim config dir
 alias cdz="cd \$ZDOTDIR"                      # zdotdir
+alias  da="direnv allow"
 alias vih="vim \$ZDOTDIR/.zshrc.d/helpers.zsh"
 alias vis="vim \$ZDOTDIR/.zshrc.d/aliases-settings.zsh"
 alias via=vis
