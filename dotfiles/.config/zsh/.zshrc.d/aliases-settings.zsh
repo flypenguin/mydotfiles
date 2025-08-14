@@ -29,6 +29,7 @@ fi
 # bat - HIGHER priority, must come _after_ pygmentize above
 if whence bat > /dev/null ; then
   export BAT_THEME="Monokai Extended"
+  alias cat="bat -p"
 fi
 
 # set & create GOPATH ...
