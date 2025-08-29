@@ -82,6 +82,7 @@ alias dgp="gp -C \$HOME/.dotfiles"
 alias dgl="gl -C \$HOME/.dotfiles"
 alias zshd="for sourcefile in \"\$ZDOTDIR/.zshrc.d/\"*.zsh ; do source \"\$sourcefile\" ; done"
 alias re-source=zshd
+alias resh=zshd  # REload SHell config :)
 
 # those nifgy G, L etc aliases :)
 alias -g WCL=" | wc -l"
