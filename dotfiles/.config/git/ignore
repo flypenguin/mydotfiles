@@ -41,3 +41,7 @@ Temporary Items
 .apdisk
 
 # End of https://www.toptal.com/developers/gitignore/api/osx
+
+
+# claude REALLY REALLY wants this ...
+**/.claude/settings.local.json
