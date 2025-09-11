@@ -1,6 +1,7 @@
 # by https://github.com/Homebrew/homebrew-bundle
 tap "buo/cask-upgrade"
 tap "hashicorp/tap"
+tap "gromgit/brewtils"
 
 # super essential
 # NOTE:
@@ -49,11 +50,12 @@ brew "vim"
 # previously uninstalled command line utils
 brew "atuin"
 brew "bat"
+brew "bbrew"                       # homebrew ui
 brew "broot"
 brew "dos2unix"
 brew "entr"
 brew "eza"
-brew "fx"           # json processor, sometimes a jq alternative
+brew "fx"                          # json processor, sometimes a jq alternative
 brew "fzf"
 brew "fzy"
 brew "git"
@@ -72,7 +74,8 @@ brew "poppler"
 brew "pv"
 brew "ripgrep"
 brew "spacer"
-brew "the_silver_searcher"      # "ag" :)
+brew "taproom"                     # homebrew ui
+brew "the_silver_searcher"         # "ag" :)
 brew "tmux"
 brew "watch"
 brew "wget"
