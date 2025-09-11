@@ -36,6 +36,7 @@ ohmyzsh/ohmyzsh path:plugins/zoxide conditional:has-zoxide              # j/z DI
 # tool-specific
 Aloxaf/fzf-tab        path:/                    conditional:has-fzf     # fzf-tab, with preview after cd
 fdellwing/zsh-bat     path:/                                            # replace cat with bat
+ohmyzsh/ohmyzsh       path:plugins/asdf
 ohmyzsh/ohmyzsh       path:plugins/aws
 ohmyzsh/ohmyzsh       path:plugins/docker       conditional:has-docker
 ohmyzsh/ohmyzsh       path:plugins/fzf          conditional:not-ubuntu-minimized
