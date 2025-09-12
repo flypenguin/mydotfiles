@@ -1,9 +1,0 @@
-<snippet>
-    <content><![CDATA[
-fail(inline_template("\n\n>>> Variable: '${1:myvar}' >>>\n<%= @${1:myvar}.to_yaml %>\n<<<\n\n"))
-]]></content>
-    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
-    <tabTrigger>fit</tabTrigger>
-    <!-- Optional: Set a scope to limit where the snippet will trigger -->
-    <scope>source.puppet</scope>
-</snippet>

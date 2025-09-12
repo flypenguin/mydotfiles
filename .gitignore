@@ -1,3 +1,9 @@
+############################
+### MY DOTFILE GITIGNORE ###
+############################
+
+*.orig
+
 # zsh sessions
 
 .zsh_sessions/
