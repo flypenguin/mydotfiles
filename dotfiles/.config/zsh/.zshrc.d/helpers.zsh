@@ -120,6 +120,22 @@ aj() {
 # ssh
 #
 
+# wrapper around "ssh-keygen -R"
+skr() {
+  if [[ -z "${1:-}" ]] ; then
+    echo "USAGE: skr REGEX"
+    echo "       removes keys from known hosts file"
+    return 1
+  fi
+  set -x
+  local hostname
+  hostname="$(ssh -G $1 | awk '/^hostname / {print $2}')"
+  [[ -n "$hostname" ]] && ssh-keygen -R "$hostname" || echo "No host found for '$1'."
+  cat "$HOME/.ssh/known_hosts" | grep -Ev "$1" > "$HOME/.ssh/known_hosts.new"
+  mv -f "$HOME/.ssh/known_hosts.new" "$HOME/.ssh/known_hosts"
+  set +x
+}
+
 # $1 = name of the identity file
 # $@ = ssh parameters
 ssi() {
