@@ -50,6 +50,10 @@ export ATUIN_NOBIND="true"                  # I want my own key bindings
 source ${ANTIDOTE_PATH}/antidote.zsh        # load antidote
 antidote load
 
+# apparently last?
+eval "$(starship init zsh)"
+
+
 
 # POST antidote configs (antidote also loads plugins)
 set -k                                      # recognize inline comments on the command line

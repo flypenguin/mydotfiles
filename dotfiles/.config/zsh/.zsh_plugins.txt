@@ -29,6 +29,7 @@ ohmyzsh/ohmyzsh path:plugins/fancy-ctrl-z                               # ctrl-z
 ohmyzsh/ohmyzsh path:plugins/gnu-utils                                  # use g* for gnu utils, NOT script-safe!
 ohmyzsh/ohmyzsh path:plugins/jump                                       # https://is.gd/cIia5E
 ohmyzsh/ohmyzsh path:plugins/zoxide conditional:has-zoxide              # j/z DIRNAME
+
 # disabled
 #ohmyzsh/ohmyzsh path:plugins/globalias                                 # unpack aliases
 #ohmyzsh/ohmyzsh path:plugins/magic-enter                               # execute commands on "empty" ENTER
