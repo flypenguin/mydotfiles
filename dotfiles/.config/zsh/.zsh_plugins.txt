@@ -30,6 +30,9 @@ ohmyzsh/ohmyzsh path:plugins/gnu-utils                                  # use g*
 ohmyzsh/ohmyzsh path:plugins/jump                                       # https://is.gd/cIia5E
 ohmyzsh/ohmyzsh path:plugins/zoxide conditional:has-zoxide              # j/z DIRNAME
 
+# dev specific
+ohmyzsh/ohmyzsh path:plugins/virtualenvwrapper                          # auto-(de-)activate venvs
+
 # disabled
 #ohmyzsh/ohmyzsh path:plugins/globalias                                 # unpack aliases
 #ohmyzsh/ohmyzsh path:plugins/magic-enter                               # execute commands on "empty" ENTER
