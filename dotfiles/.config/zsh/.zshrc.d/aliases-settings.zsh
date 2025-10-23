@@ -77,6 +77,7 @@ alias viz="vim \$ZDOTDIR/.zshrc"
 alias vip="vim \$ZDOTDIR/.zsh_plugins.txt"
 alias vih="vim \$ZDOTDIR/.zshrc.d/helpers.zsh"
 alias vis="vim \$ZDOTDIR/.zshrc.d/aliases-settings.zsh"
+alias vho="sudo vim /etc/hosts"
 alias via=vis
 alias dgit="git -C \$HOME/.dotfiles"
 alias dgapa="gapa -C \$HOME/.dotfiles"
