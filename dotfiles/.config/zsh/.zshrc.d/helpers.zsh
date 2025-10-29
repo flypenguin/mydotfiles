@@ -820,4 +820,6 @@ update-dynamic-paths() {
       fi
     done
   done
+
+  echo -e "\nFiles saved in: $OUTFILE."
 }
