@@ -48,6 +48,9 @@ export DISABLE_CORRECTION="true"            # might be oh-my-zsh only
 export ATUIN_NOBIND="true"                  # I want my own key bindings
 export ZSH_THEME=""                         # we use starship below
 
+#  BEFORE direnf (which is loaded by antidote ...)
+eval "$(starship init zsh)"
+
 source ${ANTIDOTE_PATH}/antidote.zsh        # load antidote
 antidote load
 
@@ -77,8 +80,6 @@ done
 unset _rc _RC_FILES
 
 
-# apparently last?
-eval "$(starship init zsh)"
 
 
 # ##==========================================================================
