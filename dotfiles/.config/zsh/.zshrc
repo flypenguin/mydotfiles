@@ -8,7 +8,7 @@
 #   $ZDOTDIR/.zlogout                   # login-shells (on exit)
 # see here: http://bit.ly/1sGzo6g
 
-# see remarks (2), (3)
+# see remarks (2), (3) at the end
 typeset -gU path fpath                  # no dupes in path
 path=(
   $HOME/{,s}bin(N)
@@ -39,29 +39,29 @@ if [[ ! -d "$ANTIDOTE_PATH" ]]; then
   git clone https://github.com/mattmc3/antidote "${ANTIDOTE_PATH}"
 fi
 
-# Set any zstyles you might use for configuration.
+# Set any zstyles you might use for confirmation
+# refs:  https://is.gd/ii05Qx (stackov.)  https://is.gd/l5gmgl (zsh docs)
 [[ ! -f ${ZDOTDIR}/.zstyles ]] || source ${ZDOTDIR}/.zstyles
 
 # PRE-antidote configs (e.g. the ones modifying plugin init behavior)
 export DISABLE_CORRECTION="true"            # might be oh-my-zsh only
 export ATUIN_NOBIND="true"                  # I want my own key bindings
-
+export ZSH_THEME=""                         # we use starship below
 
 source ${ANTIDOTE_PATH}/antidote.zsh        # load antidote
 antidote load
 
-# apparently last?
-eval "$(starship init zsh)"
-
-
 
 # POST antidote configs (antidote also loads plugins)
+# for optiona seee: see: https://linux.die.net/man/1/zshoptions
 set -k                                      # recognize inline comments on the command line
 bindkey '^r'        atuin-search            # bind atuin keys (reverse-search)
 bindkey '^[[1;2A'   atuin-up-search         # SHIFT-UP instead of UP
 setopt HIST_IGNORE_SPACE                    # start with " " -> no history entry
-setopt SHARE_HISTORY                        # reload history after every command
+setopt HIST_IGNORE_ALL_DUPS                 # ignore duplicates regardless of where
 setopt INC_APPEND_HISTORY                   # directly append to history file
+setopt INTERACTIVE_COMMENTS                 # enable '#' comments _on the command line_ :)
+setopt SHARE_HISTORY                        # reload history after every command
 setopt autocd                               # change into dir when entered as "command"
 unsetopt correct                            # might be oh-my-zsh only
 zstyle ':completion:*' menu no              # see remark (1)
@@ -75,6 +75,10 @@ for _rc in $_RC_FILES ; do
   [[ $_rc:t == '~'* ]] || source "$_rc"
 done
 unset _rc _RC_FILES
+
+
+# apparently last?
+eval "$(starship init zsh)"
 
 
 # ##==========================================================================
