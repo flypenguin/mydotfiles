@@ -49,7 +49,7 @@ EOF
 # NOTE: all gnu binaries are linked into \$HOME/.local/gnubin.
 # NOTE: this file was created by the shell function update-gnubins().
 
-path=(\"$gnu_dir\" \$path)
+path=("$full_gnubin_symlink_dir" \$path)
 
 EOF
 
