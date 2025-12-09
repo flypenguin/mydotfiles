@@ -1,0 +1,95 @@
+# ###########################################################################
+#
+# path helpers
+#
+# IMPORTANT!
+#   Make sure that MANPATH _always_ (!!) starts with ":", e.g.
+#   MANPATH=:/opt/one:/opt/two:..."
+#   this changes the lookup behavior of man (tested, info from chatgpt).
+#
+update-gnubins() {
+  if ! is-macos && [[ ! "${1:-}" == "-f" ]]; then
+    echo "This is a macOS utility ... use '-f' to run anyway."
+    return 1
+  fi
+
+  if [[ -z "$ZDOTDIR" ]]; then
+    echo "ERROR: \$ZDOTDIR not set. Exiting."
+    return 1
+  fi
+  local dynpath="${ZDOTDIR}/.zshrc.d"
+  if [[ ! -d "$dynpath" ]]; then
+    echo "ERROR: $dynpath does not exist. Exiting."
+    return 1
+  fi
+
+  echo "Searching for homebrew-installed GNU system tools ..."
+
+  # the "local-" prefix is registered in .gitignore in that dir ...
+  local outfile="$dynpath/local-gnu-paths.sh"
+  local gnubin_symlink_dir=".local/gnubin"
+  local full_gnubin_symlink_dir="$HOME/$gnubin_symlink_dir"
+  local timestamp="$(date +%Y-%m-%d\ %H:%M:%S)"
+
+  rm -rf "$full_gnubin_symlink_dir"
+  mkdir -p "$full_gnubin_symlink_dir"
+
+
+  cat > "$full_gnubin_symlink_dir/README.txt" <<EOF
+# Last update: $timestamp
+
+This directory and all files in it are managed and created
+by the shell function update-gnubins().
+
+Don't do anything else here ... :)
+EOF
+
+  cat > "$outfile" <<EOF
+# Last update: $timestamp
+# NOTE: all gnu binaries are linked into \$HOME/.local/gnubin.
+# NOTE: this file was created by the shell function update-gnubins().
+
+path=(\"$gnu_dir\" \$path)
+
+EOF
+
+  # zsh will PRINT THE VARIABLES if you don't assign them in the
+  # same step. WEIRD, but true.
+  local num_executables=0
+  local gnu_man_path=""
+  local gnu_dir=""
+  local gnu_binary=""
+  local spacing="                   "
+
+  for a in \
+    "/opt/homebrew/opt"
+  do
+    find -L "$a" -type d -name "gnubin" 2>/dev/null \
+    | while read gnu_dir; do
+      # the binary dir, link all files into $HOME/.local/gnubin
+      echo ""
+      echo    "Found GNU binary dir:       $gnu_dir"
+      echo -n " ... linking executables:  "
+
+      num_executables=0
+      for gnu_binary in "$gnu_dir"/* ; do
+        [[ -x "$gnu_binary" ]] && ln -sf "$gnu_binary" "$HOME/$gnubin_symlink_dir"
+        (( num_executables += 1 ))
+        if (( num_executables > 10 )) ; then
+          echo -en "\n ... ...$spacing"
+          num_executables=0
+        fi
+        echo -n " ${gnu_binary##*/}"
+      done
+      echo ""
+
+      local gnu_man_path=${gnu_dir//gnubin/gnuman}
+      if [[ -d "$gnu_man_path" ]]; then
+        echo " ... associated man path:   $gnu_man_path"
+        echo "manpath+=(\"${gnu_dir//gnubin/gnuman}\")" >>"$outfile"
+      else
+        echo " ... without man path."
+      fi
+    done
+  done
+}

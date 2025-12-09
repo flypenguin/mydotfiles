@@ -1,0 +1,57 @@
+##   !!!!
+##   !!!! IMPORANT
+##   !!!!
+##   !!!! this file is run AS A FUNCTION, in the CURRENT SHELL (.zFUNCTIONs,
+##   !!!! get it??)
+##   !!!!
+##   !!!! So you do NOT "exit" here, you merely "return".
+##   !!!! (Or simply place a function / functions inside here).
+##   !!!!
+
+# ###########################################################################
+#
+# path helpers
+#
+
+# mac os & homebrew - if the coreutils are installed, use them instead of the OS X ones.
+# see "brew info coreutils". should not have an effect on linux ;)
+# from: https://apple.stackexchange.com/a/371984
+#
+# IMPORTANT!
+#   Make sure that MANPATH _always_ (!!) starts with ":", e.g.
+#   MANPATH=:/opt/one:/opt/two:..."
+#   this changes the lookup behavior of man (tested, info from chatgpt).
+#
+
+
+which-link() {
+  if [[ "${1:-}" == "-h" ]] || [[ -z "${1:-}" ]] ; then
+    echo "USAGE: which-path COMMAND"
+    echo "       will find the exact binary in your path that is 'used' for"
+    echo "       that command, without resolving any symlinks (looking at you,"
+    echo "       'type', 'which', 'whence', ... etc.)."
+    return 1
+  fi
+
+
+  FOUND=0
+  for d in ${(s/:/)PATH}; do
+    if [[ -x "$d/$1" ]]; then
+      #print -r -- "$d/$1"
+      ls -l "$d/$1"
+      FOUND=1
+      break
+    fi
+  done
+
+  if (( FOUND == 0 )); then
+    cat >&2 <<EOF
+
+No VALID SYMLINKS named '${1}' found in your path:
+
+$(echo "$PATH" | tr ":" "\n")
+
+EOF
+    return 2
+  fi
+}

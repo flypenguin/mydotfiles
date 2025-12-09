@@ -1,4 +1,3 @@
-#!/bin/zsh
 ## FOR INTERACTIVE SHELLS
 # zsh ordering:
 #   $ZDOTDIR/.zshenv                    # all shells
@@ -30,7 +29,7 @@ UNAME="${OSTYPE//darwin*/darwin}"
 # Lazy-load (autoload) Zsh function files from a directory.
 ZFUNCDIR=${ZDOTDIR}/.zfunctions
 fpath=($ZFUNCDIR $fpath)
-autoload -Uz $ZFUNCDIR/*(.:t)
+autoload -Uz $ZFUNCDIR/*(N:t~.md)
 
 # Clone antidote if necessary.
 ANTIDOTE_PATH="${ZCACHEDIR:-${XDG_CACHE_HOME:-$HOME/.cache}/zsh}/antidote"

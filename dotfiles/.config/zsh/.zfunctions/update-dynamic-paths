@@ -1,0 +1,62 @@
+# ###########################################################################
+#
+# path helpers
+#
+update-dynamic-paths() {
+  if [[ -z "$ZDOTDIR" ]]; then
+    echo "ERROR: \$ZDOTDIR not set. Exiting."
+    return 1
+  fi
+  local DYNPATH="${ZDOTDIR}/.zshrc.d"
+  if [[ ! -d "$DYNPATH" ]]; then
+    echo "ERROR: $DYNPATH does not exist. Exiting."
+    return 1
+  fi
+  # the "local-" prefix is registered in .gitignore in that dir ...
+  local OUTFILE="$DYNPATH/local-dynamic-paths.sh"
+  echo "Purging $OUTFILE"
+  echo "# Last update: $(date +%Y-%m-%d\ %H:%M:%S)" >"$OUTFILE"
+
+  # APPENDED to path
+  for PATH_SEARCH in \
+    "/var/lib/snapd/snap/bin" \
+    "/snap/bin" \
+    "$HOME/Dev/frameworks/flutter/bin" \
+    "$HOME/Dev/frameworks/flutter/.pub-cache/bin" \
+    "$HOME/.bun/bin" \
+    "$HOME/.krew/bin"; do
+    if [ -d "$PATH_SEARCH" ]; then
+      echo "APpending path: $PATH_SEARCH"
+      echo "path=(\$path \"$PATH_SEARCH\")" >>"$OUTFILE"
+    fi
+  done
+
+  # PREpended to path (java - on mac ...)
+  # later = higher preference
+  # NOTE: $HOME/.local/gnubin comes from update-gnubins() sister function ;)
+  for PATH_SEARCH in \
+    "/opt/homebrew/opt/openjdk/bin" \
+    "/usr/local/opt/openjdk/bin"; do
+    if [ -d "$PATH_SEARCH" ]; then
+      echo "PREpending path: $PATH_SEARCH"
+      echo "path=(\"$PATH_SEARCH\" \$path)" >>"$OUTFILE"
+    fi
+  done
+
+  # special keg-only-treatment
+  local CHECK_PATH=""
+  local CHECK_PATH_LIST="/usr/local/opt"
+  for PATH_SEARCH in \
+    "curl"
+  do
+    for CHECK_PATH in $CHECK_PATH_LIST; do
+      CHECK_PATH="$CHECK_PATH/$PATH_SEARCH/bin"
+      if [ -d "$CHECK_PATH" ]; then
+        echo "adding keg-only binary: $PATH_SEARCH"
+        echo "path=(\"$CHECK_PATH\" \$path)" >>"$OUTFILE"
+      fi
+    done
+  done
+
+  echo -e "\nFiles saved in: $OUTFILE."
+}
