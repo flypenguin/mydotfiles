@@ -1,15 +1,17 @@
-# see
-# https://github.com/getantidote/use-omz?tab=readme-ov-file
+# some nice inspirations:
+#   - plugins of the antidote developer:
+#     https://github.com/mattmc3/zdotdir/blob/main/.zsh_plugins.txt
 
+# see https://github.com/getantidote/use-omz?tab=readme-ov-file
 getantidote/use-omz
 
 # alternative: choose the libs one-by-one
 #    ohmyzsh/ohmyzsh path:lib/FILENAME.ZSH
-# we're using all now.
-ohmyzsh/ohmyzsh path:lib
+# to use all, uncomment the following:
+#ohmyzsh/ohmyzsh path:lib
 
 # macOS specific plugins
-ohmyzsh/ohmyzsh path:plugins/macos conditional:is-macos
+ohmyzsh/ohmyzsh path:plugins/macos              conditional:is-macos
 
 # let's set this first, because it will set the homebrew path ...
 # hopefully ...
@@ -23,12 +25,12 @@ ohmyzsh/ohmyzsh path:plugins/copybuffer
 ohmyzsh/ohmyzsh path:plugins/copyfile
 ohmyzsh/ohmyzsh path:plugins/copypath
 ohmyzsh/ohmyzsh path:plugins/dircycle                                   # ctrl-shift-(left,right)
-ohmyzsh/ohmyzsh path:plugins/direnv conditional:has-direnv
+ohmyzsh/ohmyzsh path:plugins/direnv             conditional:has-direnv
 ohmyzsh/ohmyzsh path:plugins/extract
 ohmyzsh/ohmyzsh path:plugins/fancy-ctrl-z                               # ctrl-z to return to backgrounded job
 ohmyzsh/ohmyzsh path:plugins/gnu-utils                                  # use g* for gnu utils, NOT script-safe!
 ohmyzsh/ohmyzsh path:plugins/jump                                       # https://is.gd/cIia5E
-ohmyzsh/ohmyzsh path:plugins/zoxide conditional:has-zoxide              # j/z DIRNAME
+ohmyzsh/ohmyzsh path:plugins/zoxide             conditional:has-zoxide  # j/z DIRNAME
 
 # dev specific
 ohmyzsh/ohmyzsh path:plugins/virtualenvwrapper                          # auto-(de-)activate venvs
@@ -54,7 +56,7 @@ ohmyzsh/ohmyzsh       path:plugins/terraform                            # mainly
 ohmyzsh/ohmyzsh       path:plugins/uv
 paulirish/git-open    path:/                                            # "git open" :)))
 romkatv/zsh-bench     kind:path                                         # ... ?
-z-shell/zsh-eza       path:/              conditional:has-eza
+z-shell/zsh-eza       path:/                    conditional:has-eza
 
 # commented out so far
 #ohmyzsh/ohmyzsh path:plugins/rclone                                     # stupid error messages on linux??
