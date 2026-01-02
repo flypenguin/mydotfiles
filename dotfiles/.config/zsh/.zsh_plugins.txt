@@ -18,7 +18,7 @@ ohmyzsh/ohmyzsh path:plugins/macos              conditional:is-macos
 ohmyzsh/ohmyzsh path:plugins/brew
 
 # some shell niceties
-atuinsh/atuin path:/                                                    # sqlite-based shell history
+atuinsh/atuin   path:/                                                  # sqlite-based shell history
 ohmyzsh/ohmyzsh path:plugins/colored-man-pages
 ohmyzsh/ohmyzsh path:plugins/common-aliases
 ohmyzsh/ohmyzsh path:plugins/copybuffer
@@ -67,6 +67,7 @@ z-shell/zsh-eza       path:/                    conditional:has-eza
 #https://github.com/zinic/tmux-cssh/
 
 # Add core plugins that make Zsh a bit more like Fish
+marlonrichert/zsh-autocomplete
 zsh-users/zsh-completions path:src kind:fpath
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-history-substring-search
