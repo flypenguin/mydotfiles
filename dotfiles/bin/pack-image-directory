@@ -12,15 +12,23 @@ fi
 
 for dir_to_pack in "$@"; do
   BASENAME=$(basename "$dir_to_pack")
-  THUMBS_DIR="$dir_to_pack.thumbs"
+  # relative to "."
+  PARENT_DIR=$(dirname "$dir_to_pack")
+  THUMBS_DIR="$BASENAME.thumbs"
+  SRC_DIR="$BASENAME"
+  TGT_DIR="$BASENAME.pack"
 
   echo "Archiving directory:   [$dir_to_pack]"
 
-  picture-dir-tool create-thumbnails -n 4 "$dir_to_pack"
-  pack-directory -c 0 "$dir_to_pack"
-
-  zip -r -0 "$BASENAME.pack/$BASENAME.thumbs.zip" "$THUMBS_DIR" >"$THUMBS_DIR.progress.txt"
-  rm -rf "$THUMBS_DIR" "$THUMBS_DIR.progress.txt"
+  # use a sub-shell and 'cd' into the to-be-zipped directory's dir (even if "."),
+  # so the zip file does not contain stupid paths.
+  (
+    cd "$PARENT_DIR"
+    picture-dir-tool create-thumbnails -n 4 "$SRC_DIR"
+    pack-directory -c 0 "$SRC_DIR"
+    zip -r -0 "$TGT_DIR/${BASENAME}.thumbs.zip" "$THUMBS_DIR" >"$THUMBS_DIR.progress.txt"
+    rm -rf "$THUMBS_DIR" "$THUMBS_DIR.progress.txt"
+  )
 
   echo -e "Done ($dir_to_pack)\n"
 
