@@ -17,6 +17,9 @@ path=(
   $path
 )
 
+# otherwise opt-left and opt-right are much fucked.
+WORDCHARS='*?_[]~=&;!#$%^(){}<>'
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of .zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
