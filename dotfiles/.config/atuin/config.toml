@@ -3,7 +3,7 @@
 style = "compact"
 
 ## show line on top
-invert = true
+#invert = true
 
 ## characters that count as a part of a word
 word_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789äöüßÄÖÜ"

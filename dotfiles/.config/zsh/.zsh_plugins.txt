@@ -67,10 +67,13 @@ z-shell/zsh-eza       path:/                    conditional:has-eza
 #https://github.com/zinic/tmux-cssh/
 
 # Add core plugins that make Zsh a bit more like Fish
-marlonrichert/zsh-autocomplete
+
+# I CANNOT STAND THIS PLUGIN.
+#marlonrichert/zsh-autocomplete
+
 zsh-users/zsh-completions path:src kind:fpath
 zsh-users/zsh-autosuggestions
-zsh-users/zsh-history-substring-search
+zsh-users/zsh-history-substring-search # we STILL NEED to key-bind it (see below)
 
 # this, apparently, should be last.
 zdharma-continuum/fast-syntax-highlighting

@@ -56,12 +56,11 @@ eval "$(starship init zsh)"
 source ${ANTIDOTE_PATH}/antidote.zsh        # load antidote
 antidote load
 
-
 # POST antidote configs (antidote also loads plugins)
 # for optiona seee: see: https://linux.die.net/man/1/zshoptions
 set -k                                      # recognize inline comments on the command line
 bindkey '^r'        atuin-search            # bind atuin keys (reverse-search)
-bindkey '^[[1;2A'   atuin-up-search         # SHIFT-UP instead of UP
+bindkey "^[[A"      atuin-up-search         # re-bind "cursor up"
 setopt HIST_IGNORE_SPACE                    # start with " " -> no history entry
 setopt HIST_IGNORE_ALL_DUPS                 # ignore duplicates regardless of where
 setopt INC_APPEND_HISTORY                   # directly append to history file
@@ -136,3 +135,5 @@ unset _rc _RC_FILES
 #     $ ZSH_CUSTOM=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}
 #     $ fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 #     $ autoload -U compinit && compinit
+#
+# (5) atuin config: under $HOME/.config/atuin/...
