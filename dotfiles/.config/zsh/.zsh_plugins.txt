@@ -68,12 +68,12 @@ z-shell/zsh-eza       path:/                    conditional:has-eza
 
 # Add core plugins that make Zsh a bit more like Fish
 
-# I CANNOT STAND THIS PLUGIN.
+# I CANNOT STAND THESE PLUGINS.
 #marlonrichert/zsh-autocomplete
+#zsh-users/zsh-autosuggestions
 
 zsh-users/zsh-completions path:src kind:fpath
-zsh-users/zsh-autosuggestions
-zsh-users/zsh-history-substring-search # we STILL NEED to key-bind it (see below)
+zsh-users/zsh-history-substring-search # we STILL NEED to key-bind it
 
 # this, apparently, should be last.
 zdharma-continuum/fast-syntax-highlighting

@@ -59,18 +59,34 @@ antidote load
 # POST antidote configs (antidote also loads plugins)
 # for optiona seee: see: https://linux.die.net/man/1/zshoptions
 set -k                                      # recognize inline comments on the command line
-bindkey '^r'        atuin-search            # bind atuin keys (reverse-search)
-bindkey "^[[A"      atuin-up-search         # re-bind "cursor up"
+bindkey '^r'    atuin-search                # bind atuin keys (reverse-search)
+bindkey "^[[A"  history-substring-search-up # re-bind "cursor up"
+bindkey "^[[B"  history-substring-search-down # re-bind "cursor down"
+# history
 setopt HIST_IGNORE_SPACE                    # start with " " -> no history entry
 setopt HIST_IGNORE_ALL_DUPS                 # ignore duplicates regardless of where
-setopt INC_APPEND_HISTORY                   # directly append to history file
-setopt INTERACTIVE_COMMENTS                 # enable '#' comments _on the command line_ :)
 setopt SHARE_HISTORY                        # reload history after every command
+setopt INC_APPEND_HISTORY                   # directly append to history file
+# other
+setopt INTERACTIVE_COMMENTS                 # enable '#' comments _on the command line_ :)
 setopt autocd                               # change into dir when entered as "command"
 unsetopt correct                            # might be oh-my-zsh only
+# configure completions
+#autoload -U compinit && compinit            # not required or done before elsewhere
 zstyle ':completion:*' menu no              # see remark (1)
 zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'  # ...
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' # case-INsensitive completions
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+# completions - fzf-tab plugin, see https://github.com/Aloxaf/fzf-tab
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2 --bind=tab:accept
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' switch-group '<' '>'
+
+# tried and ... discarded. for future reference.
+#bindkey '^r'        atuin-search            # bind atuin keys (reverse-search)
+#bindkey "^[[A"      atuin-up-search         # re-bind "cursor up"
 
 # see remark (2)
 _RC_FILES=(${ZDOTDIR:-$HOME}/.zshrc.d/*(.N))
@@ -89,8 +105,8 @@ unset _rc _RC_FILES
 #
 # (1) from: https://www.youtube.com/watch?v=ud7YxC33Z3w&t=67s
 #
-#     - (Try to) set case-insensitive matching (does not work)
-#       #  zstyle ':completion:*' matcher-list 'm:{a-Z}={A-Za-z}'
+#     - (Try to) set case-insensitive matching
+#       #  zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 #     - activate fzf-preview on shell tab completion hints (really nice)
 #
 #
