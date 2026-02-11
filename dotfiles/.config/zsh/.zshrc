@@ -72,11 +72,18 @@ setopt INTERACTIVE_COMMENTS                 # enable '#' comments _on the comman
 setopt autocd                               # change into dir when entered as "command"
 unsetopt correct                            # might be oh-my-zsh only
 # configure completions
-#autoload -U compinit && compinit            # not required or done before elsewhere
+autoload -U compinit && compinit # not required or done before elsewhere
 zstyle ':completion:*' menu no              # see remark (1)
 zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'  # ...
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' # case-INsensitive completions
+zstyle ':completion:*' matcher-list \
+  '' \
+  'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' \
+  'r:|[._-]=* r:|=* m:{[:lower:][:upper:]}={[:upper:][:lower:]}' \
+  'l:|[._-]=* l:|=* m:{[:lower:][:upper:]}={[:upper:][:lower:]}' \ 
+  # yeah. don't ask. or do. no idea.
+  # anyways, IN-FUCKING-SANE. see here:
+  #   https://linux.die.net/man/1/zshcompwid
+  # ... search for "Completion Matching Control"
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 # completions - fzf-tab plugin, see https://github.com/Aloxaf/fzf-tab
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
@@ -85,6 +92,8 @@ zstyle ':fzf-tab:*' use-fzf-default-opts yes
 zstyle ':fzf-tab:*' switch-group '<' '>'
 
 # tried and ... discarded. for future reference.
+#zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'  # ...
+#zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' # case-INsensitive completions
 #bindkey '^r'        atuin-search            # bind atuin keys (reverse-search)
 #bindkey "^[[A"      atuin-up-search         # re-bind "cursor up"
 
