@@ -67,6 +67,11 @@ export AWS_PAGER=""
 alias rm >/dev/null 2>&1 && unalias rm
 alias cp >/dev/null 2>&1 && unalias cp
 
+# ls aliases which i like more
+alias ll="ls -l"
+alias laa="eza -lbhHigUmuSa"
+alias la="ls -la"
+
 # quick dotfile / etc. management
 alias cdc="cd \$HOME/.config"                 # $HOME/.config
 alias cdd="cd \$HOME/.dotfiles"               # dotfiles dir
