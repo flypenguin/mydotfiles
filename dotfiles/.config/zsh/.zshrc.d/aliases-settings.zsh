@@ -354,3 +354,7 @@ if whence kubectl > /dev/null ; then
   alias      ksd="kubectl scale deployment"
   alias     ksss="kubectl scale statefulset"
 fi
+
+# hubspot thingy
+alias hubs="npx --package @hubspot/cli hs"
+alias hspot="hubs"
