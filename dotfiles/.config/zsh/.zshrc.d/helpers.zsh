@@ -71,6 +71,24 @@ _git_upd'
 fi
 
 
+# git-backup-branch
+# 
+# creates a "backup" of the current branch like this:
+#    backup/ORIGINAL_BRANCH_NAME/TIMESTAMP
+git-backup-branch() {
+  if [[ "${1:-}" == "-h" ]] ; then
+    echo "USAGE: git-backup-branch"
+    echo "creates a 'backup' branch from the current HEAD like this:"
+    echo "  backup/ORIGINAL_BRANCH_NAME/TIMESTAMP"
+    return
+  fi
+  local BBRANCH
+	BBRANCH="backup/$(git rev-parse --abbrev-ref HEAD)/$(date "+%Y%m%d-%H%M%S")"
+	git branch "$BBRANCH"
+	echo "$BBRANCH"
+}
+
+
 # ###########################################################################
 #
 # python
