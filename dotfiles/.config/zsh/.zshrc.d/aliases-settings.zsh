@@ -151,6 +151,11 @@ if whence git > /dev/null ; then
   # enable worktrunk
   if whence wt > /dev/null ; then
     eval "$(command wt config shell init zsh)"
+
+    alias wts="wt switch"
+    alias wtl="wt list"
+    alias wtp="wt step"
+    alias wtc="wt config"
   fi
 
   # defined in helpers.sh
