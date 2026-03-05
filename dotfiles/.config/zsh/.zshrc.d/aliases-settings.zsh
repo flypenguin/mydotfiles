@@ -148,6 +148,11 @@ fi
 
 # git
 if whence git > /dev/null ; then
+  # enable worktrunk
+  if whence wt > /dev/null ; then
+    eval "$(command wt config shell init zsh)"
+  fi
+
   # defined in helpers.sh
   # NOTE: "git upd" alias defined in helpers.sh ... this is WEIRD.
   # thanks for git-commit plugin (see here: https://is.gd/RBWNcg)
