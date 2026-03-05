@@ -156,6 +156,7 @@ if whence git > /dev/null ; then
     alias wtl="wt list"
     alias wtp="wt step"
     alias wtc="wt config"
+    alias wtm="wt merge"
   fi
 
   # defined in helpers.sh
