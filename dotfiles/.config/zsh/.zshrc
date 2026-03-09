@@ -85,11 +85,13 @@ zstyle ':completion:*' matcher-list \
   #   https://linux.die.net/man/1/zshcompwid
   # ... search for "Completion Matching Control"
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
 # completions - fzf-tab plugin, see https://github.com/Aloxaf/fzf-tab
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2 --bind=tab:accept
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:*' fzf-flags --bind=tab:down,btab:up  # OH GOD YES.
 
 # tried and ... discarded. for future reference.
 #zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'  # ...
