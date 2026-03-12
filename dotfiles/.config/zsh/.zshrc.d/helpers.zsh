@@ -299,10 +299,20 @@ function gdelb() {
 #
 
 ks() {
-  CONTEXTS="$(kubectl config get-contexts 2>&1 | sed -e 1d -Ee 's/^.{8}//g' | awk '{print $1}')"
-  CONTEXT="$(echo $CONTEXTS | fzf)"
-  [[ -z $CONTEXT ]] && return
-  k9s --context "$CONTEXT" -c pods
+  local ASK_CONTEXT
+  ASK_CONTEXT=1
+  if [[ -n "${KUBECTL_CONTEXT:-}" ]]; then
+    if kubectl config get-contexts -o name | grep -q "$KUBECTL_CONTEXT" ; then
+      echo "Using context from \$KUBECTL_CONTEXT"
+      ASK_CONTEXT=0
+    fi 
+  fi
+  if (( ASK_CONTEXT == 1 )) ; then
+    CONTEXTS="$(kubectl config get-contexts -o name 2>&1)"
+    KUBECTL_CONTEXT="$(echo $CONTEXTS | fzf)"
+    [[ -z $KUBECTL_CONTEXT ]] && return
+  fi
+  k9s --context "$KUBECTL_CONTEXT" -c pods
 }
 
 
