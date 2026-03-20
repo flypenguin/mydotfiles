@@ -18,7 +18,8 @@ path=(
 )
 
 # otherwise opt-left and opt-right are much fucked.
-WORDCHARS='*?_[]~=&;!#$%^(){}<>'
+# 2026-03-20: no idea why i did the previous one, _this_ is what I want.
+WORDCHARS='_'
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of .zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
