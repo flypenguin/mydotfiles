@@ -63,6 +63,10 @@ export AWS_PAGER=""
 # ALIASES (global / shell)
 #
 
+# fucking ai
+alias danger-claude="claude --dangerously-skip-permissions"
+alias dangerclaude="danger-claude"
+
 # UN-aliases
 alias rm >/dev/null 2>&1 && unalias rm
 alias cp >/dev/null 2>&1 && unalias cp
