@@ -77,6 +77,7 @@ alias laa="eza -lbhHigUmuSa"
 alias la="ls -la"
 
 # quick dotfile / etc. management
+alias cm="chezmoi"                            # MUCH better to type ...
 alias cdc="cd \$HOME/.config"                 # $HOME/.config
 alias cdd="cd \$HOME/.dotfiles"               # dotfiles dir
 alias cdn="cd \$HOME/.config/nvim"            # nvim config dir
