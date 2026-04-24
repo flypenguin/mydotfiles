@@ -10,7 +10,9 @@ tap "gromgit/brewtils"
 #     - pastebot
 brew "pinentry-mac"       # required for gpg-suite ...
 brew "mas"                # required for installing from app store below
+brew "chezmoi"            # dotfile management
 cask "a-better-finder-rename"
+cask "clop"               # image optimizer (GOOD!!!)
 cask "contexts"
 cask "dropbox"
 cask "dropzone"
@@ -22,12 +24,11 @@ cask "lunar"
 cask "nextcloud"
 cask "onedrive"
 cask "telegram"           # the correct one
-cask "typinator"
+# cask "typinator"        # no longer, staying on not-latest version
 cask "whatsapp"
 
 # editors
 cask "jetbrains-toolbox"
-cask "sublime-text@dev"
 cask "vscodium"
 cask "zed"
 
@@ -50,14 +51,14 @@ brew "vim"
 # previously uninstalled command line utils
 brew "atuin"
 brew "bat"
-brew "bbrew"                       # homebrew ui
-brew "broot"
+brew "bbrew"                        # homebrew ui
+# brew "broot"                      # never used
 brew "dos2unix"
-brew "entr"
-brew "eza"
-brew "fx"                          # json processor, sometimes a jq alternative
-brew "fzf"
-brew "fzy"
+brew "entr"                         # "run arbitrary commands when files change"
+brew "eza"                          # maintained ls replacement
+brew "fx"                           # json processor, sometimes a jq alternative
+brew "fzf"                          # ...
+# brew "fzy"                        # unmaintained
 brew "git"
 brew "git-extras"
 brew "gnupg"
@@ -70,12 +71,13 @@ brew "nmap"
 brew "parallel"
 brew "pdfcpu"
 brew "pdftk"
-brew "poppler"
-brew "pv"
+brew "poppler"                      # pdf rendering lib
+brew "pv"                           # terminal progress bar
 brew "ripgrep"
-brew "spacer"
-brew "taproom"                     # homebrew ui
-brew "the_silver_searcher"         # "ag" :)
+brew "spacer"                       # log file tail helper
+brew "taproom"                      # homebrew ui
+brew "the_silver_searcher"          # "ag" :)
+brew "telnet"
 brew "tmux"
 brew "watch"
 brew "wget"
@@ -83,35 +85,9 @@ brew "xz"
 brew "yq"
 brew "zoxide"
 
-# coding and work related
-brew "ansible"
-brew "autoenv"
-brew "awscli"
-brew "doctl"
-brew "git-delta"
-brew "hashicorp/terraform"
-brew "helm"
-brew "helmsman"
-brew "k9s"
-brew "kubectx"
-brew "kubernetes-cli"
-brew "mise"
-brew "multimarkdown"
-brew "pgcli"
-brew "pyenv"
-brew "pyenv-virtualenv"
-brew "stern"
-brew "telnet"
-brew "uv"
-cask "clop"
-cask "devutils"
-cask "fork"
-cask "podman-desktop"
-cask "postgres-unofficial"
-cask "slack"
-
-# (mac) ui appliccations
+# DESKTOP apps & tools - via homebrew
 cask "cyberduck"
+cask "devutils"
 cask "imageoptim"
 cask "jordanbaird-ice"
 cask "karabiner-elements"
@@ -123,9 +99,56 @@ cask "rocket"
 cask "typora"             # markdown editor
 cask "wireshark"
 
-# misc
-brew "croc"
-brew "yt-dlp"
+# DESKTOP apps & tools - via app store
+mas "Amphetamine", id: 937984704
+mas "BetterSnapTool", id: 417375580
+mas "Keka", id: 470158793
+mas "MoneyMoney", id: 872698314
+mas "Pastebot", id: 1179623856
+mas "PhotoSync", id: 418818452
+mas "rcmd", id: 1596283165
+mas "The Unarchiver", id: 425424353
+
+# CLI apps & tools
+brew "croc"                         # transfer data between systems
+brew "pgcli"
+# brew "multimarkdown"              # seems unmaintained
+brew "yt-dlp"                       # download videos :)
+cask "postgres-unofficial"
+
+# terminal
+brew "autoenv"
+
+# work related
+cask "slack"
+
+# coding related
+brew "uv"
+brew "git-delta"
+brew "mise"
+brew "pyenv"
+brew "pyenv-virtualenv"
+
+# infrastructure
+brew "ansible"
+brew "awscli"
+brew "doctl"                        # digital ocean
+brew "hashicorp/terraform"
+brew "opentofu"                     # tf replacement
+brew "uv"
+cask "fork"                         # graphical git client
+cask "podman-desktop"
+
+# k8s related
+brew "stern"
+brew "helm"
+brew "helmsman"
+brew "k9s"
+brew "kubecolor"                    # colorize kubectl output :)
+brew "kubectl-tree"                 # "tree" for k8s resources
+brew "kubectx"
+brew "kubernetes-cli"
+brew "popeye"                       # cluster "sanitizer"
 
 # fonts
 cask "font-bitstream-vera-sans-mono-nerd-font"
@@ -189,13 +212,3 @@ cask "font-noto-mono-for-powerline"
 cask "font-roboto-mono-for-powerline"
 cask "font-sf-mono-for-powerline"
 cask "font-ubuntu-mono-derivative-powerline"
-
-# mac app store applications
-mas "Amphetamine", id: 937984704
-mas "BetterSnapTool", id: 417375580
-mas "Keka", id: 470158793
-mas "MoneyMoney", id: 872698314
-mas "Pastebot", id: 1179623856
-mas "PhotoSync", id: 418818452
-mas "rcmd", id: 1596283165
-mas "The Unarchiver", id: 425424353
