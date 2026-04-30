@@ -75,7 +75,12 @@ unsetopt correct                            # might be oh-my-zsh only
 # configure completions
 autoload -U compinit && compinit # not required or done before elsewhere
 zstyle ':completion:*' menu no              # see remark (1)
-zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
+# the special dirs completion is ... annoying with tab completion on "../someWEIRDthing"
+# (re: the SuPeR FuCkInG AnNoYiNg triple-dot completion: ".../someGARBxyxx")
+# according to claude the "special-dirs .." should fix it, so let's see if it does.
+#zstyle ':completion:*' special-dirs true    # please complete "cd .._/_" ...
+zstyle ':completion:*' special-dirs ..
+
 zstyle ':completion:*' matcher-list \
   '' \
   'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' \
